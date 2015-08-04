@@ -1,0 +1,9 @@
+package schedule.solver;
+    dialect "java"
+
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
+
+import java.time.LocalDateTime
+import java.time.LocalDate
+
+global HardSoftScoreHolder scoreHolder;
