@@ -7,6 +7,7 @@
   	[org.clojure/clojure "1.6.0"]
   	[org.optaplanner/optaplanner-core "6.2.0.Final"]
    ]
+  :aot [schedule.types]
   :main ^:skip-aot schedule.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

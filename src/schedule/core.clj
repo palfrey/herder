@@ -1,11 +1,11 @@
 (ns schedule.core
-  (:require [schedule.Solution])
+  (:use [schedule.types])
   (:import 
   	[org.optaplanner.core.api.solver SolverFactory]
   	[org.optaplanner.core.config.solver SolverConfig]
   	[org.optaplanner.core.config.score.director ScoreDirectorFactoryConfig]
   	[org.optaplanner.core.config.score.definition ScoreDefinitionType]
-  	[schedule Solution]
+  	[schedule.types Solution]
   )
   (:gen-class))
 
@@ -24,7 +24,7 @@
   (println 
   	(doto
   		(SolverConfig.)
-  		(.setSolutionClass Solution/class)
+  		(.setSolutionClass (class (Solution.)))
   		(.setScoreDirectorFactoryConfig (scoreDirectoryFactory))
   		(.buildSolver)
   	)
