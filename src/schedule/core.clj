@@ -5,7 +5,9 @@
   	[org.optaplanner.core.config.solver SolverConfig]
   	[org.optaplanner.core.config.score.director ScoreDirectorFactoryConfig]
   	[org.optaplanner.core.config.score.definition ScoreDefinitionType]
-  	[schedule.types Solution]
+    [org.optaplanner.core.config.constructionheuristic ConstructionHeuristicPhaseConfig]
+
+  	[schedule.types Solution Event]
   )
   (:gen-class))
 
@@ -17,15 +19,19 @@
 	)
 )
 
+(defn genPhaseSearch []
+  [(ConstructionHeuristicPhaseConfig.)]
+)
+
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!")
   (println 
   	(doto
   		(SolverConfig.)
   		(.setSolutionClass (class (Solution.)))
   		(.setScoreDirectorFactoryConfig (scoreDirectoryFactory))
+      (.setEntityClassList [(class (Event.))])
+      (.setPhaseConfigList (genPhaseSearch))
   		(.buildSolver)
   	)
   )
