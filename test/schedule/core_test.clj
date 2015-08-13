@@ -1,7 +1,14 @@
 (ns schedule.core-test
-  (:require [clojure.test :refer :all]
-            [schedule.core :refer :all]))
+  (:use
+  	[midje.sweet]
+   	[schedule.types]
+  )
+  (:require [schedule.core :refer :all])
+  (:import  [schedule.types ScheduleSolution Event])
+)
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(fact "Can make solver config" (makeSolverConfig) => anything) ; doesn't throw exception
+
+(fact "Can make solver" (-> (makeSolverConfig) (makeSolver)) => anything) ; doesn't throw exception
+
+(fact "Can solve" (-> (makeSolverConfig) (makeSolver) (#(.solve % (ScheduleSolution.)))) => nil)
