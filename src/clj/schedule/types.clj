@@ -9,6 +9,13 @@
    [schedule HardSoftSolution]
    [java.util ArrayList]))
 
+(defn- getValue [this k]
+  (let [state (.state this)] (.get @state k)))
+
+(defn- setValue [this k v]
+  (let [state (.state this)]
+    (dosync (alter state assoc k v)) v))
+
 (gen-class 
  :name ^{PlanningSolution {}} schedule.types.ScheduleSolution
  :extends schedule.HardSoftSolution
@@ -27,13 +34,6 @@
 (defn solution-getProblemFacts [this]
   (ArrayList.))
 
-(defn- getValue [this k]
-  (let [state (.state this)] (.get @state k)))
-
-(defn- setValue [this k v]
-  (let [state (.state this)]
-    (dosync (alter state assoc k v)) v))
-
 (defn solution-setScore [this score]
   (setValue this :score score))
 
@@ -46,8 +46,16 @@
 (gen-class 
  :name ^{PlanningEntity {}} schedule.types.Event
  :prefix "event-"
+ :init init
+ :state state
  :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"]}} getSlot [] Object]
            [setSlot [Object] void]])
 
+(defn event-init []
+  [[] (ref {})])
+
 (defn event-getSlot [this]
-  nil)
+  (getValue this :slot))
+
+(defn event-setSlot [this item]
+  (setValue this :slot item))
