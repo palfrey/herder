@@ -21,27 +21,33 @@
  :extends schedule.HardSoftSolution
  :init init
  :state state
- :methods [[^{PlanningEntityCollectionProperty {}} getTestItems [] java.util.ArrayList]
-           [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.ArrayList]]
+ :methods [[^{PlanningEntityCollectionProperty {}} getEvents [] java.util.List]
+           [setEvents [java.util.List] void]
+           [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.ArrayList]
+           [setSlotRange [java.util.ArrayList] void]]
  :prefix "solution-")
 
-(defn solution-init []
-  [[] (ref {})])
+(defn- solution-init []
+  [[] (ref {:events (ArrayList.)
+            :slotRange (ArrayList.)})])
 
-(defn solution-getTestItems [this]
-  (ArrayList.))
+(defn- solution-getEvents [this]
+  (ArrayList. (getValue this :events)))
 
-(defn solution-getProblemFacts [this]
-  (ArrayList.))
+(defn- solution-getProblemFacts [this]
+  (getValue this :events))
 
-(defn solution-setScore [this score]
+(defn- solution-getScore [this]
+  (getValue this :score))
+
+(defn- solution-setScore [this score]
   (setValue this :score score))
 
-(defn solution-getSlotRange [this]
-  (ArrayList.))
+(defn- solution-getSlotRange [this]
+  (getValue this :slotRange))
 
-(defn solution-getScore	[this]
-  (getValue this :score))
+(defn- solution-setSlotRange [this value]
+  (setValue this :slotRange value))
 
 (gen-class 
  :name ^{PlanningEntity {}} schedule.types.Event
@@ -51,11 +57,11 @@
  :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"]}} getSlot [] Object]
            [setSlot [Object] void]])
 
-(defn event-init []
+(defn- event-init []
   [[] (ref {})])
 
-(defn event-getSlot [this]
+(defn- event-getSlot [this]
   (getValue this :slot))
 
-(defn event-setSlot [this item]
+(defn- event-setSlot [this item]
   (setValue this :slot item))
