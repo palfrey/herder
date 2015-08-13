@@ -3,10 +3,23 @@
    [midje.sweet]
    [schedule.types])
   (:require [schedule.core :refer :all])
-  (:import  [schedule.types ScheduleSolution Event]))
+  (:import  [schedule.types ScheduleSolution Event]
+            [org.optaplanner.core.config.solver SolverConfig]
+            [org.optaplanner.core.api.solver Solver]))
 
-(fact "Can make solver config" (makeSolverConfig) => anything) ; doesn't throw exception
+(defn isClass [ofClass]
+  (chatty-checker [thing]
+    (.isAssignableFrom ofClass (class thing))))
 
-(fact "Can make solver" (-> (makeSolverConfig) (makeSolver)) => anything) ; doesn't throw exception
+(fact "Can make solver config" (makeSolverConfig) => (isClass SolverConfig))
 
-(fact "Can solve" (-> (makeSolverConfig) (makeSolver) (.solve (ScheduleSolution.))) => nil)
+(fact "Can make solver" (-> (makeSolverConfig) (makeSolver)) => (isClass Solver))
+
+(defn solve []
+  (let [solver (-> (makeSolverConfig) (makeSolver))]
+    (.solve solver (ScheduleSolution.))
+    solver))
+
+(fact "Can solve" (solve) => (isClass Solver))
+
+(fact "Can get best solution" (-> (solve) (.getBestSolution)) => (isClass ScheduleSolution))

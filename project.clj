@@ -11,6 +11,7 @@
   :aot [schedule.types]
   :main ^:skip-aot schedule.core
   :target-path "target/%s"
+  :cljfmt {:indents {chatty-checker [[:block 1]]}}
   :profiles {:uberjar {:aot :all}
              :dev {:dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]
