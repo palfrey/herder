@@ -9,4 +9,4 @@
 
 (fact "Can make solver" (-> (makeSolverConfig) (makeSolver)) => anything) ; doesn't throw exception
 
-(fact "Can solve" (-> (makeSolverConfig) (makeSolver) (#(.solve % (ScheduleSolution.)))) => nil)
+(fact "Can solve" (-> (makeSolverConfig) (makeSolver) (.solve (ScheduleSolution.))) => nil)
