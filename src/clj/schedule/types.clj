@@ -12,9 +12,14 @@
 (gen-class 
  :name ^{PlanningSolution {}} schedule.types.ScheduleSolution
  :extends schedule.HardSoftSolution
+ :init init
+ :state state
  :methods [[^{PlanningEntityCollectionProperty {}} getTestItems [] java.util.ArrayList]
            [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.ArrayList]]
  :prefix "solution-")
+
+(defn solution-init []
+  [[] (ref {})])
 
 (defn solution-getTestItems [this]
   (ArrayList.))
@@ -22,13 +27,21 @@
 (defn solution-getProblemFacts [this]
   (ArrayList.))
 
-(defn solution-setScore [this score])
+(defn- getValue [this k]
+  (let [state (.state this)] (.get @state k)))
+
+(defn- setValue [this k v]
+  (let [state (.state this)]
+    (dosync (alter state assoc k v)) v))
+
+(defn solution-setScore [this score]
+  (setValue this :score score))
 
 (defn solution-getSlotRange [this]
   (ArrayList.))
 
 (defn solution-getScore	[this]
-  (HardSoftScore/parseScore "0hard/0soft"))
+  (getValue this :score))
 
 (gen-class 
  :name ^{PlanningEntity {}} schedule.types.Event
