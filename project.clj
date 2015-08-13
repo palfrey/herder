@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.optaplanner/optaplanner-core "6.2.0.Final"]
-                 [org.slf4j/slf4j-log4j12 "1.6.6"]]
+                 [org.slf4j/slf4j-log4j12 "1.6.6"]
+                 [clj-time "0.10.0"]]
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
   :aot [schedule.types]

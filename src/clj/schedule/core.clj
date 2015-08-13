@@ -7,8 +7,7 @@
    [org.optaplanner.core.config.constructionheuristic ConstructionHeuristicPhaseConfig]
    [org.optaplanner.core.config.solver.termination TerminationConfig]
 
-   [schedule.types ScheduleSolution Event])
-  (:gen-class))
+   [schedule.types ScheduleSolution Event Slot]))
 
 (defn scoreDirectoryFactory []
   (doto
@@ -35,6 +34,16 @@
 
 (defn makeSolver [solverConfig]
   (.buildSolver solverConfig))
+
+(defn genSlots [slots]
+  (map #(Slot. (int (first %)) (second %)) slots))
+
+(defn setupSolution [config]
+  (doto
+   (ScheduleSolution.)
+    (.setFirstDay (:firstDay config))
+    (.setLastDay (:lastDay config))
+    (.setSlots (genSlots (:slots config)))))
 
 (defn -main
   [& args]

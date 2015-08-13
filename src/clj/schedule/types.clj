@@ -6,8 +6,11 @@
    [org.optaplanner.core.api.domain.variable PlanningVariable]
    [org.optaplanner.core.api.domain.valuerange ValueRangeProvider]
    [org.optaplanner.core.api.score.buildin.hardsoft HardSoftScore]
+
    [schedule HardSoftSolution]
-   [java.util ArrayList]))
+
+   [java.util ArrayList]
+   [org.joda.time ReadablePeriod DateTime]))
 
 (defn- getValue [this k]
   (let [state (.state this)] (.get @state k)))
@@ -24,7 +27,10 @@
  :methods [[^{PlanningEntityCollectionProperty {}} getEvents [] java.util.List]
            [setEvents [java.util.List] void]
            [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.ArrayList]
-           [setSlotRange [java.util.ArrayList] void]]
+           [setSlotRange [java.util.ArrayList] void]
+           [setFirstDay [org.joda.time.DateTime] void]
+           [setLastDay [org.joda.time.DateTime] void]
+           [setSlots [java.util.List] void]]
  :prefix "solution-")
 
 (defn- solution-init []
@@ -49,6 +55,18 @@
 (defn- solution-setSlotRange [this value]
   (setValue this :slotRange value))
 
+(defn- solution-getFirstDay [this]
+  (getValue this :firstDay))
+
+(defn- solution-setFirstDay [this value]
+  (setValue this :firstDay value))
+
+(defn- solution-setLastDay [this value]
+  (setValue this :lastDay value))
+
+(defn- solution-setSlots [this value]
+  (setValue this :slots value))
+
 (gen-class 
  :name ^{PlanningEntity {}} schedule.types.Event
  :prefix "event-"
@@ -65,3 +83,15 @@
 
 (defn- event-setSlot [this item]
   (setValue this :slot item))
+
+(gen-class
+ :name schedule.types.Slot
+ :prefix "slot-"
+ :init init
+ :state state
+ :extends java.lang.Object
+ :constructors {[java.lang.Integer org.joda.time.ReadablePeriod] []}
+ :methods [])
+
+(defn- slot-init [start length]
+  [[] (ref {:start start :length length})])
