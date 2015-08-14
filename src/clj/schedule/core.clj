@@ -43,7 +43,8 @@
    (ScheduleSolution.)
     (.setFirstDay (:firstDay config))
     (.setLastDay (:lastDay config))
-    (.setSlots (genSlots (:slots config)))))
+    (.setSlots (genSlots (:slots config)))
+    (.setEvents (:events config))))
 
 (defn -main
   [& args]

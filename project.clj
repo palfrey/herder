@@ -18,4 +18,7 @@
                    :plugins [[lein-midje "3.1.3"]
                              [lein-auto "0.1.2"]
                              [lein-cljfmt "0.3.0"]]
-                   :auto {:default {:file-pattern #"\.(clj|cljs|cljx|edn|java)$"}}}})
+                   :auto {
+                    :default {
+                      :file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"
+                      :paths ["src" "resources" "test"]}}}})

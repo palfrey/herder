@@ -30,12 +30,19 @@
 (def defaultConfig
   {:firstDay (t/date-time 2015 7 6)
    :lastDay (t/date-time 2015 7 8)
-   :slots [[10 (t/hours 4)] [14 (t/hours 4)] [18 (t/hours 4)]]})
+   :slots [[10 (t/hours 4)]
+           [14 (t/hours 4)]
+           [18 (t/hours 4)]]
+   :events [(Event.) (Event.)]})
+
+(defn getSolution []
+  (-> (solve defaultConfig) (.getBestSolution)))
 
 (fact "Can solve"
       (solve defaultConfig) => (isClass Solver))
 (fact "Can get best solution"
-      (-> (solve defaultConfig) (.getBestSolution)) => (isClass ScheduleSolution))
+      (getSolution) => (isClass ScheduleSolution))
+
 (fact "Slot generation works"
       (genSlots [[10 (t/hours 4)]]) => (one-of (isClass Slot)))
 (fact "Slot generation works with default"
@@ -44,3 +51,10 @@
       (-> (setupSolution defaultConfig) (.getSlots)) => (three-of (isClass Slot)))
 (fact "Slot range is derived from the slots"
       (-> (setupSolution defaultConfig) (.getSlotRange)) => (nine-of (isClass org.joda.time.Interval)))
+
+(fact "Events have distinct slots"
+      (->> (getSolution) (.getEvents) (map #(.getSlot %)))
+      => (chatty-checker [items] (apply distinct? items)))
+
+(fact "Solution has good score"
+      (-> (getSolution) (.getScore) (.toString)) => "0hard/0soft")

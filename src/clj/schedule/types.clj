@@ -42,6 +42,9 @@
 (defn- solution-getEvents [this]
   (ArrayList. (getValue this :events)))
 
+(defn- solution-setEvents [this events]
+  (setValue this :events events))
+
 (defn- solution-getProblemFacts [this]
   (getValue this :events))
 
@@ -79,10 +82,14 @@
  :init init
  :state state
  :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"]}} getSlot [] Object]
-           [setSlot [Object] void]])
+           [setSlot [Object] void]
+           [getId [] java.util.UUID]])
 
 (defn- event-init []
-  [[] (ref {})])
+  [[] (ref {:id (java.util.UUID/randomUUID)})])
+
+(defn- event-getId [this]
+  (getValue this :id))
 
 (defn- event-getSlot [this]
   (getValue this :slot))

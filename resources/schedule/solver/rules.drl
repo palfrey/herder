@@ -2,5 +2,18 @@ package schedule.solver;
     dialect "java"
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
+import schedule.types.Event;
 
 global HardSoftScoreHolder scoreHolder;
+
+rule "one event per slot"
+    when
+        $leftEvent : Event(
+                slot != null, $slot: slot,
+                $leftId : id)
+        $rightEvent : Event(
+                slot == $slot,
+                id > $leftId)
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -10);
+end
