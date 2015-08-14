@@ -5,29 +5,42 @@
    [schedule.core])
   (:require
    [clj-time.core :as t])
-  (:import  [schedule.types ScheduleSolution Event Slot]
-            [org.optaplanner.core.config.solver SolverConfig]
-            [org.optaplanner.core.api.solver Solver]))
+  (:import 
+   [schedule.types ScheduleSolution Event Slot]
+   [org.optaplanner.core.config.solver SolverConfig]
+   [org.optaplanner.core.api.solver Solver]
+   [org.joda.time Interval]))
 
 (defn isClass [ofClass]
   (chatty-checker [thing]
     (.isAssignableFrom ofClass (class thing))))
 
-(fact "Can make solver config" (makeSolverConfig) => (isClass SolverConfig))
+(fact "Can make solver config"
+      (makeSolverConfig) => (isClass SolverConfig))
 
-(fact "Can make solver" (-> (makeSolverConfig) (makeSolver)) => (isClass Solver))
+(fact "Can make solver" 
+      (-> (makeSolverConfig) (makeSolver)) => (isClass Solver))
 
 (defn solve [config]
-  (let [solver (-> (makeSolverConfig) (makeSolver))]
-    (.solve solver (setupSolution config))
+  (let [solver (-> (makeSolverConfig) (makeSolver))
+        configured (setupSolution config)]
+    (.solve solver configured)
     solver))
 
-(def defaultConfig {:firstDay (t/date-time 2015 7 6)
-                    :lastDay (t/date-time 2015 7 13)
-                    :slots [[10 14] [14 18] [18 22]]})
+(def defaultConfig
+  {:firstDay (t/date-time 2015 7 6)
+   :lastDay (t/date-time 2015 7 8)
+   :slots [[10 (t/hours 4)] [14 (t/hours 4)] [18 (t/hours 4)]]})
 
-(fact "Can solve" (solve defaultConfig) => (isClass Solver))
-
-(fact "Can get best solution" (-> (solve defaultConfig) (.getBestSolution)) => (isClass ScheduleSolution))
-
-(fact "Slot generation works" (genSlots [[10 (t/hours 4)]]) => (one-of (isClass Slot)))
+(fact "Can solve"
+      (solve defaultConfig) => (isClass Solver))
+(fact "Can get best solution"
+      (-> (solve defaultConfig) (.getBestSolution)) => (isClass ScheduleSolution))
+(fact "Slot generation works"
+      (genSlots [[10 (t/hours 4)]]) => (one-of (isClass Slot)))
+(fact "Slot generation works with default"
+      (genSlots (:slots defaultConfig)) => (three-of (isClass Slot)))
+(fact "Config works"
+      (-> (setupSolution defaultConfig) (.getSlots)) => (three-of (isClass Slot)))
+(fact "Slot range is derived from the slots"
+      (-> (setupSolution defaultConfig) (.getSlotRange)) => (nine-of (isClass org.joda.time.Interval)))
