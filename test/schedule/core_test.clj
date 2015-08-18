@@ -29,10 +29,9 @@
 
 (def defaultConfig
   {:firstDay (t/date-time 2015 7 6)
-   :lastDay (t/date-time 2015 7 8)
+   :lastDay (t/date-time 2015 7 7)
    :slots [[10 (t/hours 4)]
-           [14 (t/hours 4)]
-           [18 (t/hours 4)]]
+           [14 (t/hours 4)]]
    :events [(Event.) (Event.)]})
 
 (defn getSolution []
@@ -46,11 +45,11 @@
 (fact "Slot generation works"
       (genSlots [[10 (t/hours 4)]]) => (one-of (isClass Slot)))
 (fact "Slot generation works with default"
-      (genSlots (:slots defaultConfig)) => (three-of (isClass Slot)))
+      (genSlots (:slots defaultConfig)) => (two-of (isClass Slot)))
 (fact "Config works"
-      (-> (setupSolution defaultConfig) (.getSlots)) => (three-of (isClass Slot)))
+      (-> (setupSolution defaultConfig) (.getSlots)) => (two-of (isClass Slot)))
 (fact "Slot range is derived from the slots"
-      (-> (setupSolution defaultConfig) (.getSlotRange)) => (nine-of (isClass org.joda.time.Interval)))
+      (-> (setupSolution defaultConfig) (.getSlotRange)) => (four-of (isClass org.joda.time.Interval)))
 
 (fact "Events have distinct slots"
       (->> (getSolution) (.getEvents) (map #(.getSlot %)))
