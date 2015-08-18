@@ -7,7 +7,13 @@
                  [org.optaplanner/optaplanner-core "6.2.0.Final"]
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
                  [clj-time "0.10.0"]
-                 [commons-collections/commons-collections "3.2.1"]]
+                 [commons-collections/commons-collections "3.2.1"]
+                 [ring "1.3.1"]
+                 [ring/ring-defaults "0.1.2"]
+                 [compojure "1.2.0"]
+                 [org.danielsz/system "0.1.1"]
+                 [environ "1.0.0"]]
+  :plugins [[lein-environ "1.0.0"]]                 
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
   :aot [schedule.types]
@@ -15,11 +21,14 @@
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
   :profiles {:uberjar {:aot :all}
-             :dev {:dependencies [[midje "1.7.0"]]
+             :prod {:env {:http-port 8000
+                          :repl-port 8001}
+                    :dependencies [[org.clojure/tools.nrepl "0.2.5"]]}  
+             :dev {:source-paths ["dev"]
+                   :env {:http-port 3000}
+                   :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]
                              [lein-auto "0.1.2"]
                              [lein-cljfmt "0.3.0"]]
-                   :auto {
-                    :default {
-                      :file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"
-                      :paths ["src" "resources" "test"]}}}})
+                   :auto {:default {:file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"
+                                    :paths ["src" "resources" "test"]}}}})

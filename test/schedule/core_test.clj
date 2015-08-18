@@ -2,7 +2,7 @@
   (:use
    [midje.sweet]
    [schedule.types]
-   [schedule.core])
+   [schedule.schedule])
   (:require
    [clj-time.core :as t])
   (:import 
