@@ -22,3 +22,4 @@
 (load "solution")
 (load "event")
 (load "slot")
+(load "person")

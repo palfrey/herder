@@ -4,15 +4,31 @@ package schedule.solver;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 import schedule.types.Event;
 
+import org.apache.commons.collections.CollectionUtils;
+
 global HardSoftScoreHolder scoreHolder;
 
-rule "one event per slot"
+rule "spread events out (penalty per extra event in slot)"
     when
         $leftEvent : Event(
                 slot != null, $slot: slot,
                 $leftId : id)
         $rightEvent : Event(
                 slot == $slot,
+                id > $leftId)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -10);
+end
+
+rule "people shouldn't overlap"
+    when
+        $leftEvent : Event(
+                slot != null, $slot: slot,
+                people != null, $people: people,
+                $leftId : id)
+        $rightEvent : Event(
+                slot == $slot,
+                CollectionUtils.isNotEmpty(CollectionUtils.intersection(people, $people)),
                 id > $leftId)
     then
         scoreHolder.addHardConstraintMatch(kcontext, -10);
