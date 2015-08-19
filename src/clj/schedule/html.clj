@@ -1,5 +1,6 @@
 (ns schedule.html
   (:use [clostache.parser]))
 
-(defn index []
-  (render-resource "templates/index.mustache"))
+(defn index [db]
+  (render-resource "templates/index.mustache"
+                   {:conventions (get db :conventions)}))

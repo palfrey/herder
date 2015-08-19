@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>Schedules</title>
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/flatly/bootstrap.min.css" rel="stylesheet">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -16,10 +16,14 @@
     <![endif]-->
   </head>
   <body>
-    <div class="jumbotron">
-      <div class="container">
-        <h1>Hello, world!</h1>
-      </div>
+    <div class="container">
+      <h1>Conventions</h1>
+      <ul>
+        {{#conventions}}
+        <li>{{name}} {{id}}</li>
+        {{/conventions}}
+      </ul>
+      <a href="/new-convention">Create a new convention</a>
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
