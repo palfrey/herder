@@ -12,7 +12,8 @@
                  [ring/ring-defaults "0.1.2"]
                  [compojure "1.2.0"]
                  [org.danielsz/system "0.1.1"]
-                 [environ "1.0.0"]]
+                 [environ "1.0.0"]
+                 [de.ubercode.clostache/clostache "1.4.0"]]
   :plugins [[lein-environ "1.0.0"]]                 
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
@@ -24,11 +25,13 @@
              :prod {:env {:http-port 8000
                           :repl-port 8001}
                     :dependencies [[org.clojure/tools.nrepl "0.2.5"]]}  
+            :test {:dependencies [[midje "1.7.0"]]
+                   :plugins [[lein-midje "3.1.3"]]}
              :dev {:source-paths ["dev"]
                    :env {:http-port 3000}
-                   :dependencies [[midje "1.7.0"]]
-                   :plugins [[lein-midje "3.1.3"]
+                   :plugins [
                              [lein-auto "0.1.2"]
                              [lein-cljfmt "0.3.0"]]
                    :auto {:default {:file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"
                                     :paths ["src" "resources" "test"]}}}})
+            }

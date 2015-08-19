@@ -1,4 +1,5 @@
-(ns schedule.html)
+(ns schedule.html
+  (:use [clostache.parser]))
 
 (defn index []
-  "Foo bar")
+  (render-resource "templates/index.mustache"))
