@@ -1,4 +1,4 @@
-(ns schedule.html
+(ns schedule.web.html
   (:use [clostache.parser]))
 
 (defn index [db]

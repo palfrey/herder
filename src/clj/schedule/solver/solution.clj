@@ -1,8 +1,8 @@
-(in-ns 'schedule.types)
+(in-ns 'schedule.solver.types)
 
 (gen-class 
- :name ^{PlanningSolution {}} schedule.types.ScheduleSolution
- :extends schedule.HardSoftSolution
+ :name ^{PlanningSolution {}} schedule.solver.types.ScheduleSolution
+ :extends schedule.solver.HardSoftSolution
  :init init
  :state state
  :methods [[^{PlanningEntityCollectionProperty {}} getEvents [] java.util.List]

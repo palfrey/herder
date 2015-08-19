@@ -1,12 +1,12 @@
 (ns schedule.core-test
   (:use
    [midje.sweet]
-   [schedule.types]
-   [schedule.schedule])
+   [schedule.solver.types]
+   [schedule.solver.schedule])
   (:require
    [clj-time.core :as t])
   (:import 
-   [schedule.types ScheduleSolution Event Slot Person]
+   [schedule.solver.types ScheduleSolution Event Slot Person]
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.api.solver Solver]
    [org.joda.time Interval]))

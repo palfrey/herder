@@ -1,7 +1,7 @@
-(in-ns 'schedule.types)
+(in-ns 'schedule.solver.types)
 
 (gen-class
- :name ^{PlanningEntity {}} schedule.types.Person
+ :name ^{PlanningEntity {}} schedule.solver.types.Person
  :prefix "person-"
  :init init
  :state state

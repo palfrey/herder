@@ -1,5 +1,5 @@
-(ns schedule.schedule
-  (:use [schedule.types])
+(ns schedule.solver.schedule
+  (:use [schedule.solver.types])
   (:import
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.config.score.director ScoreDirectorFactoryConfig]
@@ -7,7 +7,7 @@
    [org.optaplanner.core.config.constructionheuristic ConstructionHeuristicPhaseConfig]
    [org.optaplanner.core.config.solver.termination TerminationConfig]
 
-   [schedule.types ScheduleSolution Event Slot]))
+   [schedule.solver.types ScheduleSolution Event Slot]))
 
 (defn scoreDirectoryFactory []
   (doto

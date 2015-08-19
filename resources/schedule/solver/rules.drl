@@ -2,7 +2,7 @@ package schedule.solver;
     dialect "java"
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
-import schedule.types.Event;
+import schedule.solver.types.Event;
 
 import org.apache.commons.collections.CollectionUtils;
 

@@ -1,7 +1,7 @@
-(in-ns 'schedule.types)
+(in-ns 'schedule.solver.types)
 
 (gen-class
- :name schedule.types.Slot
+ :name schedule.solver.types.Slot
  :prefix "slot-"
  :init init
  :state state

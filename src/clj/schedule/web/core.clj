@@ -1,8 +1,8 @@
-(ns schedule.core
+(ns schedule.web.core
   (:gen-class)
   (:require 
    [reloaded.repl :refer [system init start stop go reset]]
-   [schedule.systems :refer [prod-system]]))
+   [schedule.web.systems :refer [prod-system]]))
 
 (defn -main
   "Start a production system."

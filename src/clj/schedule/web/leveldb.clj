@@ -1,5 +1,5 @@
-(ns schedule.leveldb
-  (:require          
+(ns schedule.web.leveldb
+  (:require
    [com.stuartsierra.component :as component]
    [clj-leveldb :as leveldb]))
 

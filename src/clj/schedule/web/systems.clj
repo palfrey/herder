@@ -1,11 +1,11 @@
-(ns schedule.systems
+(ns schedule.web.systems
   (:require [system.core :refer [defsystem]]
-            (system.components 
+            (system.components
              [jetty :refer [new-web-server]]
              [repl-server :refer [new-repl-server]])
-            [schedule.leveldb :refer [new-leveldb]]
+            [schedule.web.leveldb :refer [new-leveldb]]
             [environ.core :refer [env]]
-            [schedule.handler :refer [app]]))
+            [schedule.web.handler :refer [app]]))
 
 (def dbPath "schedule.db")
 (def config {:key-decoder byte-streams/to-string

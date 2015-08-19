@@ -18,8 +18,8 @@
   :plugins [[lein-environ "1.0.0"]]                 
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
-  :aot [schedule.types]
-  :main ^:skip-aot schedule.core
+  :aot [schedule.solver.types]
+  :main ^:skip-aot schedule.web.core
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
   :profiles {:uberjar {:aot :all}
