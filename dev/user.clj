@@ -4,6 +4,6 @@
    [schedule.web.systems :refer [dev-system]]
    [clojure.tools.namespace.repl :refer [set-refresh-dirs]]))
 
-(clojure.tools.namespace.repl/set-refresh-dirs "src/clj")
+;(clojure.tools.namespace.repl/set-refresh-dirs "src/clj")
 (reloaded.repl/set-init! dev-system)
 ; type (go) in the repl to start your development-time system.
