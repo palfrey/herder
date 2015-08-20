@@ -4,10 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.optaplanner/optaplanner-core "6.2.0.Final" :exclusions [commons-io]]
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
-                 [clj-time "0.10.0"]
-                 [commons-collections/commons-collections "3.2.1"]
                  [compojure "1.4.0"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.2"]
@@ -15,11 +12,9 @@
                  [org.danielsz/system "0.1.9" :exclusions [org.clojure/tools.namespace]]
                  [environ "1.0.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
-                 [factual/clj-leveldb "0.1.1"]]
-  :plugins [[lein-environ "1.0.0"]]                 
-  :source-paths ["src/clj"]
-  :java-source-paths ["src/java"]
-  :aot [schedule.solver.types]
+                 [factual/clj-leveldb "0.1.1"]
+                 [solver "0.1.0-SNAPSHOT"]]
+  :plugins [[lein-environ "1.0.0"]]
   :main ^:skip-aot schedule.web.core
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
@@ -27,11 +22,7 @@
              :prod {:env {:http-port 8000
                           :repl-port 8001}
                     :dependencies [[org.clojure/tools.nrepl "0.2.5"]]}  
-             :test {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]]
-                    :plugins [[lein-midje "3.1.3"]]}
              :dev [:test {:source-paths ["dev"]
                           :env {:http-port 3000}
                           :plugins [[lein-auto "0.1.2"]
-                                    [lein-cljfmt "0.3.0"]]
-                          :auto {:default {:file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"
-                                           :paths ["src" "resources" "test"]}}}]})
+                                    [lein-cljfmt "0.3.0"]]}]})
