@@ -7,6 +7,7 @@
                  [org.optaplanner/optaplanner-core "6.2.0.Final" :exclusions [commons-io]]
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
                  [clj-time "0.10.0"]
+                 [midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                  [commons-collections/commons-collections "3.2.1"]]
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
@@ -14,7 +15,7 @@
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
   :profiles {:uberjar {:aot :all}
-             :dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]]
+             :dev {:dependencies []
                     :plugins [[lein-midje "3.1.3"]                       [lein-auto "0.1.2"]
                                     [lein-cljfmt "0.3.0"]]
                           :auto {:default {:file-pattern #"\.(clj|cljs|cljx|edn|java|drl)$"

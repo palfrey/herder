@@ -13,6 +13,8 @@
                  [environ "1.0.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [factual/clj-leveldb "0.1.1"]
+                 [http-kit "2.1.18"]
+                 [bouncer "0.3.3"]
                  [solver "0.1.0-SNAPSHOT"]]
   :plugins [[lein-environ "1.0.0"]]
   :main ^:skip-aot schedule.web.core

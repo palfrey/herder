@@ -3,9 +3,14 @@
    [clostache.parser :as clo]
    [compojure.route :as route]
    [compojure.handler :as handler]
-   [compojure.core :refer [defroutes GET context routes]]
+   [compojure.core :refer [defroutes GET POST context] :as compojure]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-   [reloaded.repl :refer [system]]))
+   [reloaded.repl :refer [system]]
+   [bouncer.core :as b]
+   [bouncer.validators :as v]
+   [ring.util.response :refer [redirect]]
+   [clj-leveldb :as leveldb]
+   [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
 (def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
 
@@ -15,24 +20,47 @@
 (defn render [template values]
   (clo/render-resource
    template
-   (merge common-features values)
+   (merge common-features values {:anti-forgery (anti-forgery-field)})
    common-partials))
 
-(defn index [db]
-  (render "templates/index.mustache"
-          {:conventions (get db :conventions)}))
+(defn index [{{:keys [connection]} :db}]
+  (let [conventions (leveldb/get connection :conventions)]
+    (render "templates/index.mustache"
+            {:conventions (map #(assoc (leveldb/get connection %) :id %) conventions)})))
 
-(defn new-convention [db]
-  (render "templates/new-convention.mustache" {}))
+(defn validate-new-convention [params]
+  (first
+   (b/validate
+    params
+    :conventionName [[v/required :message "Need a name for the convention"]])))
 
-(let [db (:db system)]
-  (defroutes convention-routes
-    (context "/convention" []
-      (GET "/new" [] (new-convention db))))
-  (defroutes core-routes
-    (GET "/" [] (index db))
-    (route/not-found "Not found")))
+(defn new-convention [{:keys [flash]}]
+  (render "templates/new-convention.mustache" {:errors (:errors flash)}))
 
-(def app
-  (-> (routes convention-routes core-routes)
+(defn save-new-convention! [{{:keys [connection]} :db :keys [:params]}]
+  (if-let [errors (validate-new-convention params)]
+    (-> (redirect "/convention/new")
+        (assoc :flash (assoc params :errors errors)))
+    (let [id (java.util.UUID/randomUUID)
+          existingConventions (leveldb/get connection :conventions)
+          daterange (clojure.string/split (:daterange params) #"-")]
+      (leveldb/put connection
+                   :conventions (conj existingConventions id)
+                   id {:name (:conventionName params) :from (first daterange) :to (second daterange)})
+      (redirect "/"))))
+
+(defroutes convention-routes
+  (context "/convention" []
+    (GET "/new" [] new-convention)
+    (POST "/new" [] save-new-convention!)))
+
+(defroutes core-routes
+  (GET "/" [] index)
+  (route/resources "/")
+  (route/not-found "Not found"))
+
+(def routes (compojure/routes convention-routes core-routes))
+
+(defn app [routes]
+  (-> routes
       (wrap-defaults site-defaults)))
