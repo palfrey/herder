@@ -1,26 +1,29 @@
 (ns schedule.web.handler
-  (:use [clostache.parser])
   (:require
+   [clostache.parser :as clo]
    [compojure.route :as route]
    [compojure.handler :as handler]
    [compojure.core :refer [defroutes GET context routes]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [reloaded.repl :refer [system]]))
 
-(def common-partials {:footer (render-resource "templates/footer.mustache")})
+(def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
 
 (def common-features 
-  {:header #(-> (render-resource "templates/header.mustache") (clojure.string/replace "%TITLE%" %))})
+  {:header #(-> (clo/render-resource "templates/header.mustache") (clojure.string/replace "%TITLE%" %))})
 
-(defn index [db]
-  (render-resource
-   "templates/index.mustache"
-   (assoc common-features
-          :conventions (get db :conventions))
+(defn render [template values]
+  (clo/render-resource
+   template
+   (merge common-features values)
    common-partials))
 
+(defn index [db]
+  (render "templates/index.mustache"
+          {:conventions (get db :conventions)}))
+
 (defn new-convention [db]
-  (render-resource "templates/new-convention.mustache" common-features common-partials))
+  (render "templates/new-convention.mustache" {}))
 
 (let [db (:db system)]
   (defroutes convention-routes
