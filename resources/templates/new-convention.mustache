@@ -3,7 +3,6 @@
   <h1>New Convention</h1>
   <form method="POST" class="form-horizontal">
     <fieldset>
-      <!-- Text input-->
       {{{anti-forgery}}}
       <div class="form-group {{#errors.conventionName}}has-error{{/errors.conventionName}}">
         <label class="col-md-2 control-label text-left" for="conventionName">Convention name</label>
@@ -12,7 +11,7 @@
           <label class="text-danger">{{.}}</label>{{/errors.conventionName}}
         </div>
       </div>
-      <div class="form-group ">
+      <div class="form-group">
         <label class="col-md-2 control-label text-left" for="conventionName">Dates</label>
         <div class="col-md-10 ">
           <input type="text" name="daterange" class="form-control" />

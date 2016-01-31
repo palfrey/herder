@@ -49,10 +49,17 @@
                    id {:name (:conventionName params) :from (first daterange) :to (second daterange)})
       (redirect "/"))))
 
+(defn show-convention [{{:keys [connection]} :db {:keys [id]} :params}]
+  (let [convention (leveldb/get connection (java.util.UUID/fromString id))]
+    (println convention)
+    (println id)
+    (render "templates/show-convention.mustache" convention)))
+
 (defroutes convention-routes
   (context "/convention" []
     (GET "/new" [] new-convention)
-    (POST "/new" [] save-new-convention!)))
+    (POST "/new" [] save-new-convention!)
+    (GET ["/:id", :id #"[\w]{8}(-[\w]{4}){3}-[\w]{12}"] [id] show-convention)))
 
 (defroutes core-routes
   (GET "/" [] index)
