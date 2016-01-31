@@ -7,7 +7,7 @@
                  [org.optaplanner/optaplanner-core "6.2.0.Final" :exclusions [commons-io]]
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
                  [clj-time "0.10.0"]
-                 [midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
+                 [midje "1.7.0"]
                  [commons-collections/commons-collections "3.2.1"]]
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
