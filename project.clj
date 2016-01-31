@@ -16,14 +16,15 @@
                  [http-kit "2.1.18"]
                  [bouncer "0.3.3"]
                  [solver "0.1.0-SNAPSHOT"]]
-  :plugins [[lein-environ "1.0.0"]]
+  :plugins [[lein-environ "1.0.0"]
+            [lein-cljfmt "0.3.0"]]
   :main ^:skip-aot schedule.web.core
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
   :profiles {:uberjar {:aot :all}
              :prod {:env {:http-port 8000
                           :repl-port 8001}
-                    :dependencies [[org.clojure/tools.nrepl "0.2.5"]]}  
+                    :dependencies [[org.clojure/tools.nrepl "0.2.5"]]}
              :dev [:test {:source-paths ["dev"]
                           :env {:http-port 3000}
                           :plugins [[lein-auto "0.1.2"]
