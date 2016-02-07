@@ -15,9 +15,18 @@
                  [factual/clj-leveldb "0.1.1"]
                  [http-kit "2.1.18"]
                  [bouncer "0.3.3"]
-                 [solver "0.1.0-SNAPSHOT"]]
+                 [solver "0.1.0-SNAPSHOT"]
+                 [ring/ring-mock "0.3.0"]
+                 [midje "1.8.3"]
+                 [peridot "0.4.3"]
+                 [ring/ring-json "0.4.0"]
+                 [org.clojure/data.json "0.2.6"]
+                 [danlentz/clj-uuid "0.1.6"]]
   :plugins [[lein-environ "1.0.0"]
             [lein-cljfmt "0.3.0"]]
+
+  :aliases {"format" ["auto" "do" ["cljfmt" "fix" "project.clj" "src" "test"]]}
+  :auto {:default {:paths ["."]}}
   :main ^:skip-aot schedule.web.core
   :target-path "target/%s"
   :cljfmt {:indents {chatty-checker [[:block 1]]}}
@@ -28,4 +37,5 @@
              :dev [:test {:source-paths ["dev"]
                           :env {:http-port 3000}
                           :plugins [[lein-auto "0.1.2"]
-                                    [lein-cljfmt "0.3.0"]]}]})
+                                    [lein-cljfmt "0.3.0"]
+                                    [lein-midje "3.1.3"]]}]})

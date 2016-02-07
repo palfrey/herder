@@ -4,17 +4,19 @@
    [compojure.route :as route]
    [compojure.handler :as handler]
    [compojure.core :refer [defroutes GET POST context] :as compojure]
-   [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
    [reloaded.repl :refer [system]]
    [bouncer.core :as b]
    [bouncer.validators :as v]
-   [ring.util.response :refer [redirect]]
+   [ring.util.response :refer [redirect response status]]
+   [ring.middleware.json :refer [wrap-json-response]]
    [clj-leveldb :as leveldb]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]))
+   [ring.util.anti-forgery :refer [anti-forgery-field]]
+   [clj-uuid :as uuid]))
 
 (def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
 
-(def common-features 
+(def common-features
   {:header #(-> (clo/render-resource "templates/header.mustache") (clojure.string/replace "%TITLE%" %))})
 
 (defn render [template values]
@@ -32,22 +34,23 @@
   (first
    (b/validate
     params
-    :conventionName [[v/required :message "Need a name for the convention"]])))
+    :conventionName [[v/required :message "Need a name for the convention"]]
+    :from [v/required]
+    :to [v/required])))
 
 (defn new-convention [{:keys [flash]}]
   (render "templates/new-convention.mustache" {:errors (:errors flash)}))
 
 (defn save-new-convention! [{{:keys [connection]} :db :keys [:params]}]
   (if-let [errors (validate-new-convention params)]
-    (-> (redirect "/convention/new")
-        (assoc :flash (assoc params :errors errors)))
-    (let [id (java.util.UUID/randomUUID)
-          existingConventions (leveldb/get connection :conventions)
-          daterange (clojure.string/split (:daterange params) #"-")]
+    (-> (response {:errors errors})
+        (status 400))
+    (let [id (str (uuid/v1))
+          existingConventions (leveldb/get connection :conventions)]
       (leveldb/put connection
                    :conventions (conj existingConventions id)
-                   id {:name (:conventionName params) :from (first daterange) :to (second daterange)})
-      (redirect "/"))))
+                   id {:name (:conventionName params) :from (:from params) :to (:to params)})
+      (status (response {:id id}) 201))))
 
 (defn show-convention [{{:keys [connection]} :db {:keys [id]} :params}]
   (let [convention (leveldb/get connection (java.util.UUID/fromString id))]
@@ -55,11 +58,21 @@
     (println id)
     (render "templates/show-convention.mustache" convention)))
 
+(defn edit-convention [])
+
+(defn list-conventions [{{:keys [connection]} :db}]
+  (let [conventions (leveldb/get connection :conventions)]
+    (response {:conventions (map #(assoc (leveldb/get connection %) :id %) conventions)})))
+
+(def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
+
 (defroutes convention-routes
   (context "/convention" []
+    (GET "/" [] list-conventions)
     (GET "/new" [] new-convention)
     (POST "/new" [] save-new-convention!)
-    (GET ["/:id", :id #"[\w]{8}(-[\w]{4}){3}-[\w]{12}"] [id] show-convention)))
+    (GET ["/:id", :id uuid-regex] [id] show-convention)
+    (POST ["/:id", :id uuid-regex] [id] edit-convention)))
 
 (defroutes core-routes
   (GET "/" [] index)
@@ -70,4 +83,5 @@
 
 (defn app [routes]
   (-> routes
-      (wrap-defaults site-defaults)))
+      (wrap-defaults api-defaults)
+      wrap-json-response))
