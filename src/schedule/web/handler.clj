@@ -54,10 +54,8 @@
       (status (response {:id id}) 201))))
 
 (defn show-convention [{{:keys [connection]} :db {:keys [id]} :params}]
-  (let [convention (leveldb/get connection (java.util.UUID/fromString id))]
-    (println convention)
-    (println id)
-    (render "templates/show-convention.mustache" convention)))
+  (let [convention (leveldb/get connection id)]
+    (response convention)))
 
 (defn edit-convention [])
 
