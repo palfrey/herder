@@ -12,7 +12,8 @@
    [ring.middleware.json :refer [wrap-json-response]]
    [clj-leveldb :as leveldb]
    [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [clj-uuid :as uuid]))
+   [clj-uuid :as uuid]
+   [clj-time.format :as f]))
 
 (def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
 
@@ -35,8 +36,8 @@
    (b/validate
     params
     :conventionName [[v/required :message "Need a name for the convention"]]
-    :from [v/required]
-    :to [v/required])))
+    :from [[v/datetime (f/formatter "yyyy-MM-dd")]]
+    :to [[v/datetime (f/formatter "yyyy-MM-dd")]])))
 
 (defn new-convention [{:keys [flash]}]
   (render "templates/new-convention.mustache" {:errors (:errors flash)}))
@@ -69,7 +70,6 @@
 (defroutes convention-routes
   (context "/convention" []
     (GET "/" [] list-conventions)
-    (GET "/new" [] new-convention)
     (POST "/new" [] save-new-convention!)
     (GET ["/:id", :id uuid-regex] [id] show-convention)
     (POST ["/:id", :id uuid-regex] [id] edit-convention)))

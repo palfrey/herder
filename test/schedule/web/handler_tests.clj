@@ -20,17 +20,28 @@
            :response
            unpack) => {:body {:conventions []}, :status 200})
 
+ (defn make-convention [arg & {:keys [from to] :or {from "2016-01-01" to "2016-01-02"}}]
+   (request arg "/convention/new"
+            :request-method :post
+            :params {:conventionName "stuff"
+                     :from from
+                     :to to}))
+
+ (fact "make new convention fail"
+       (-> (session (app routes))
+           (make-convention :from "foo" :to "bar")
+           :response
+           unpack) => {:status 400
+                       :body {:errors {:from ["from must be a valid date"]
+                                       :to ["to must be a valid date"]}}})
+
  (fact "make new convention"
        (-> (session (app routes))
-           (request "/convention/new"
-                    :request-method :post
-                    :params {:conventionName "stuff"
-                             :from "dd"
-                             :to "blah"})
+           make-convention
            :response
            unpack) => {:body {:id "..uuid.."} :status 201}
        (provided
         (#'uuid/v1) => ..uuid..
         (#'clj-leveldb/put anything
                            :conventions ["..uuid.."]
-                           "..uuid.." {:name "stuff" :from "dd" :to "blah"}) => nil)))
+                           "..uuid.." {:name "stuff" :from "2016-01-01" :to "2016-01-02"}) => nil)))
