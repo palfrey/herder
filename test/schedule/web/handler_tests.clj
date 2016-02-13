@@ -32,7 +32,7 @@
 
 (against-background
  [(before :contents (with-test-db))
-  (around :contents (kd/transaction ?form))]
+  (around :facts (kd/transaction ?form))]
  (fact "list conventions"
        (-> (session (app routes))
            (request "/convention")
@@ -61,7 +61,11 @@
              :response
              unpack) => {:body {:id (str uuid)} :status 201}
          (provided
-          (#'uuid/v1) => uuid)))
+          (#'uuid/v1) => uuid)
+         (first (kc/select db/conventions (kc/where {:id uuid}))) => {:name "stuff"
+                                                                      :id uuid
+                                                                      :from #inst "2016-01-01T00:00:00.000-00:00"
+                                                                      :to #inst "2016-01-02T00:00:00.000-00:00"}))
 
  (fact "get convention"
        (let [uuid "1652d4d3-9a88-4feb-a01b-5c1855742747"]
