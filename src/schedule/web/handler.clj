@@ -10,10 +10,11 @@
    [bouncer.validators :as v]
    [ring.util.response :refer [redirect response status]]
    [ring.middleware.json :refer [wrap-json-response]]
-   [clj-leveldb :as leveldb]
    [ring.util.anti-forgery :refer [anti-forgery-field]]
    [clj-uuid :as uuid]
-   [clj-time.format :as f]))
+   [clj-time.format :as f]
+   [korma.core :as d]
+   [schedule.web.db :as db]))
 
 (def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
 
@@ -26,10 +27,10 @@
    (merge common-features values {:anti-forgery (anti-forgery-field)})
    common-partials))
 
-(defn index [{{:keys [connection]} :db}]
-  (let [conventions (leveldb/get connection :conventions)]
+(defn index [params]
+  (let [conventions (d/select db/conventions)]
     (render "templates/index.mustache"
-            {:conventions (map #(assoc (leveldb/get connection %) :id %) conventions)})))
+            {:conventions conventions})))
 
 (defn validate-new-convention [params]
   (first
@@ -42,26 +43,25 @@
 (defn new-convention [{:keys [flash]}]
   (render "templates/new-convention.mustache" {:errors (:errors flash)}))
 
-(defn save-new-convention! [{{:keys [connection]} :db :keys [:params]}]
+(defn save-new-convention! [{:keys [:params]}]
   (if-let [errors (validate-new-convention params)]
     (-> (response {:errors errors})
         (status 400))
     (let [id (str (uuid/v1))
-          existingConventions (leveldb/get connection :conventions)]
-      (leveldb/put connection
-                   :conventions (conj existingConventions id)
-                   id {:name (:conventionName params) :from (:from params) :to (:to params)})
+          existingConventions (d/select db/conventions)]
+      (d/insert
+       db/conventions (d/values [{:id id :name (:conventionName params) :from (:from params) :to (:to params)}]))
       (status (response {:id id}) 201))))
 
-(defn show-convention [{{:keys [connection]} :db {:keys [id]} :params}]
-  (let [convention (leveldb/get connection id)]
-    (response convention)))
+(defn get-convention [{{:keys [id]} :params}]
+  (let [convention (d/select db/conventions (d/where {:id id}))]
+    (response (first convention))))
 
 (defn edit-convention [])
 
-(defn list-conventions [{{:keys [connection]} :db}]
-  (let [conventions (leveldb/get connection :conventions)]
-    (response {:conventions (map #(assoc (leveldb/get connection %) :id %) conventions)})))
+(defn list-conventions [params]
+  (let [conventions (d/select db/conventions)]
+    (response {:conventions conventions})))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
@@ -69,7 +69,7 @@
   (context "/convention" []
     (GET "/" [] list-conventions)
     (POST "/new" [] save-new-convention!)
-    (GET ["/:id", :id uuid-regex] [id] show-convention)
+    (GET ["/:id", :id uuid-regex] [id] get-convention)
     (POST ["/:id", :id uuid-regex] [id] edit-convention)))
 
 (defroutes core-routes

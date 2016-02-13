@@ -2,27 +2,42 @@
   (:use [midje.sweet]
         [peridot.core])
   (:require [schedule.web.handler :refer [app routes]]
-            [clj-leveldb]
+            [schedule.web.lobos :as lobos]
             [clojure.data.json :as json]
-            [clj-uuid :as uuid]))
+            [schedule.web.db :as db]
+            [clj-uuid :as uuid]
+            [korma.core :as kc]
+            [korma.db :as kd]
+            [lobos.migration :as lm]
+            [lobos.connectivity :as lc]))
 
 (defn unpack [response]
   (try
     (hash-map
      :body (json/read-str (:body response) :key-fn keyword)
      :status (:status response))
-    (catch NullPointerException ex
+    (catch Exception ex
       (println response)
       response)))
 
-(fact
+(defn with-test-db []
+  (let [db-details (kd/h2 {:db "mem:test_mem"})]
+    (lc/close-global :korma-test-connection true)
+    (lc/open-global :korma-test-connection db-details)
 
+    (kd/defdb db db-details)
+    (kc/exec-raw ["drop all objects"])
+    (lc/with-connection :korma-test-connection
+      (lobos/add-conventions-table))))
+
+(against-background
+ [(before :contents (with-test-db))
+  (around :contents (kd/transaction ?form))]
  (fact "list conventions"
        (-> (session (app routes))
            (request "/convention")
            :response
-           unpack) => {:body {:conventions []}, :status 200}
-       (provided (#'clj-leveldb/get anything :conventions) => []))
+           unpack) => {:body {:conventions []}, :status 200})
 
  (defn make-convention [arg & {:keys [from to] :or {from "2016-01-01" to "2016-01-02"}}]
    (request arg "/convention/new"
@@ -40,21 +55,20 @@
                                        :to ["to must be a valid date"]}}})
 
  (fact "make new convention"
-       (-> (session (app routes))
-           make-convention
-           :response
-           unpack) => {:body {:id "..uuid.."} :status 201}
-       (provided
-        (#'clj-leveldb/get anything :conventions) => []
-        (#'uuid/v1) => ..uuid..
-        (#'clj-leveldb/put anything
-                           :conventions ["..uuid.."]
-                           "..uuid.." {:name "stuff" :from "2016-01-01" :to "2016-01-02"}) => nil))
+       (let [uuid (uuid/v1)]
+         (-> (session (app routes))
+             make-convention
+             :response
+             unpack) => {:body {:id (str uuid)} :status 201}
+         (provided
+          (#'uuid/v1) => uuid)))
 
  (fact "get convention"
-       (-> (session (app routes))
-           (request "/convention/1652d4d3-9a88-4feb-a01b-5c1855742747")
-           :response
-           unpack) => {:body {:foo "bar"} :status 200}
-       (provided
-        (#'clj-leveldb/get anything "1652d4d3-9a88-4feb-a01b-5c1855742747") => {:foo :bar})))
+       (let [uuid "1652d4d3-9a88-4feb-a01b-5c1855742747"]
+         (kc/insert db/conventions
+                    (kc/values {:id uuid
+                                :from "2016-01-01"}))
+         (-> (session (app routes))
+             (request (str "/convention/" uuid))
+             :response
+             unpack) => {:body {:id uuid :from "2016-01-01T00:00:00Z" :to nil :name nil} :status 200})))

@@ -11,3 +11,4 @@ pom.xml.asc
 logs/
 node_modules/
 schedule.db/
+.lobos_stash.clj
