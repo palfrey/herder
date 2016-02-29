@@ -16,9 +16,9 @@
    [korma.core :as d]
    [schedule.web.db :as db]))
 
-(def common-partials {:footer (clo/render-resource "templates/footer.mustache")})
+(defn common-partials [] {:footer (clo/render-resource "templates/footer.mustache")})
 
-(def common-features
+(defn common-features []
   {:header #(-> (clo/render-resource "templates/header.mustache") (clojure.string/replace "%TITLE%" %))})
 
 (defn render [template values]

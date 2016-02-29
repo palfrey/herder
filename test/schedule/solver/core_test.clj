@@ -1,4 +1,4 @@
-(ns schedule.core-test
+(ns schedule.solver.core-test
   (:use
    [midje.sweet]
    [schedule.solver.types]
