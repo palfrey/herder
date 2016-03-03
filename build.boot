@@ -49,7 +49,13 @@
    (build)
    (test)))
 
+(deftask fast-watch []
+  (comp
+   (solver)
+   (watch)
+   (test)))
+
 (deftask watch-tests []
   (comp
-   (watch :verbose true)
+   (watch)
    (tests)))
