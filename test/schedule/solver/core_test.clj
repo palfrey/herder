@@ -1,25 +1,24 @@
 (ns schedule.solver.core-test
   (:use
-   [midje.sweet]
    [schedule.solver.types]
-   [schedule.solver.schedule])
+   [schedule.solver.schedule]
+   [clojure.test])
   (:require
    [clj-time.core :as t])
-  (:import 
+  (:import
    [schedule.solver.types ScheduleSolution Event Slot Person]
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.api.solver Solver]
    [org.joda.time Interval]))
 
-(defn isClass [ofClass]
-  (chatty-checker [thing]
-    (.isAssignableFrom ofClass (class thing))))
+(defn isClass [ofClass thing]
+  (.isAssignableFrom ofClass (class thing)))
 
-(fact "Can make solver config"
-      (makeSolverConfig) => (isClass SolverConfig))
+(testing "Can make solver config"
+  (is (isClass SolverConfig (makeSolverConfig))))
 
-(fact "Can make solver" 
-      (-> (makeSolverConfig) (makeSolver)) => (isClass Solver))
+(testing "Can make solver"
+  (is (isClass Solver (-> (makeSolverConfig) (makeSolver)))))
 
 (defn solve [config]
   (let [solver (-> (makeSolverConfig) (makeSolver))
@@ -40,53 +39,55 @@
    (solve)
    (.getBestSolution)))
 
-(fact "Can solve"
-      (solve defaultConfig) => (isClass Solver))
-(fact "Can get best solution"
-      (getSolution []) => (isClass ScheduleSolution))
+(defmacro n-of [func count items]
+  (list 'map func items))
 
-(fact "Slot generation works"
-      (genSlots [[10 (t/hours 4)]]) => (one-of (isClass Slot)))
-(fact "Slot generation works with default"
-      (genSlots (:slots defaultConfig)) => (two-of (isClass Slot)))
-(fact "Config works"
-      (-> (setupSolution defaultConfig) (.getSlots)) => (two-of (isClass Slot)))
-(fact "Slot range is derived from the slots"
-      (-> (setupSolution defaultConfig) (.getSlotRange)) => (four-of (isClass org.joda.time.Interval)))
+(testing "Can solve"
+  (is (isClass Solver (solve defaultConfig))))
+(testing "Can get best solution"
+  (is (isClass ScheduleSolution (getSolution []))))
 
-(fact "Solution has good score"
-      (->
-       (getSolution [])
-       (.getScore)
-       (.toString))
-      => "0hard/0soft")
+(testing "Slot generation works"
+  (is (n-of (partial isClass Slot) 1 (genSlots [[10 (t/hours 4)]])))) ; one-of
+(testing "Slot generation works with default"
+  (is (n-of (partial isClass Slot) 2 (genSlots (:slots defaultConfig))))) ; two-of
+(testing "Config works"
+  (is (n-of (partial isClass Slot) 2 (-> (setupSolution defaultConfig) (.getSlots))))) ; two-of
+(testing "Slot range is derived from the slots"
+  (is (n-of (partial isClass org.joda.time.Interval) 4 (-> (setupSolution defaultConfig) (.getSlotRange))))) ; four-of
 
-(fact "Events have distinct slots"
-      (->>
+(testing "Solution has good score"
+  (is (= "0hard/0soft"
+         (->
+          (getSolution [])
+          (.getScore)
+          (.toString)))))
+
+(testing "Events have distinct slots"
+  (is (->>
        (getSolution [(Event.) (Event.)])
        (.getEvents)
-       (map #(.getSlot %)))
-      => (chatty-checker [items] (apply distinct? items)))
+       (map #(.getSlot %))
+       distinct?)))
 
 (let [alpha (Person.)
       beta (Person.)
-      eventWithPerson
-      (fn [person]
-        (doto (Event.)
-          (.setPeople [person])))]
+      eventWithPerson (fn [person]
+                        (doto (Event.)
+                          (.setPeople [person])))]
 
-  (fact "Events have distinct slots with full schedule"
-        (->>
+  (testing "Events have distinct slots with full schedule"
+    (is (->>
          (getSolution (repeatedly 4 #(eventWithPerson alpha)))
          (.getEvents)
-         (map #(.getSlot %)))
-        => (chatty-checker [items] (apply distinct? items)))
+         (map #(.getSlot %))
+         distinct?)))
 
-  (fact "Events have distinct slots with overly full schedule"
-        (->> (getSolution
-              (concat
-               (repeatedly 4 #(eventWithPerson alpha))
-               (repeatedly 4 #(eventWithPerson beta))))
-             (.getEvents)
-             (map #(vector (.getSlot %) (-> (.getPeople %) first))))
-        => (chatty-checker [items] (apply distinct? items))))
+  (testing "Events have distinct slots with overly full schedule"
+    (->> (getSolution
+          (concat
+           (repeatedly 4 #(eventWithPerson alpha))
+           (repeatedly 4 #(eventWithPerson beta))))
+         (.getEvents)
+         (map #(vector (.getSlot %) (-> (.getPeople %) first)))
+         distinct?)))

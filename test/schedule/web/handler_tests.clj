@@ -1,6 +1,7 @@
 (ns schedule.web.handler-tests
-  (:use [midje.sweet]
-        [peridot.core])
+  (:use
+   [clojure.test]
+   [peridot.core])
   (:require [schedule.web.handler :refer [app routes]]
             [schedule.web.lobos :as lobos]
             [clojure.data.json :as json]
