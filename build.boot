@@ -16,8 +16,9 @@
                  [org.clojure/tools.namespace "0.2.10"]
                  [org.danielsz/system "0.1.9" :exclusions [org.clojure/tools.namespace]]
                  [environ "1.0.0"]
-                 [lobos "1.0.0-beta3"]
+                 [lobos "1.0.0-beta3" :exclude [org.clojure/java.jdbc]]
                  [org.xerial/sqlite-jdbc "3.8.11.2"]
+                 [org.clojure/java.jdbc "0.3.7"]
                  [korma "0.4.2"]
 
                  [http-kit "2.1.18"]
