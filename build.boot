@@ -1,6 +1,7 @@
 (set-env!
- :source-paths #{"src/java" "src/clj" "test"}
+ :source-paths #{"src/java" "src/clj" "test" "build.boot"}
  :resource-paths #{"resources"}
+ :format-paths #{"src/clj" "build.boot" "test"}
  :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
                  [org.clojure/clojure "1.6.0"]
                  [commons-io "2.4"]
@@ -32,7 +33,10 @@
                  [midje "1.8.3" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
                  [com.h2database/h2 "1.3.172"]
-                 [cljfmt "0.4.1"]])
+
+                 [cljfmt "0.4.1"]
+                 [me.raynes/fs "1.4.6"]
+				 [juxt/dirwatch "0.2.3"]])
 
 (require '[adzerk.boot-test :refer :all])
 
@@ -41,29 +45,36 @@
   (aot :namespace '#{schedule.solver.types}))
 
 (require '[cljfmt.core :refer [reformat-string]]
-         '[clojure.java.io :as io])
+         '[clojure.java.io :as io]
+         '[me.raynes.fs :as fs]
+		'[juxt.dirwatch :refer [watch-dir close-watcher]])
 
 (defn grep [re dir]
   (filter #(re-find re (str %)) (file-seq (io/file dir))))
 
-(defn find-files [f]
-  (let [f (io/file f)]
-    (when-not (.exists f) (println "No such file:" (str f)))
+(defn find-files [fname]
+  (let [f (io/file fname)]
     (if (.isDirectory f)
-      (grep #"\.clj[sx]?$" f)
+      (apply concat
+             (fs/walk
+              (fn [root dirs files]
+                (grep #"\.clj[sx]?$" root)) fname))
       [f])))
 
 (defn reformat-str [s]
   (cljfmt.core/reformat-string s {}))
 
-(defn fix
-  [files]
-  (doseq [f     (find-files files)
-          :let  [original (slurp f)
-                 revised  (reformat-str original)]
-          :when (not= original revised)]
-    (println "Reformatting" f)
-    (spit f revised)))
+(deftask fix
+  []
+  (with-pre-wrap [fs]
+    (let [files (:format-paths boot.pod/env)]
+      (doseq [f     (mapcat find-files files)
+              :let  [original (slurp f)
+                     revised  (reformat-str original)]
+              :when (not= original revised)]
+        (println "Reformatting" f)
+        (spit f revised)))
+    fs))
 
 (deftask solver []
   (comp
