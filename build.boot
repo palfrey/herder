@@ -24,7 +24,6 @@
                  [http-kit "2.1.18"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [bouncer "0.3.3"]
-                 [solver "0.1.0-SNAPSHOT"]
                  [ring/ring-json "0.4.0"]
                  [org.clojure/data.json "0.2.6"]
                  [danlentz/clj-uuid "0.1.6"]
@@ -36,9 +35,10 @@
 
 (require '[adzerk.boot-test :refer :all])
 
-(defn build []
+(deftask build []
+	(comp
   (javac)
-  (aot :namespace '#{schedule.solver.types}))
+  (aot :namespace '#{schedule.solver.types})))
 
 (deftask solver []
   (comp
@@ -47,7 +47,7 @@
 
 (deftask tests []
   (comp
-   (build)
+   (solver)
    (test)))
 
 (deftask fast-watch []
