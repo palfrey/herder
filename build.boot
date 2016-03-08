@@ -31,13 +31,39 @@
                  [ring/ring-mock "0.3.0" :scope "test"]
                  [midje "1.8.3" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
-                 [com.h2database/h2 "1.3.172"]])
+                 [com.h2database/h2 "1.3.172"]
+                 [cljfmt "0.4.1"]])
 
 (require '[adzerk.boot-test :refer :all])
 
 (defn build []
   (javac)
   (aot :namespace '#{schedule.solver.types}))
+
+(require '[cljfmt.core :refer [reformat-string]]
+         '[clojure.java.io :as io])
+
+(defn grep [re dir]
+  (filter #(re-find re (str %)) (file-seq (io/file dir))))
+
+(defn find-files [f]
+  (let [f (io/file f)]
+    (when-not (.exists f) (println "No such file:" (str f)))
+    (if (.isDirectory f)
+      (grep #"\.clj[sx]?$" f)
+      [f])))
+
+(defn reformat-str [s]
+  (cljfmt.core/reformat-string s {}))
+
+(defn fix
+  [files]
+  (doseq [f     (find-files files)
+          :let  [original (slurp f)
+                 revised  (reformat-str original)]
+          :when (not= original revised)]
+    (println "Reformatting" f)
+    (spit f revised)))
 
 (deftask solver []
   (comp
