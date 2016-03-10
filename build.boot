@@ -2,6 +2,7 @@
  :source-paths #{"src/java" "src/clj" "test" "build.boot"}
  :resource-paths #{"resources"}
  :format-paths #{"src/clj" "build.boot" "test"}
+ ;:format-regex #"\.clj[sx]?$"
  :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
                  [org.clojure/clojure "1.8.0"]
                  [commons-io "2.4"]
