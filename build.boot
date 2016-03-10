@@ -1,8 +1,10 @@
 (set-env!
- :source-paths #{"src/java" "src/clj" "test"}
+ :source-paths #{"src/java" "src/clj" "test" "build.boot"}
  :resource-paths #{"resources"}
+ :format-paths #{"src/clj" "build.boot" "test"}
+ ;:format-regex #"\.clj[sx]?$"
  :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
-                 [org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojure "1.8.0"]
                  [commons-io "2.4"]
 
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
@@ -31,7 +33,11 @@
                  [ring/ring-mock "0.3.0" :scope "test"]
                  [midje "1.8.3" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
-                 [com.h2database/h2 "1.3.172"]])
+                 [com.h2database/h2 "1.3.172"]
+
+                 [cljfmt "0.4.1"]
+                 [me.raynes/fs "1.4.6"]
+                 [juxt/dirwatch "0.2.3"]])
 
 (require '[adzerk.boot-test :refer :all])
 
@@ -39,6 +45,35 @@
 	(comp
   (javac)
   (aot :namespace '#{schedule.solver.types})))
+
+(require '[cljfmt.core :refer [reformat-string]]
+         '[clojure.java.io :as io]
+         '[me.raynes.fs :as fs]
+         '[juxt.dirwatch :refer [watch-dir close-watcher]]
+         '[clojure.string :as str])
+
+(defn reformat-str [s]
+  (cljfmt.core/reformat-string s {}))
+
+(defn fix-path [{:keys [file action]}]
+  (let [paths (:format-paths boot.pod/env)
+        path (.getAbsolutePath file)
+        matches (-> (filter #(str/includes? path %) paths) empty? not)]
+    (if matches
+      (let  [original (slurp file)
+             revised  (reformat-str original)]
+        (if (not= original revised)
+          (spit file revised))))))
+
+(defonce watcher (atom nil))
+
+(deftask fix
+  []
+  (with-pre-wrap [fs]
+    (if-let [old-watcher @watcher]
+      (close-watcher old-watcher))
+    (reset! watcher (watch-dir fix-path (io/file ".")))
+    fs))
 
 (deftask solver []
   (comp
@@ -50,8 +85,9 @@
    (solver)
    (test)))
 
-(deftask fast-watch []
+(deftask dev []
   (comp
+   (fix)
    (solver)
    (watch)
    (test)))

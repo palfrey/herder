@@ -1,7 +1,7 @@
 (ns schedule.web.db
-  (:use [korma.db]
-        [korma.core]))
+  (:require [korma.db :as db]
+            [korma.core :as core]))
 
 ;(defdb db (sqlite3 {:db "resources/db/korma.db"}))
 
-(defentity conventions)
+(core/defentity conventions)
