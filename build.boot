@@ -3,7 +3,7 @@
  :resource-paths #{"resources"}
  :format-paths #{"src/clj" "build.boot" "test"}
  :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
-                 [org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojure "1.8.0"]
                  [commons-io "2.4"]
 
                  [org.slf4j/slf4j-log4j12 "1.6.6"]
@@ -36,7 +36,7 @@
 
                  [cljfmt "0.4.1"]
                  [me.raynes/fs "1.4.6"]
-				 [juxt/dirwatch "0.2.3"]])
+                 [juxt/dirwatch "0.2.3"]])
 
 (require '[adzerk.boot-test :refer :all])
 
@@ -47,33 +47,30 @@
 (require '[cljfmt.core :refer [reformat-string]]
          '[clojure.java.io :as io]
          '[me.raynes.fs :as fs]
-		'[juxt.dirwatch :refer [watch-dir close-watcher]])
-
-(defn grep [re dir]
-  (filter #(re-find re (str %)) (file-seq (io/file dir))))
-
-(defn find-files [fname]
-  (let [f (io/file fname)]
-    (if (.isDirectory f)
-      (apply concat
-             (fs/walk
-              (fn [root dirs files]
-                (grep #"\.clj[sx]?$" root)) fname))
-      [f])))
+         '[juxt.dirwatch :refer [watch-dir close-watcher]]
+         '[clojure.string :as str])
 
 (defn reformat-str [s]
   (cljfmt.core/reformat-string s {}))
 
+(defn fix-path [{:keys [file action]}]
+  (let [paths (:format-paths boot.pod/env)
+        path (.getAbsolutePath file)
+        matches (-> (filter #(str/includes? path %) paths) empty? not)]
+    (if matches
+      (let  [original (slurp file)
+             revised  (reformat-str original)]
+        (if (not= original revised)
+          (spit file revised))))))
+
+(defonce watcher (atom nil))
+
 (deftask fix
   []
   (with-pre-wrap [fs]
-    (let [files (:format-paths boot.pod/env)]
-      (doseq [f     (mapcat find-files files)
-              :let  [original (slurp f)
-                     revised  (reformat-str original)]
-              :when (not= original revised)]
-        (println "Reformatting" f)
-        (spit f revised)))
+    (if-let [old-watcher @watcher]
+      (close-watcher old-watcher))
+    (reset! watcher (watch-dir fix-path (io/file ".")))
     fs))
 
 (deftask solver []
@@ -86,8 +83,9 @@
    (build)
    (test)))
 
-(deftask fast-watch []
+(deftask dev []
   (comp
+   (fix)
    (solver)
    (watch)
    (test)))
