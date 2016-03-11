@@ -14,10 +14,10 @@
 (defn isClass [ofClass thing]
   (.isAssignableFrom ofClass (class thing)))
 
-(testing "Can make solver config"
+(deftest CanMakeSolverConfig
   (is (isClass SolverConfig (makeSolverConfig))))
 
-(testing "Can make solver"
+(deftest CanMakeSolver
   (is (isClass Solver (-> (makeSolverConfig) (makeSolver)))))
 
 (defn solve [config]
@@ -42,28 +42,28 @@
 (defmacro n-of [func count items]
   (list 'map func items))
 
-(testing "Can solve"
+(deftest CanSolve
   (is (isClass Solver (solve defaultConfig))))
-(testing "Can get best solution"
+(deftest CanGetBestSolution
   (is (isClass ScheduleSolution (getSolution []))))
 
-(testing "Slot generation works"
+(deftest SlotGenerationWorks
   (is (n-of (partial isClass Slot) 1 (genSlots [[10 (t/hours 4)]])))) ; one-of
-(testing "Slot generation works with default"
+(deftest SlotGenerationWorksWithDefault
   (is (n-of (partial isClass Slot) 2 (genSlots (:slots defaultConfig))))) ; two-of
-(testing "Config works"
+(deftest ConfigWorks
   (is (n-of (partial isClass Slot) 2 (-> (setupSolution defaultConfig) (.getSlots))))) ; two-of
-(testing "Slot range is derived from the slots"
+(deftest SlotRangeIsDerivedFromTheSlots
   (is (n-of (partial isClass org.joda.time.Interval) 4 (-> (setupSolution defaultConfig) (.getSlotRange))))) ; four-of
 
-(testing "Solution has good score"
+(deftest SolutionHasGoodScore
   (is (= "0hard/0soft"
          (->
           (getSolution [])
           (.getScore)
           (.toString)))))
 
-(testing "Events have distinct slots"
+(deftest EventsHaveDistinctSlots
   (is (->>
        (getSolution [(Event.) (Event.)])
        (.getEvents)
@@ -76,14 +76,14 @@
                         (doto (Event.)
                           (.setPeople [person])))]
 
-  (testing "Events have distinct slots with full schedule"
+  (deftest EventsHaveDistinctSlotsWithFullSchedule
     (is (->>
          (getSolution (repeatedly 4 #(eventWithPerson alpha)))
          (.getEvents)
          (map #(.getSlot %))
          distinct?)))
 
-  (testing "Events have distinct slots with overly full schedule"
+  (deftest EventsHavedistinctSlotsWithOverlyFullSchedule
     (->> (getSolution
           (concat
            (repeatedly 4 #(eventWithPerson alpha))
