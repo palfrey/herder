@@ -1,3 +1,4 @@
+sudo: false
 language: java
 jdk:
 - oraclejdk8
@@ -6,7 +7,7 @@ cache:
   - $HOME/.m2
   - $HOME/.boot
 before_cache:
-  - rm -f $HOME/.boot/cache/tmp
+  - rm -Rf $HOME/.boot/cache/tmp
 install:
 - wget -O boot https://github.com/boot-clj/boot-bin/releases/download/2.5.2/boot.sh
 - chmod 755 boot
