@@ -2,7 +2,7 @@
  :source-paths #{"src/java" "src/clj" "test" "build.boot"}
  :resource-paths #{"resources"}
  :format-paths #{"src/clj" "build.boot" "test"}
- ;:format-regex #"\.clj[sx]?$"
+ :format-regex #"\.(?:clj[sx]?|boot)$"
  :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
                  [org.clojure/clojure "1.8.0"]
                  [commons-io "2.4"]
@@ -42,9 +42,9 @@
 (require '[adzerk.boot-test :refer :all])
 
 (deftask build []
-	(comp
-  (javac)
-  (aot :namespace '#{schedule.solver.types})))
+  (comp
+   (javac)
+   (aot :namespace '#{schedule.solver.types})))
 
 (require '[cljfmt.core :refer [reformat-string]]
          '[clojure.java.io :as io]
@@ -56,10 +56,10 @@
   (cljfmt.core/reformat-string s {}))
 
 (defn fix-path [{:keys [file action]}]
-  (let [paths (:format-paths boot.pod/env)
-        path (.getAbsolutePath file)
-        matches (-> (filter #(str/includes? path %) paths) empty? not)]
-    (if matches
+  (let [path (.getAbsolutePath file)
+        matches-path (-> boot.pod/env :format-paths ((partial filter #(str/includes? path %))) empty? not)
+        matches-regex (-> boot.pod/env :format-regex (#(re-find % path)) nil? not)]
+    (if (and matches-path matches-regex)
       (let  [original (slurp file)
              revised  (reformat-str original)]
         (if (not= original revised)
