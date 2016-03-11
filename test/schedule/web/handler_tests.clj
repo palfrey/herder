@@ -45,7 +45,7 @@
              unpack) {:body {:conventions []}, :status 200})))
 
 (defn make-convention [arg & {:keys [from to] :or {from "2016-01-01" to "2016-01-02"}}]
-  (request arg "/convention/new"
+  (request arg "/convention"
            :request-method :post
            :params {:conventionName "stuff"
                     :from from

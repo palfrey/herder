@@ -68,7 +68,7 @@
 (defroutes convention-routes
   (context "/convention" []
     (GET "/" [] list-conventions)
-    (POST "/new" [] save-new-convention!)
+    (POST "/" [] save-new-convention!)
     (GET ["/:id", :id uuid-regex] [id] get-convention)
     (POST ["/:id", :id uuid-regex] [id] edit-convention)))
 
