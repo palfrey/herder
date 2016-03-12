@@ -89,7 +89,7 @@
   (comp
    (fix)
    (solver)
-   (watch)
+   (watch :verbose true)
    (test)))
 
 (deftask watch-tests []
