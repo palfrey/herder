@@ -29,7 +29,7 @@
     (kd/defdb db db-details)
     (kc/exec-raw ["drop all objects"])
     (lc/with-connection :korma-test-connection
-      (lobos/add-conventions-table))))
+      (lobos/make-tables))))
 
 (defn db-test-fixture [f]
   (with-test-db)
@@ -66,17 +66,58 @@
                  make-convention
                  :response
                  unpack) {:body {:id (str uuid)} :status 201})))
-    (is (= (first (kc/select db/conventions (kc/where {:id uuid}))) {:name "stuff"
-                                                                     :id uuid
-                                                                     :from #inst "2016-01-01T00:00:00.000-00:00"
-                                                                     :to #inst "2016-01-02T00:00:00.000-00:00"}))))
+    (is (= (first (kc/select db/conventions (kc/where {:id uuid})))
+           {:name "stuff"
+            :id uuid
+            :from #inst "2016-01-01T00:00:00.000-00:00"
+            :to #inst "2016-01-02T00:00:00.000-00:00"}))))
 
-(deftest GetConvention
-  (let [uuid "1652d4d3-9a88-4feb-a01b-5c1855742747"]
-    (kc/insert db/conventions
-               (kc/values {:id uuid
-                           :from "2016-01-01"}))
+(defn insert-convention [uuid]
+  (kc/insert db/conventions
+             (kc/values {:id uuid
+                         :from "2016-01-01"})))
+
+(let [con_uuid (uuid/v1)
+      str_con_uuid (str con_uuid)]
+  (deftest GetConvention
+    (insert-convention con_uuid)
     (is (= (-> (session (app routes))
-               (request (str "/convention/" uuid))
+               (request (str "/convention/" str_con_uuid))
                :response
-               unpack) {:body {:id uuid :from "2016-01-01T00:00:00Z" :to nil :name nil} :status 200}))))
+               unpack)
+           {:body
+            {:id str_con_uuid :from "2016-01-01T00:00:00Z" :to nil :name nil}
+            :status 200})))
+
+  (deftest MakeNewSlotFail
+    (is (=
+         {:body {:errors
+                 {:start ["start must be a valid time"],
+                  :end ["end must be a valid time"]}}
+          :status 400}
+         (-> (session (app routes))
+             (request (str "/convention/" str_con_uuid "/slot")
+                      :request-method :post
+                      :params {:start "garble"
+                               :end "garble"})
+             :response
+             unpack))))
+
+  (deftest MakeNewSlot
+    (insert-convention con_uuid)
+    (let [slot_uuid (uuid/v1)]
+      (with-redefs [uuid/v1 (fn [] slot_uuid)]
+        (is (=
+             {:body {:id (str slot_uuid)} :status 201}
+             (-> (session (app routes))
+                 (request (str "/convention/" str_con_uuid "/slot")
+                          :request-method :post
+                          :params {:start "10:05"
+                                   :end "11:00"})
+                 :response
+                 unpack))))
+      (is (= {:id slot_uuid
+              :start-minutes 605
+              :end-minutes 660
+              :convention_id con_uuid}
+             (first (kc/select db/slots (kc/where {:id slot_uuid}))))))))

@@ -5,3 +5,4 @@
 ;(defdb db (sqlite3 {:db "resources/db/korma.db"}))
 
 (core/defentity conventions)
+(core/defentity slots)
