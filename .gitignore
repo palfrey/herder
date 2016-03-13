@@ -10,6 +10,6 @@ pom.xml.asc
 .hg/
 logs/
 node_modules/
-schedule.db/
+herder.db/
 .lobos_stash.clj
 .nrepl-history

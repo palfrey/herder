@@ -1,4 +1,4 @@
-(ns schedule.web.handler
+(ns herder.web.handler
   (:require
    [clostache.parser :as clo]
    [compojure.route :as route]
@@ -15,7 +15,7 @@
    [clj-time.core :as t]
    [clj-time.format :as f]
    [korma.core :as d]
-   [schedule.web.db :as db]))
+   [herder.web.db :as db]))
 
 (defn common-partials [] {:footer (clo/render-resource "templates/footer.mustache")})
 

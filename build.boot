@@ -44,7 +44,7 @@
 (deftask build []
   (comp
    (javac)
-   (aot :namespace '#{schedule.solver.types})))
+   (aot :namespace '#{herder.solver.types})))
 
 (require '[cljfmt.core :refer [reformat-string]]
          '[clojure.java.io :as io]

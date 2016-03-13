@@ -1,4 +1,4 @@
-(ns schedule.web.db
+(ns herder.web.db
   (:require [korma.db :as db]
             [korma.core :as core]))
 

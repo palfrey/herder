@@ -1,12 +1,12 @@
-(ns schedule.solver.core-test
+(ns herder.solver.core-test
   (:use
-   [schedule.solver.types]
-   [schedule.solver.schedule]
+   [herder.solver.types]
+   [herder.solver.schedule]
    [clojure.test])
   (:require
    [clj-time.core :as t])
   (:import
-   [schedule.solver.types ScheduleSolution Event Slot Person]
+   [herder.solver.types HerderSolution Event Slot Person]
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.api.solver Solver]
    [org.joda.time Interval]))
@@ -45,7 +45,7 @@
 (deftest CanSolve
   (is (isClass Solver (solve defaultConfig))))
 (deftest CanGetBestSolution
-  (is (isClass ScheduleSolution (getSolution []))))
+  (is (isClass HerderSolution (getSolution []))))
 
 (deftest SlotGenerationWorks
   (is (n-of (partial isClass Slot) 1 (genSlots [[10 (t/hours 4)]])))) ; one-of
@@ -76,14 +76,14 @@
                         (doto (Event.)
                           (.setPeople [person])))]
 
-  (deftest EventsHaveDistinctSlotsWithFullSchedule
+  (deftest EventsHaveDistinctSlotsWithFullSolution
     (is (->>
          (getSolution (repeatedly 4 #(eventWithPerson alpha)))
          (.getEvents)
          (map #(.getSlot %))
          distinct?)))
 
-  (deftest EventsHavedistinctSlotsWithOverlyFullSchedule
+  (deftest EventsHavedistinctSlotsWithOverlyFullSolution
     (->> (getSolution
           (concat
            (repeatedly 4 #(eventWithPerson alpha))

@@ -1,4 +1,4 @@
-package schedule.solver;
+package herder.solver;
 
 import org.optaplanner.core.api.domain.solution.Solution;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;

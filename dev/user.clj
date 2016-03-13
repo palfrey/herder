@@ -1,7 +1,7 @@
 (ns user
   (:require 
    [reloaded.repl :refer [system init start stop go reset]]
-   [schedule.web.systems :refer [dev-system]]
+   [herder.web.systems :refer [dev-system]]
    [clojure.tools.namespace.repl :refer [set-refresh-dirs]]))
 
 ;(clojure.tools.namespace.repl/set-refresh-dirs "src/clj")

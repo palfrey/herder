@@ -1,5 +1,5 @@
 {
-  "name": "schedule",
+  "name": "herder",
   "version": "0.0.1",
   "devDependencies": {
     "grunt-prettify": "~0.4.0",

@@ -1,4 +1,4 @@
-(ns schedule.web.lobos
+(ns herder.web.lobos
   (:refer-clojure :exclude [alter drop
                             bigint boolean char double float time])
   (:use (lobos core schema)))

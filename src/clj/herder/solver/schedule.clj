@@ -1,5 +1,5 @@
-(ns schedule.solver.schedule
-  (:use [schedule.solver.types])
+(ns herder.solver.schedule
+  (:use [herder.solver.types])
   (:import
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.config.score.director ScoreDirectorFactoryConfig]
@@ -7,13 +7,13 @@
    [org.optaplanner.core.config.constructionheuristic ConstructionHeuristicPhaseConfig]
    [org.optaplanner.core.config.solver.termination TerminationConfig]
 
-   [schedule.solver.types ScheduleSolution Event Slot]))
+   [herder.solver.types HerderSolution Event Slot]))
 
 (defn scoreDirectoryFactory []
   (doto
    (ScoreDirectorFactoryConfig.)
     (.setScoreDefinitionType ScoreDefinitionType/HARD_SOFT)
-    (.setScoreDrlList ["schedule/solver/rules.drl"])))
+    (.setScoreDrlList ["herder/solver/rules.drl"])))
 
 (defn genPhaseSearch []
   [(ConstructionHeuristicPhaseConfig.)])
@@ -26,7 +26,7 @@
 (defn makeSolverConfig []
   (doto
    (SolverConfig.)
-    (.setSolutionClass ScheduleSolution)
+    (.setSolutionClass HerderSolution)
     (.setScoreDirectorFactoryConfig (scoreDirectoryFactory))
     (.setEntityClassList [Event])
     (.setPhaseConfigList (genPhaseSearch))
@@ -40,7 +40,7 @@
 
 (defn setupSolution [config]
   (doto
-   (ScheduleSolution.)
+   (HerderSolution.)
     (.setFirstDay (:firstDay config))
     (.setLastDay (:lastDay config))
     (.setSlots (genSlots (:slots config)))

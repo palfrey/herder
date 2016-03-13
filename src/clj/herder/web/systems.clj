@@ -1,4 +1,4 @@
-(ns schedule.web.systems
+(ns herder.web.systems
   (:require [system.core :refer [defsystem]]
             [com.stuartsierra.component :as component]
             [clojure.edn :as edn]
@@ -8,9 +8,9 @@
              [app :refer [new-app]]
              [h2 :refer [new-h2-database]])
             [environ.core :refer [env]]
-            [schedule.web.handler :refer [routes app]]))
+            [herder.web.handler :refer [routes app]]))
 
-(def dbPath "schedule.db")
+(def dbPath "herder.db")
 
 (defn dev-system []
   (component/system-map

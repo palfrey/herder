@@ -1,4 +1,4 @@
-(ns schedule.solver.types
+(ns herder.solver.types
   (:require
    [clj-time.periodic :as p]
    [clj-time.core :as t])
@@ -10,7 +10,7 @@
    [org.optaplanner.core.api.domain.valuerange ValueRangeProvider]
    [org.joda.time ReadablePeriod DateTime Interval]
    [java.util ArrayList]
-   [schedule.solver HardSoftSolution]))
+   [herder.solver HardSoftSolution]))
 
 (defn- getValue [this k]
   (let [state (.state this)] (.get @state k)))

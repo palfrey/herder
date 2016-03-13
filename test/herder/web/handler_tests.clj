@@ -1,11 +1,11 @@
-(ns schedule.web.handler-tests
+(ns herder.web.handler-tests
   (:use
    [clojure.test]
    [peridot.core])
-  (:require [schedule.web.handler :refer [app routes]]
-            [schedule.web.lobos :as lobos]
+  (:require [herder.web.handler :refer [app routes]]
+            [herder.web.lobos :as lobos]
             [clojure.data.json :as json]
-            [schedule.web.db :as db]
+            [herder.web.db :as db]
             [clj-uuid :as uuid]
             [korma.core :as kc]
             [korma.db :as kd]

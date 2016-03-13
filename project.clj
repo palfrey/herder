@@ -1,4 +1,4 @@
-(defproject schedule "0.1.0-SNAPSHOT"
+(defproject herder "0.1.0-SNAPSHOT"
   :plugins [[lein-environ "1.0.0"]
             [lein-cljfmt "0.4.1"]
             [lein-auto "0.1.2"]]
