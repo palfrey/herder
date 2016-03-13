@@ -32,7 +32,8 @@
 (defn db-test-fixture [f]
   (with-test-db)
   (kd/transaction
-   (f)))
+   (f))
+  (lc/close-global :korma-test-connection true))
 
 (defn make-session []
   (session (app routes)))

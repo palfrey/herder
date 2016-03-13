@@ -1,9 +1,9 @@
 (set-env!
- :source-paths #{"src/java" "src/clj" "test" "build.boot"}
+ :source-paths #{"src/java" "src/clj"}
  :resource-paths #{"resources"}
  :format-paths #{"src/clj" "build.boot" "test"}
  :format-regex #"\.(?:clj[sx]?|boot)$"
- :dependencies '[[adzerk/boot-test "1.1.0" :scope "test"]
+ :dependencies '[[adzerk/boot-test "1.1.1" :scope "test"]
                  [org.clojure/clojure "1.8.0"]
                  [commons-io "2.4"]
 
@@ -31,7 +31,6 @@
                  [danlentz/clj-uuid "0.1.6"]
 
                  [ring/ring-mock "0.3.0" :scope "test"]
-                 [midje "1.8.3" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
                  [com.h2database/h2 "1.3.172"]
 
@@ -80,9 +79,15 @@
    (build)
    (target "target")))
 
+(deftask testing
+  []
+  (set-env! :source-paths #(conj % "test"))
+  identity)
+
 (deftask tests []
   (comp
    (solver)
+   (testing)
    (test)))
 
 (deftask dev []
@@ -90,6 +95,7 @@
    (fix)
    (solver)
    (watch :verbose true)
+   (testing)
    (test)))
 
 (deftask watch-tests []
