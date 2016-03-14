@@ -19,7 +19,7 @@
     :start [[v/datetime time-format :message "start must be a valid time"]]
     :end [[v/datetime time-format :message "end must be a valid time"]])))
 
-(defn minutes [time]
+(defn time->minutes [time]
   (let [when (f/parse time-format time)]
     (+ (t/minute when) (* 60 (t/hour when)))))
 
@@ -30,11 +30,28 @@
     (let [id (str (uuid/v1))]
       (d/insert
        db/slots (d/values [{:id id
-                            :start-minutes (-> params :start minutes)
-                            :end-minutes (-> params :end minutes)
+                            :start-minutes (-> params :start time->minutes)
+                            :end-minutes (-> params :end time->minutes)
                             :convention_id (:id params)}]))
       (status (response {:id id}) 201))))
 
+(defn minutes->time [minutes]
+  (f/unparse time-format (t/plus (t/date-time 1970 1 1) (t/minutes minutes))))
+
+(defn get-slot [{{:keys [id]} :params}]
+  (let [slot (first (d/select db/slots (d/where {:id id})))]
+    (if (nil? slot)
+      (status (response (str "No such slot " id)) 404)
+      (response (->
+                 slot
+                 (#(assoc %
+                          :start (minutes->time (:start-minutes %))
+                          :end (minutes->time (:end-minutes %))))
+                 (#(dissoc % :start-minutes :end-minutes)))))))
+
+(def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
+
 (def slot-context
   (context "/slot" []
+    (GET ["/:id" :id uuid-regex] [id] get-slot)
     (POST "/" [] new-slot!)))

@@ -12,6 +12,13 @@
 
 (use-fixtures :each db-test-fixture)
 
+(defn insert-slot [con_uuid slot_uuid]
+  (kc/insert db/slots
+             (kc/values {:id slot_uuid
+                         :convention_id con_uuid
+                         :start-minutes 600
+                         :end-minutes 660})))
+
 (let [con_uuid (uuid/v1)
       str_con_uuid (str con_uuid)]
   (deftest MakeNewSlotFail
@@ -45,4 +52,21 @@
               :start-minutes 605
               :end-minutes 660
               :convention_id con_uuid}
-             (first (kc/select db/slots (kc/where {:id slot_uuid}))))))))
+             (first (kc/select db/slots (kc/where {:id slot_uuid})))))))
+
+  (deftest get-slot
+    (let [slot_uuid (uuid/v1)]
+      (insert-convention con_uuid)
+      (insert-slot con_uuid slot_uuid)
+      (is (=
+           {:body
+            {:id (str slot_uuid)
+             :convention_id str_con_uuid
+             :start "10:00"
+             :end "11:00"}
+            :status 200}
+           (->
+            (make-session)
+            (request (str "/convention/" str_con_uuid "/slot/" (str slot_uuid)))
+            :response
+            unpack))))))

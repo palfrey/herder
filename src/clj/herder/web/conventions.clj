@@ -38,8 +38,6 @@
   (let [conventions (d/select db/conventions)]
     (response {:conventions conventions})))
 
-(def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
-
 (defroutes convention-routes
   (context "/convention" []
     (GET "/" [] list-conventions)
