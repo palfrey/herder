@@ -6,3 +6,4 @@
 
 (core/defentity conventions)
 (core/defentity slots)
+(core/defentity persons)

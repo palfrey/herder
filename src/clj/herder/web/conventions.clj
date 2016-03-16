@@ -9,7 +9,8 @@
    [compojure.core :refer [defroutes GET POST PUT context]]
 
    [herder.web.db :as db]
-   [herder.web.slots :as slots]))
+   [herder.web.slots :as slots]
+   [herder.web.persons :as persons]))
 
 (defn validate-new-convention [params]
   (first
@@ -46,4 +47,5 @@
     (context "/:id" [id]
       (GET "/" [id] get-convention)
       (PUT "/" [id] edit-convention)
-      slots/slot-context)))
+      slots/slot-context
+      persons/person-context)))

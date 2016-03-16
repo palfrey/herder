@@ -36,6 +36,13 @@
         (integer :end-minutes)
         (refer-to :conventions))))
 
+(defn add-persons-table []
+  (create
+   (tbl :persons
+        (varchar :name 100)
+        (refer-to :conventions))))
+
 (defn make-tables []
   (add-conventions-table)
-  (add-slots-table))
+  (add-slots-table)
+  (add-persons-table))
