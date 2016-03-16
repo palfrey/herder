@@ -42,7 +42,18 @@
         (varchar :name 100)
         (refer-to :conventions))))
 
+(defn add-events-table []
+  (create
+   (tbl :events
+        (varchar :name 100)
+        (refer-to :conventions)))
+  (create
+   (table :events-persons
+          (refer-to :events)
+          (refer-to :persons))))
+
 (defn make-tables []
   (add-conventions-table)
   (add-slots-table)
-  (add-persons-table))
+  (add-persons-table)
+  (add-events-table))

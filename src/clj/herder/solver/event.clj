@@ -1,6 +1,6 @@
 (in-ns 'herder.solver.types)
 
-(gen-class 
+(gen-class
  :name ^{PlanningEntity {}} herder.solver.types.Event
  :prefix "event-"
  :init init
@@ -12,7 +12,9 @@
            [setPeople [java.util.List] void]])
 
 (defn- event-init []
-  [[] (ref {:id (java.util.UUID/randomUUID) :people []})])
+  [[] (ref {:id (java.util.UUID/randomUUID)
+            :people []
+            :name ""})])
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -28,3 +30,9 @@
 
 (defn- event-setPeople [this item]
   (setValue this :people item))
+
+(defn- person-getName [this]
+  (getValue this :name))
+
+(defn- person-setName [this item]
+  (setValue this :name item))

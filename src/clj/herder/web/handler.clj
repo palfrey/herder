@@ -37,5 +37,5 @@
 
 (defn app [routes]
   (-> routes
-      (wrap-defaults api-defaults)
+      (wrap-defaults (assoc-in api-defaults [:params :nested] true))
       wrap-json-response))

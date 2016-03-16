@@ -10,7 +10,8 @@
 
    [herder.web.db :as db]
    [herder.web.slots :as slots]
-   [herder.web.persons :as persons]))
+   [herder.web.persons :as persons]
+   [herder.web.events :as events]))
 
 (defn validate-new-convention [params]
   (first
@@ -48,4 +49,5 @@
       (GET "/" [id] get-convention)
       (PUT "/" [id] edit-convention)
       slots/slot-context
-      persons/person-context)))
+      persons/person-context
+      events/event-context)))

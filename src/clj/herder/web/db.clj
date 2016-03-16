@@ -7,3 +7,5 @@
 (core/defentity conventions)
 (core/defentity slots)
 (core/defentity persons)
+(core/defentity events)
+(core/defentity events-persons)
