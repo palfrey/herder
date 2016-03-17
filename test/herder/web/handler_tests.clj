@@ -2,7 +2,7 @@
   (:use
    [peridot.core])
   (:require
-   [herder.web.handler :refer [app routes]]
+   [herder.web.handler :refer [app]]
    [herder.web.lobos :as lobos]
    [clojure.data.json :as json]
    [herder.web.db :as db]
@@ -36,4 +36,4 @@
   (lc/close-global :korma-test-connection true))
 
 (defn make-session []
-  (session (app routes)))
+  (session app))

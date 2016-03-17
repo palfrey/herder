@@ -1,8 +1,8 @@
-(ns herder.web.core
+(ns herder.core
   (:gen-class)
-  (:require 
+  (:require
    [reloaded.repl :refer [system init start stop go reset]]
-   [herder.web.systems :refer [prod-system]]))
+   [herder.systems :refer [prod-system]]))
 
 (defn -main
   "Start a production system."
