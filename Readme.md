@@ -1,7 +1,6 @@
-boot repl
-boot.user=> (boot (dev))
+boot dev-clj
+boot dev-cljs
 
-(go)
 http://localhost:3000
 
 npm install
@@ -11,5 +10,4 @@ replace this with http://stackoverflow.com/a/1989112/320546
 https://github.com/yogthos/Selmer
 
 # TODO
-* fix (go)
 * kill grunt, replace with JTidy

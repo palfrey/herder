@@ -3,24 +3,21 @@
    [compojure.route :as route]
    [compojure.core :refer [defroutes GET POST PUT context] :as compojure]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-   [ring.util.response :refer [redirect response status file-response]]
+   [ring.util.response :refer [file-response content-type]]
    [ring.middleware.json :refer [wrap-json-response]]
    [ring.util.anti-forgery :refer [anti-forgery-field]]
    [korma.core :as d]
    [korma.db :as kd]
    [reloaded.repl :refer [system]]
 
-   [herder.web.conventions :refer [convention-routes]]
-   [herder.web.db :as db]))
+   [herder.web.conventions :refer [convention-routes]]))
 
 (defn index [params]
-  (println (keys params))
-  (let [conventions (d/select db/conventions)]
-    (file-response "templates/index.html")))
+  (content-type (file-response "resources/herder/templates/index.html") "text/html"))
 
 (defroutes core-routes
   (GET "/" [] index)
-  (route/resources "/")
+  (route/files "/resources/public/" {:root "target/resources/public/"})
   (route/not-found "Not found"))
 
 (def routes (compojure/routes convention-routes core-routes))

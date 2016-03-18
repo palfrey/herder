@@ -119,14 +119,15 @@
  figwheel {:build-ids  ["dev"]
            :all-builds [{:id "dev"
                          :compiler {:main 'herder.core
-                                    :output-to "herder.js"}
+                                    :output-to "resources/public/herder.js"
+                                    :output-dir "resources/public"}
                          :figwheel {:build-id  "dev"
                                     :on-jsload 'herder.core/run
                                     :heads-up-display true
                                     :autoload true
                                     :debug false}}]
            :figwheel-options {:repl true
-                              :http-server-root "target"
+                              :http-server-root "/"
                               :css-dirs ["target"]}})
 
 (deftask run-figwheel []
