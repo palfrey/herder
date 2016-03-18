@@ -25,7 +25,7 @@
 (defn wrap-db [f]
   (fn [req]
     (if-let [sys-db (:db system)]
-      (kd/with-db (:db system)
+      (kd/with-db sys-db
         (f req))
       (f req))))
 
