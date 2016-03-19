@@ -143,7 +143,7 @@
    (figwheel)
    (run-figwheel)
    (watch)
-   (system :sys #'dev-system :auto true :files ["handler.clj"])))
+   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])))
 
 (deftask watch-tests []
   (comp
