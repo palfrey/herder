@@ -31,6 +31,6 @@
 
 (def app
   (-> #'routes
+      wrap-json-response
       (wrap-defaults (assoc-in api-defaults [:params :nested] true))
-      wrap-db
-      wrap-json-response))
+      wrap-db))
