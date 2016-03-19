@@ -107,14 +107,6 @@
    (testing)
    (test)))
 
-(deftask dev-clj []
-  (comp
-   (fix)
-   (solver)
-   (watch :verbose true)
-   (testing)
-   (test)))
-
 (task-options!
  figwheel {:build-ids  ["dev"]
            :all-builds [{:id "dev"
@@ -135,15 +127,26 @@
     (start-figwheel!)
     fs))
 
-(deftask dev-cljs []
+(deftask dev-clj []
   (comp
    (fix)
+   (solver)
+   (watch :verbose true)
+   (testing)
+   (test)))
+
+(deftask dev []
+  (comp
+   (fix)
+   (solver)
    (environ :env {:http-port "3000"})
    (repl)
    (figwheel)
    (run-figwheel)
    (watch)
-   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])))
+   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])
+   (testing)
+   (test)))
 
 (deftask watch-tests []
   (comp

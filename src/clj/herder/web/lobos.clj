@@ -1,7 +1,8 @@
 (ns herder.web.lobos
   (:refer-clojure :exclude [alter drop
                             bigint boolean char double float time])
-  (:use (lobos core schema [migration :only [defmigration]])))
+  (:require [lobos.migration :refer [defmigration Migration] :as mig])
+  (:use (lobos core schema)))
 
   ;; Define a UUID column type (for H2)
 (defn uuid [table name & options]
@@ -65,8 +66,11 @@
    (drop (table :events))
    (drop (table :events-persons))))
 
+(defn call-migration [migration]
+  (mig/up migration))
+
 (defn make-tables []
-  (add-conventions-table)
-  (add-slots-table)
-  (add-persons-table)
-  (add-events-table))
+  (call-migration add-conventions-table)
+  (call-migration add-slots-table)
+  (call-migration add-persons-table)
+  (call-migration add-events-table))
