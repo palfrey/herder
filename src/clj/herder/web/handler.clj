@@ -24,8 +24,8 @@
 
 (defn wrap-db [f]
   (fn [req]
-    (if-let [sys-db-spec (:db-spec (:db system))]
-      (kd/with-db (kd/create-db sys-db-spec)
+    (if-let [sys-db (-> system :db :connection)]
+      (kd/with-db sys-db
         (f req))
       (f req))))
 
