@@ -42,6 +42,9 @@
 
                  [org.clojure/clojurescript "1.7.228"]
                  [reagent "0.6.0-alpha"]
+                 [org.webjars/bootstrap "4.0.0-alpha.2"]
+                 [deraen/boot-sass "0.2.1"]
+
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
                  [com.cemerick/piggieback "0.2.1" :scope "test"]
@@ -55,7 +58,8 @@
          '[environ.boot :refer [environ]]
          '[system.boot :refer [system run]]
          '[herder.systems :refer [dev-system]]
-         '[boot-figwheel])
+         '[boot-figwheel]
+         '[deraen.boot-sass :refer [sass]])
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
 
 (deftask build []
@@ -111,16 +115,16 @@
  figwheel {:build-ids  ["dev"]
            :all-builds [{:id "dev"
                          :compiler {:main 'herder.core
-                                    :output-to "resources/public/herder.js"
-                                    :output-dir "resources/public"}
+                                    :output-to "resources/public/js/herder.js"
+                                    :output-dir "resources/public/js"
+                                    :asset-path "static/js"}
                          :figwheel {:build-id  "dev"
                                     :on-jsload 'herder.core/run
                                     :heads-up-display true
                                     :autoload true
                                     :debug false}}]
            :figwheel-options {:repl true
-                              :http-server-root "/"
-                              :css-dirs ["target"]}})
+                              :http-server-root "resources/public/"}})
 
 (deftask run-figwheel []
   (with-pre-wrap [fs]
@@ -144,6 +148,9 @@
    (figwheel)
    (run-figwheel)
    (watch)
+   (sass)
+   (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
+   (target :no-clean true)
    (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])
    (testing)
    (test)))

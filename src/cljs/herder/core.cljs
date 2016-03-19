@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]))
 
 (defn hello-component []
-  [:p "Hello, name!"])
+  [:div {:class "container-fluid"}
+   [:p "Hello, names!"]])
 
 (defn ^:export run []
   (r/render [hello-component]

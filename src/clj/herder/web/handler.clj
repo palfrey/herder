@@ -17,7 +17,7 @@
 
 (defroutes core-routes
   (GET "/" [] index)
-  (route/files "/resources/public/" {:root "target/resources/public/"})
+  (route/files "/static" {:root "target/resources/public/"})
   (route/not-found "Not found"))
 
 (def routes (compojure/routes convention-routes core-routes))
