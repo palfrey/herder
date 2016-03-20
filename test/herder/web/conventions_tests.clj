@@ -14,12 +14,12 @@
 
 (deftest ListConventions
   (is (= (-> (make-session)
-             (request "/convention")
+             (request "/api/convention")
              :response
              unpack) {:body {:conventions []}, :status 200})))
 
 (defn make-convention [arg & {:keys [from to] :or {from "2016-01-01" to "2016-01-02"}}]
-  (request arg "/convention"
+  (request arg "/api/convention"
            :request-method :post
            :params {:conventionName "stuff"
                     :from from
@@ -56,7 +56,7 @@
   (deftest GetConvention
     (insert-convention con_uuid)
     (is (= (-> (make-session)
-               (request (str "/convention/" str_con_uuid))
+               (request (str "/api/convention/" str_con_uuid))
                :response
                unpack)
            {:body

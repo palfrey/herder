@@ -28,7 +28,7 @@
                   :end ["end must be a valid time"]}}
           :status 400}
          (-> (make-session)
-             (request (str "/convention/" str_con_uuid "/slot")
+             (request (str "/api/convention/" str_con_uuid "/slot")
                       :request-method :post
                       :params {:start "garble"
                                :end "garble"})
@@ -42,7 +42,7 @@
         (is (=
              {:body {:id (str slot_uuid)} :status 201}
              (-> (make-session)
-                 (request (str "/convention/" str_con_uuid "/slot")
+                 (request (str "/api/convention/" str_con_uuid "/slot")
                           :request-method :post
                           :params {:start "10:05"
                                    :end "11:00"})
@@ -67,6 +67,6 @@
             :status 200}
            (->
             (make-session)
-            (request (str "/convention/" str_con_uuid "/slot/" (str slot_uuid)))
+            (request (str "/api/convention/" str_con_uuid "/slot/" (str slot_uuid)))
             :response
             unpack))))))

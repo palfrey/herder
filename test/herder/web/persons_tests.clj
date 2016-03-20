@@ -26,7 +26,7 @@
                  {:name ["Must have a name"]}}
           :status 400}
          (-> (make-session)
-             (request (str "/convention/" str_con_uuid "/person")
+             (request (str "/api/convention/" str_con_uuid "/person")
                       :request-method :post
                       :params {:name ""})
              :response
@@ -39,7 +39,7 @@
         (is (=
              {:body {:id (str person_uuid)} :status 201}
              (-> (make-session)
-                 (request (str "/convention/" str_con_uuid "/person")
+                 (request (str "/api/convention/" str_con_uuid "/person")
                           :request-method :post
                           :params {:name "Foo"})
                  :response
@@ -61,6 +61,6 @@
             :status 200}
            (->
             (make-session)
-            (request (str "/convention/" str_con_uuid "/person/" (str person_uuid)))
+            (request (str "/api/convention/" str_con_uuid "/person/" (str person_uuid)))
             :response
             unpack))))))

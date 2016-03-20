@@ -17,10 +17,12 @@
 
 (defroutes core-routes
   (GET "/" [] index)
+  (context "/api" []
+    convention-routes)
   (route/files "/static" {:root "target/resources/public/"})
   (route/not-found "Not found"))
 
-(def routes (compojure/routes convention-routes core-routes))
+(def routes core-routes)
 
 (defn wrap-db [f]
   (fn [req]
