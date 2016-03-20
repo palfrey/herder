@@ -18,8 +18,8 @@
    (b/validate
     params
     :conventionName [[v/required :message "Need a name for the convention"]]
-    :from [[v/datetime (f/formatter "yyyy-MM-dd")]]
-    :to [[v/datetime (f/formatter "yyyy-MM-dd")]])))
+    :from [v/required [v/datetime (f/formatter "yyyy-MM-dd")]]
+    :to [v/required [v/datetime (f/formatter "yyyy-MM-dd")]])))
 
 (defn save-new-convention! [{:keys [:params]}]
   (if-let [errors (validate-new-convention params)]
@@ -38,7 +38,7 @@
 
 (defn list-conventions [params]
   (let [conventions (d/select db/conventions)]
-    (response {:conventions conventions})))
+    (response conventions)))
 
 (defroutes convention-routes
   (context "/convention" []
