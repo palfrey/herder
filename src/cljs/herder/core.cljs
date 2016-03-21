@@ -41,12 +41,6 @@
                                     (swap! val assoc key
                                            [(-> obj .-date1) (-> obj .-date2)]))))}))
 
-(defn form-data [m]
-  (let [fd (js/FormData.)]
-    (doseq [k (keys m)]
-      (.append fd (name k) (k m)))
-    fd))
-
 (defn conferences-component []
   (let [val (r/atom {:name "" :date nil})
         df (fn [date] (-> date js/moment (.format "YYYY-MM-DD")))]
