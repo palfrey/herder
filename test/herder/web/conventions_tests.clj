@@ -61,4 +61,25 @@
                unpack)
            {:body
             {:id str_con_uuid :from "2016-01-01T00:00:00Z" :to nil :name nil}
-            :status 200}))))
+            :status 200})))
+
+  (deftest DeleteConventionFail
+    (is (=
+         {:body {}
+          :status 404}
+         (-> (make-session)
+             (request (str "/api/convention/" str_con_uuid)
+                      :request-method :delete)
+             :response
+             unpack))))
+
+  (deftest DeleteConvention
+    (insert-convention con_uuid)
+    (is (=
+         {:body {}
+          :status 200}
+         (-> (make-session)
+             (request (str "/api/convention/" str_con_uuid)
+                      :request-method :delete)
+             :response
+             unpack)))))

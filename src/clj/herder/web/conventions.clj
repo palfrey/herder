@@ -6,7 +6,7 @@
    [clj-time.format :as f]
    [korma.core :as d]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [defroutes GET POST PUT context]]
+   [compojure.core :refer [defroutes GET POST PUT DELETE context]]
 
    [herder.web.db :as db]
    [herder.web.slots :as slots]
@@ -34,6 +34,10 @@
   (let [convention (d/select db/conventions (d/where {:id id}))]
     (response (first convention))))
 
+(defn delete-convention [{{:keys [id]} :params}]
+  (let [convention (d/delete db/conventions (d/where {:id id}))]
+    (status (response {}) (if (> convention 0) 200 404))))
+
 (defn edit-convention [])
 
 (defn list-conventions [params]
@@ -48,6 +52,7 @@
     (context "/:id" [id]
       (GET "/" [id] get-convention)
       (PUT "/" [id] edit-convention)
+      (DELETE "/" [id] delete-convention)
       slots/slot-context
       persons/person-context
       events/event-context)))

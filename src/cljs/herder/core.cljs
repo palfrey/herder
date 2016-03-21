@@ -1,6 +1,6 @@
 (ns herder.core
   (:require [reagent.core :as r]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST DELETE]]
             [cljsjs.jquery]
             [cljsjs.moment]
             [cljsjs.jquery-daterange-picker]
@@ -49,7 +49,15 @@
        [:h1 "Conventions"]
        [:ul
         (for [{:keys [id name from to]} (get-convention)]
-          ^{:key id} [:li [:a {:href (str "/convention/" id)} name] (str " " (df from) " - " (df to))])]
+          ^{:key id} [:li
+                      [:a {:href (str "/convention/" id)} name]
+                      (str " " (df from) " - " (df to) " ")
+                      [:button {:type "button"
+                                :class "btn btn-danger"
+                                :on-click #(DELETE (str "/api/convention/" id)
+                                             {:handler
+                                              (fn [resp] (get-convention :refresh true))})}
+                       (str "Delete " name)]])]
        [:hr]
 
        [:div {:class "form-group"}
