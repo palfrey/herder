@@ -22,7 +22,7 @@
     :title title}))
 
 (defroutes core-routes
-  (GET "/" [] (partial page "herder.core.conventions-component" "Index"))
+  (GET "/" [] (partial page "herder.conventions.conventions-component" "Index"))
   (context "/api" []
     convention-routes)
   (route/files "/static" {:root "target/resources/public/"})
