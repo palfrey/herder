@@ -6,10 +6,7 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
-.hgignore
-.hg/
 logs/
-node_modules/
 herder.db*
 .lobos_stash.clj
 .nrepl-history
