@@ -19,3 +19,19 @@
     (do
       (GET url {:handler (partial key-handler key)})
       {})))
+
+(defn convention-url []
+  (str "/api/convention/" (:id @state)))
+
+(defn get-convention [& {:keys [refresh]}]
+  (get-data :convention (convention-url) :refresh refresh))
+
+(defn convention-header []
+  (let [convention (get-convention)]
+    [:nav {:class "navbar navbar-nav navbar-full navbar-dark bg-inverse"}
+     [:a {:class "navbar-brand"} (:name convention) " (" (to-date (:from convention)) " - " (to-date (:to convention)) ")"]
+     [:ul {:class "nav navbar-nav"}
+      [:li {:class "nav-item active"}
+       [:a {:class "nav-link"} "Slots"]]
+      [:li {:class "nav-item"}
+       [:a {:class "nav-link" :href "/"} "Goto convention list"]]]]))
