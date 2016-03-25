@@ -17,6 +17,7 @@
                  [ring/ring-defaults "0.2.0"]
                  [org.clojure/tools.namespace "0.2.10"]
                  [org.danielsz/system "0.3.0-SNAPSHOT"]
+                 [de.ubercode.clostache/clostache "1.4.0"]
 
                  [environ "1.0.2"]
                  [boot-environ "1.0.2"]
@@ -120,7 +121,7 @@
                          :compiler {:main 'herder.core
                                     :output-to "resources/public/js/herder.js"
                                     :output-dir "resources/public/js"
-                                    :asset-path "static/js"}
+                                    :asset-path "/static/js"}
                          :figwheel {:build-id  "dev"
                                     :on-jsload 'herder.core/run
                                     :heads-up-display true

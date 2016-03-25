@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Herder</title>
+    <meta charset="utf-8" />
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <link href="/static/css/core.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <div id="app"/>
+    <script type="text/javascript" src="/static/js/herder.js"></script>
+    <script>herder.core.run("{{component}}", "{{title}}");</script>
+  </body>
+</html>

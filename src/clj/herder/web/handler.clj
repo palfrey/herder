@@ -10,14 +10,19 @@
    [korma.core :as d]
    [korma.db :as kd]
    [reloaded.repl :refer [system]]
+   [clostache.parser :as clostache]
 
    [herder.web.conventions :refer [convention-routes]]))
 
-(defn index [params]
-  (content-type (file-response "resources/herder/templates/index.html") "text/html"))
+(defn page [component title params]
+  (clostache/render
+   (slurp (clojure.java.io/resource
+           (str "herder/templates/index.clostache")))
+   {:component component
+    :title title}))
 
 (defroutes core-routes
-  (GET "/" [] index)
+  (GET "/" [] (partial page "herder.core.conventions-component" "Index"))
   (context "/api" []
     convention-routes)
   (route/files "/static" {:root "target/resources/public/"})

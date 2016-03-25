@@ -42,7 +42,7 @@
                                     (swap! val assoc key
                                            [(-> obj .-date1) (-> obj .-date2)]))))}))
 
-(defn ^:export conferences-component []
+(defn ^:export conventions-component []
   (let [val (r/atom {:name "" :date nil})
         df (fn [date] (-> date js/moment (.format "YYYY-MM-DD")))]
     (fn []
@@ -102,6 +102,7 @@
 (defn ^:export run [component title-text]
   (.log js/console (pr-str @state))
   (let [to-render (js/eval (->js component))]
+    (if (nil? to-render) (throw (js/Error. (str "Can't find " component))))
     (r/render [to-render]
               (js/document.getElementById "app")))
   (let [title (.item (js/document.getElementsByTagName "title") 0)]
