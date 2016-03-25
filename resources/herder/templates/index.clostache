@@ -9,6 +9,10 @@
   <body>
     <div id="app"/>
     <script type="text/javascript" src="/static/js/herder.js"></script>
-    <script>herder.core.run("{{component}}", "{{title}}");</script>
+    <script>
+        herder.core.set("component", "{{component}}");
+        herder.core.set("title", "{{title}}");
+        herder.core.run();
+    </script>
   </body>
 </html>

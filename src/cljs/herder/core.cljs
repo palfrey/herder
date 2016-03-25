@@ -1,8 +1,10 @@
 (ns herder.core
+  (:refer-clojure :exclude [set])
   (:require
    [reagent.core :as r]
    [clojure.string :as str]
-   [herder.conventions]))
+   [herder.conventions]
+   [herder.helpers :refer [state]]))
 
 (defn set-html! [dom content]
   (set! (. dom -innerHTML) content))
@@ -12,8 +14,13 @@
       (str/replace "/" ".")
       (str/replace "-" "_")))
 
+(defn ^:export set [key value]
+  (swap! state assoc (keyword key) value))
+
 (defn ^:export run [component title-text]
-  (let [to-render (js/eval (->js component))]
+  (.log js/console (pr-str @state))
+  (let [component (:component @state)
+        to-render (js/eval (->js component))]
     (if (nil? to-render) (throw (js/Error. (str "Can't find " component))))
     (r/render [to-render]
               (js/document.getElementById "app")))
