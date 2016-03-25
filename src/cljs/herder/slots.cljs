@@ -25,7 +25,7 @@
                    ""
                    value))}])
     :component-did-mount #(->
-                           (.timepicker (js/$ (r/dom-node %)) (js-obj "timeFormat" "h:i"))
+                           (.timepicker (js/$ (r/dom-node %)) (js-obj "timeFormat" "H:i"))
                            (.bind "changeTime"
                                   (fn [event obj]
                                     (swap! val assoc key
