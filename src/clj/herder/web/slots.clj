@@ -8,7 +8,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT context]]))
+   [compojure.core :refer [GET POST PUT DELETE context]]))
 
 (def time-format (f/formatter "hh:mm"))
 
@@ -56,10 +56,15 @@
   (let [slots (d/select db/slots (d/where {:convention_id id}))]
     (response (map reformat-slot slots))))
 
+(defn delete-slot [{{:keys [id]} :params}]
+  (let [slot (d/delete db/slots (d/where {:id id}))]
+    (status (response {}) (if (> slot 0) 200 404))))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def slot-context
   (context "/slot" []
     (GET "/" [] get-slots)
     (GET ["/:id" :id uuid-regex] [id] get-slot)
+    (DELETE ["/:id" :id uuid-regex] [id] delete-slot)
     (POST "/" [] new-slot!)))

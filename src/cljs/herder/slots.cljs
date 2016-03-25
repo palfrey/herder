@@ -48,7 +48,13 @@
          [:h2 "Slots"]
          [:ul
           (for [{:keys [id start end]} (get-slots)]
-            ^{:key id} [:li start " to " end])]
+            ^{:key id} [:li start " to " end " "
+                        [:button {:type "button"
+                                  :class "btn btn-danger"
+                                  :on-click #(DELETE (str (slots-url) "/" id)
+                                               {:handler
+                                                (fn [resp] (get-slots :refresh true))})}
+                         (str "Delete " start "-" end)]])]
          [:hr]
          [:form {:method "POST" :class "form-inline"}
           [:div {:class "form-group"}
