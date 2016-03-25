@@ -3,6 +3,7 @@
             [ajax.core :refer [GET POST DELETE]]
             [cljsjs.jquery]
             [cljsjs.moment]
+            [clojure.string :as str]
             [cljsjs.jquery-daterange-picker]
             [clojure.walk :refer [keywordize-keys]]))
 
@@ -41,7 +42,7 @@
                                     (swap! val assoc key
                                            [(-> obj .-date1) (-> obj .-date2)]))))}))
 
-(defn conferences-component []
+(defn ^:export conferences-component []
   (let [val (r/atom {:name "" :date nil})
         df (fn [date] (-> date js/moment (.format "YYYY-MM-DD")))]
     (fn []
@@ -93,9 +94,15 @@
 (defn set-html! [dom content]
   (set! (. dom -innerHTML) content))
 
-(defn ^:export run []
+(defn ->js [var-name]
+  (-> var-name
+      (str/replace "/" ".")
+      (str/replace "-" "_")))
+
+(defn ^:export run [component title-text]
   (.log js/console (pr-str @state))
-  (r/render [conferences-component]
-            (js/document.getElementById "app"))
+  (let [to-render (js/eval (->js component))]
+    (r/render [to-render]
+              (js/document.getElementById "app")))
   (let [title (.item (js/document.getElementsByTagName "title") 0)]
-    (set-html! title "Herder")))
+    (set-html! title title-text)))
