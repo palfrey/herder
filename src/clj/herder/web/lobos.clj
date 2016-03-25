@@ -15,7 +15,7 @@
   (let [cname (-> (->> ptable name butlast (apply str))
                   (str "_id")
                   keyword)]
-    (uuid table cname [:refer ptable :id :on-delete :set-null])))
+    (uuid table cname [:refer ptable :id])))
 
 (defmacro tbl [name & elements]
   `(-> (table ~name
