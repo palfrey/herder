@@ -14,15 +14,20 @@
 
    [herder.web.conventions :refer [convention-routes]]))
 
-(defn page [component title params]
+(defn page [component title request]
   (clostache/render
    (slurp (clojure.java.io/resource
            (str "herder/templates/index.clostache")))
-   {:component component
-    :title title}))
+   (let [params (assoc (:params request)
+                       :component component
+                       :title title)]
+     {:params (map #(hash-map :key (name %) :value (get params %)) (keys params))})))
+
+(def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (defroutes core-routes
-  (GET "/" [] (partial page "herder.conventions.conventions-component" "Index"))
+  (GET "/" [] (partial page "herder.conventions.component" "Index"))
+  (GET ["/convention/:id" :id uuid-regex] [id] (partial page "herder.slots.component", "Convention"))
   (context "/api" []
     convention-routes)
   (route/files "/static" {:root "target/resources/public/"})

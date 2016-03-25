@@ -4,10 +4,11 @@
    [cljsjs.jquery]
    [cljsjs.moment]
    [cljsjs.jquery-daterange-picker]
-   [herder.helpers :as h]))
+   [ajax.core :refer [POST DELETE]]
+   [herder.helpers :as h :refer [to-date get-data]]))
 
 (defn get-convention [& {:keys [refresh]}]
-  (h/get-data :conventions "/api/convention" :refresh refresh))
+  (get-data :conventions "/api/convention" :refresh refresh))
 
 (defn daterange [val key]
   (r/create-class
@@ -28,9 +29,8 @@
                                     (swap! val assoc key
                                            [(-> obj .-date1) (-> obj .-date2)]))))}))
 
-(defn ^:export conventions-component []
-  (let [val (r/atom {:name "" :date nil})
-        df (fn [date] (-> date js/moment (.format "YYYY-MM-DD")))]
+(defn ^:export component []
+  (let [val (r/atom {:name "" :date nil})]
     (fn []
       [:div {:class "container-fluid"}
        [:h1 "Conventions"]
@@ -38,7 +38,7 @@
         (for [{:keys [id name from to]} (get-convention)]
           ^{:key id} [:li
                       [:a {:href (str "/convention/" id)} name]
-                      (str " " (df from) " - " (df to) " ")
+                      (str " " (to-date from) " - " (to-date to) " ")
                       [:button {:type "button"
                                 :class "btn btn-danger"
                                 :on-click #(DELETE (str "/api/convention/" id)
@@ -49,9 +49,7 @@
 
        [:div {:class "form-inline"}
         [:div {:class "form-group"}
-         [:label {:for "conventionName"
-                  :style {:padding-left "5px"
-                          :padding-right "5px"}} "Convention name"]
+         [:label {:for "conventionName"} "Convention name"]
          [:input {:id "conventionName"
                   :name "conventionName"
                   :type "text"
@@ -61,9 +59,7 @@
                   :on-change #(swap! val assoc :name (-> % .-target .-value))}]]
 
         [:div {:class "form-group"}
-         [:label {:for "daterange"
-                  :style {:padding-left "5px"
-                          :padding-right "5px"}} "Dates"]
+         [:label {:for "daterange"} "Dates"]
          [daterange val :date]]
         [:button {:type "button"
                   :class "btn btn-primary"

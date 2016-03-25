@@ -4,6 +4,7 @@
    [reagent.core :as r]
    [clojure.string :as str]
    [herder.conventions]
+   [herder.slots]
    [herder.helpers :refer [state]]))
 
 (defn set-html! [dom content]
@@ -17,7 +18,7 @@
 (defn ^:export set [key value]
   (swap! state assoc (keyword key) value))
 
-(defn ^:export run [component title-text]
+(defn ^:export run []
   (.log js/console (pr-str @state))
   (let [component (:component @state)
         to-render (js/eval (->js component))]
@@ -25,4 +26,4 @@
     (r/render [to-render]
               (js/document.getElementById "app")))
   (let [title (.item (js/document.getElementsByTagName "title") 0)]
-    (set-html! title title-text)))
+    (set-html! title (:title @state))))

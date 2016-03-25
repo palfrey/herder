@@ -48,6 +48,7 @@
                  [cljs-ajax "0.5.4"]
                  [cljsjs/jquery "2.2.2-0"]
                  [cljsjs/jquery-daterange-picker "0.0.8-0"]
+                 [cljsjs/jquery-timepicker "1.8.10-0"]
 
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
@@ -152,8 +153,10 @@
    (figwheel)
    (run-figwheel)
    (sift
-    :add-jar {'cljsjs/jquery-daterange-picker #"^cljsjs/common/jquery-daterange-picker.inc.css$"}
-    :move {#"cljsjs/common/(jquery-daterange-picker.inc.css)" "resources/public/css/$1"})
+    :add-jar {'cljsjs/jquery-daterange-picker #"^cljsjs/common/jquery-daterange-picker.inc.css$"
+              'cljsjs/jquery-timepicker #"^cljsjs/common/jquery-timepicker.inc.css$"}
+    :move {#"cljsjs/common/(jquery-daterange-picker.inc.css)" "resources/public/css/$1"
+           #"cljsjs/common/(jquery-timepicker.inc.css)" "resources/public/css/$1"})
    (watch)
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})

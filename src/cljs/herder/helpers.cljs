@@ -1,10 +1,13 @@
 (ns herder.helpers
   (:require
    [reagent.core :as r]
-   [ajax.core :refer [GET POST DELETE]]
+   [ajax.core :refer [GET]]
    [clojure.walk :refer [keywordize-keys]]))
 
 (defonce state (r/atom {}))
+
+(defn to-date [tstamp]
+  (-> tstamp js/moment (.format "YYYY-MM-DD")))
 
 (defn key-handler [key data]
   (.log js/console (str key) "Response" (pr-str data))
