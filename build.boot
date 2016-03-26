@@ -145,6 +145,18 @@
    (testing)
    (test)))
 
+(deftask kill-pods []
+  (with-pre-wrap [fs]
+    (doseq [pod (->> boot.pod/pods (map key))
+            :let [name (.getName pod)
+                  allowed ["worker" "core" "deraen.boot-sass" "boot.pod"]]]
+      (if (not (.contains allowed name))
+        (do
+          (println "Killing " name)
+          (boot.pod/destroy-pod pod))
+        (println "Not killing " name)))
+    fs))
+
 (deftask dev []
   (comp
    (fix)
@@ -164,7 +176,8 @@
    (target :no-clean true)
    (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])
    (testing)
-   (test)))
+   (test)
+   (kill-pods)))
 
 (deftask watch-tests []
   (comp
