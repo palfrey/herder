@@ -19,7 +19,7 @@
     (-> (response {:errors errors})
         (status 400))
     (let [id (str (uuid/v1))
-          persons (:persons params)
+          persons (get params :persons [])
           persons (if (vector? persons) persons [persons])]
       (d/insert
        db/events (d/values [{:id id

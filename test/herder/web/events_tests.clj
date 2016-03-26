@@ -61,6 +61,31 @@
               :person_id person_uuid}
              (first (kc/select db/events-persons (kc/where {:event_id event_uuid})))))))
 
+  (deftest MakeNewEventWithNoPerson
+    (insert-convention con_uuid)
+    (let [event_uuid (uuid/v1)]
+      (with-redefs [uuid/v1 (fn [] event_uuid)]
+        (is (=
+             {:body {:id (str event_uuid)} :status 201}
+             (-> (make-session)
+                 (request (str "/api/convention/" str_con_uuid "/event")
+                          :request-method :post
+                          :params {:name "Foo"
+                                   :persons []})
+                 :response
+                 unpack))))
+      (is (= {:body
+              {:id (str event_uuid)
+               :name "Foo"
+               :convention_id (str con_uuid)
+               :persons []}
+              :status 200}
+             (->
+              (make-session)
+              (request (str "/api/convention/" str_con_uuid "/event/" (str event_uuid)))
+              :response
+              unpack)))))
+
   (deftest get-event
     (let [event_uuid (uuid/v1)]
       (insert-convention con_uuid)
