@@ -28,7 +28,6 @@
 (defroutes core-routes
   (GET "/" [] (partial page "herder.conventions.component" "Index"))
   (GET ["/convention/:id" :id uuid-regex] [id] (partial page "herder.slots.component", "Convention"))
-  (GET ["/convention/:id/persons" :id uuid-regex] [id] (partial page "herder.persons.component", "People"))
   (context "/api" []
     convention-routes)
   (route/files "/static" {:root "target/resources/public/"})
