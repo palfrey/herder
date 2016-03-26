@@ -40,9 +40,14 @@
                  (#(assoc %
                           :persons (map :person_id (d/select db/events-persons (d/where {:event_id id}))))))))))
 
+(defn get-events [{{:keys [id]} :params}]
+  (let [events (d/select db/events (d/where {:convention_id id}))]
+    (response events)))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def event-context
   (context "/event" []
+    (GET "/" [] get-events)
     (GET ["/:id" :id uuid-regex] [id] get-event)
     (POST "/" [] new-event!)))

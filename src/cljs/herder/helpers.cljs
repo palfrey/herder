@@ -36,5 +36,7 @@
        [:a {:class "nav-link" :href "#/"} "Slots"]]
       [:li {:class (str "nav-item " (if (= active :persons) "active" ""))}
        [:a {:class "nav-link" :href "#/persons"} "People"]]
+      [:li {:class (str "nav-item " (if (= active :events) "active" ""))}
+       [:a {:class "nav-link" :href "#/events"} "Events"]]
       [:li {:class "nav-item"}
        [:a {:class "nav-link" :href "/"} "Goto convention list"]]]]))
