@@ -6,7 +6,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT context]]))
+   [compojure.core :refer [GET POST PUT DELETE context]]))
 
 (defn validate-new-person [params]
   (first
@@ -31,9 +31,19 @@
       (status (response (str "No such person " id)) 404)
       (response person))))
 
+(defn get-persons [{{:keys [id]} :params}]
+  (let [persons (d/select db/persons (d/where {:convention_id id}))]
+    (response persons)))
+
+(defn delete-person [{{:keys [id]} :params}]
+  (let [person (d/delete db/persons (d/where {:id id}))]
+    (status (response {}) (if (> person 0) 200 404))))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def person-context
   (context "/person" []
+    (GET "/" [] get-persons)
     (GET ["/:id" :id uuid-regex] [id] get-person)
+    (DELETE ["/:id" :id uuid-regex] [id] delete-person)
     (POST "/" [] new-person!)))

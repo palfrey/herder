@@ -26,12 +26,14 @@
 (defn get-convention [& {:keys [refresh]}]
   (get-data :convention (convention-url) :refresh refresh))
 
-(defn convention-header []
+(defn convention-header [active]
   (let [convention (get-convention)]
     [:nav {:class "navbar navbar-nav navbar-full navbar-dark bg-inverse"}
      [:a {:class "navbar-brand"} (:name convention) " (" (to-date (:from convention)) " - " (to-date (:to convention)) ")"]
      [:ul {:class "nav navbar-nav"}
-      [:li {:class "nav-item active"}
-       [:a {:class "nav-link"} "Slots"]]
+      [:li {:class (str "nav-item " (if (= active :slots) "active" ""))}
+       [:a {:class "nav-link" :href (str "/convention/" (:id @state))} "Slots"]]
+      [:li {:class (str "nav-item " (if (= active :persons) "active" ""))}
+       [:a {:class "nav-link" :href (str "/convention/" (:id @state) "/persons")} "People"]]
       [:li {:class "nav-item"}
        [:a {:class "nav-link" :href "/"} "Goto convention list"]]]]))

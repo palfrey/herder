@@ -5,6 +5,7 @@
    [clojure.string :as str]
    [herder.conventions]
    [herder.slots]
+   [herder.persons]
    [herder.helpers :refer [state]]))
 
 (defn set-html! [dom content]

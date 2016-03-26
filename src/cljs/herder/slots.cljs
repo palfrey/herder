@@ -35,7 +35,7 @@
   (let [val (r/atom {:fromTime nil :toTime nil})]
     (fn []
       [:div {:class "container-fluid"}
-       [convention-header]
+       [convention-header :slots]
        [:h2 "Slots"]
        [:ul
         (for [{:keys [id start end]} (get-slots)]
