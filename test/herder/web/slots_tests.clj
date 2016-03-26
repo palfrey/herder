@@ -45,12 +45,12 @@
                  (request (str "/api/convention/" str_con_uuid "/slot")
                           :request-method :post
                           :params {:start "10:05"
-                                   :end "11:00"})
+                                   :end "13:00"})
                  :response
                  unpack))))
       (is (= {:id slot_uuid
               :start-minutes 605
-              :end-minutes 660
+              :end-minutes 780
               :convention_id con_uuid}
              (first (kc/select db/slots (kc/where {:id slot_uuid})))))))
 

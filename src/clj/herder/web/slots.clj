@@ -10,7 +10,7 @@
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PUT DELETE context]]))
 
-(def time-format (f/formatter "hh:mm"))
+(def time-format (f/formatter "HH:mm"))
 
 (defn validate-new-slot [params]
   (first
