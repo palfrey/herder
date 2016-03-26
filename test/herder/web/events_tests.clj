@@ -59,7 +59,16 @@
 
       (is (= {:event_id event_uuid
               :person_id person_uuid}
-             (first (kc/select db/events-persons (kc/where {:event_id event_uuid})))))))
+             (first (kc/select db/events-persons (kc/where {:event_id event_uuid})))))
+
+      (is (= {:body {}
+              :status 200}
+             (->
+              (make-session)
+              (request (str "/api/convention/" str_con_uuid "/event/" (str event_uuid))
+                       :request-method :delete)
+              :response
+              unpack)))))
 
   (deftest MakeNewEventWithNoPerson
     (insert-convention con_uuid)

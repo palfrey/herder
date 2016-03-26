@@ -6,7 +6,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT context]]))
+   [compojure.core :refer [GET POST PUT DELETE context]]))
 
 (defn validate-new-event [params]
   (first
@@ -44,10 +44,15 @@
   (let [events (d/select db/events (d/where {:convention_id id}))]
     (response events)))
 
+(defn delete-event [{{:keys [id]} :params}]
+  (let [event (d/delete db/events (d/where {:id id}))]
+    (status (response {}) (if (> event 0) 200 404))))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def event-context
   (context "/event" []
     (GET "/" [] get-events)
     (GET ["/:id" :id uuid-regex] [id] get-event)
+    (DELETE ["/:id" :id uuid-regex] [id] delete-event)
     (POST "/" [] new-event!)))

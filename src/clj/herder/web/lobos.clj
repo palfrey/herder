@@ -11,11 +11,11 @@
 (defn surrogate-key [table]
   (uuid table :id :primary-key))
 
-(defn refer-to [table ptable]
+(defn refer-to [table ptable & args]
   (let [cname (-> (->> ptable name butlast (apply str))
                   (str "_id")
                   keyword)]
-    (uuid table cname [:refer ptable :id])))
+    (uuid table cname (into [:refer ptable :id] args))))
 
 (defmacro tbl [name & elements]
   `(-> (table ~name
@@ -60,8 +60,8 @@
          (refer-to :conventions)))
    (create
     (table :events-persons
-           (refer-to :events)
-           (refer-to :persons))))
+           (refer-to :events :on-delete :cascade)
+           (refer-to :persons :on-delete :cascade))))
   (down
    (drop (table :events))
    (drop (table :events-persons))))
