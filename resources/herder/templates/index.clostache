@@ -13,7 +13,12 @@
         {{#params}}
             herder.core.set("{{key}}", "{{value}}");
         {{/params}}
-        herder.core.run();
+        const loadedStates = ['complete', 'loaded', 'interactive'];
+        if (loadedStates.includes(document.readyState) && document.body) {
+          herder.core.run();
+        } else {
+          window.addEventListener('DOMContentLoaded', herder.core.run(), false);
+        }
     </script>
   </body>
 </html>

@@ -6,7 +6,27 @@
    [herder.conventions]
    [herder.slots]
    [herder.persons]
-   [herder.helpers :refer [state]]))
+   [herder.helpers :refer [state]]
+   [secretary.core :as secretary :refer-macros [defroute]]
+   [goog.events :as events]
+   [goog.history.EventType :as HistoryEventType])
+  (:import goog.History))
+
+(secretary/set-config! :prefix "#")
+
+(defroute "/" []
+  (swap! state assoc :component "herder.slots.component"))
+
+(defroute "/persons" []
+  (swap! state assoc :component "herder.persons.component"))
+
+(defn hook-browser-navigation! []
+  (doto (History.)
+    (events/listen
+     HistoryEventType/NAVIGATE
+     (fn [event]
+       (secretary/dispatch! (.-token event))))
+    (.setEnabled true)))
 
 (defn set-html! [dom content]
   (set! (. dom -innerHTML) content))
@@ -19,12 +39,16 @@
 (defn ^:export set [key value]
   (swap! state assoc (keyword key) value))
 
-(defn ^:export run []
+(defn page []
+  [(-> (get @state :component "herder.slots.component") ->js js/eval)])
+
+(defn mount-root []
   (.log js/console (pr-str @state))
-  (let [component (:component @state)
-        to-render (js/eval (->js component))]
-    (if (nil? to-render) (throw (js/Error. (str "Can't find " component))))
-    (r/render [to-render]
-              (js/document.getElementById "app")))
+  (r/render [#'page]
+            (js/document.getElementById "app"))
   (let [title (.item (js/document.getElementsByTagName "title") 0)]
     (set-html! title (:title @state))))
+
+(defn ^:export run []
+  (hook-browser-navigation!)
+  (mount-root))
