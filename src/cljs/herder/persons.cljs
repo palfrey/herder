@@ -10,6 +10,16 @@
 (defn get-persons [& {:keys [refresh]}]
   (get-data :persons (persons-url) :refresh refresh))
 
+(defn create-new [val]
+  (POST (persons-url)
+    {:params @val
+     :format :json
+     :handler
+     (fn [resp]
+       (do
+         (reset! val {:fromTime nil :toTime nil})
+         (get-persons :refresh true)))}))
+
 (defn ^:export component []
   (let [val (r/atom {})]
     (fn []
@@ -26,7 +36,11 @@
                                               (fn [resp] (get-persons :refresh true))})}
                        (str "Delete " name)]])]
        [:hr]
-       [:form {:class "form-inline"}
+       [:form {:class "form-inline"
+               :on-submit #(do
+                             (.preventDefault %)
+                             (create-new val)
+                             false)}
         [:div {:class "form-group"}
          [:label {:for "name"} "Add Person with name"]
          [:input {:id "name"
@@ -39,12 +53,5 @@
          [:button {:type "button"
                    :class "btn btn-primary"
                    :style {:margin-left "5px"}
-                   :on-click #(do
-                                (.log js/console (pr-str @val))
-                                (POST (persons-url)
-                                  {:params @val
-                                   :format :json
-                                   :handler (fn [resp] (do
-                                                         (reset! val {:fromTime nil :toTime nil})
-                                                         (get-persons :refresh true)))}))}
+                   :on-click #(create-new val)}
           "Create a new person"]]]])))
