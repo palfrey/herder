@@ -2,9 +2,12 @@
   (:require
    [reagent.core :as r]
    [ajax.core :refer [GET]]
-   [clojure.walk :refer [keywordize-keys]]))
+   [clojure.walk :refer [keywordize-keys]]
+   [alandipert.storage-atom :refer [local-storage]]))
 
-(defonce state (r/atom {}))
+(def state
+  (local-storage
+   (r/atom {}) :app-state))
 
 (defn to-date [tstamp]
   (-> tstamp js/moment (.format "YYYY-MM-DD")))

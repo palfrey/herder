@@ -49,6 +49,7 @@
                  [cljsjs/jquery "2.2.2-0"]
                  [cljsjs/jquery-daterange-picker "0.0.8-0"]
                  [cljsjs/jquery-timepicker "1.8.10-0"]
+                 [alandipert/storage-atom "1.2.4"]
 
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
