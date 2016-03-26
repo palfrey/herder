@@ -53,7 +53,7 @@
       (response (reformat-slot slot)))))
 
 (defn get-slots [{{:keys [id]} :params}]
-  (let [slots (d/select db/slots (d/where {:convention_id id}))]
+  (let [slots (d/select db/slots (d/where {:convention_id id}) (d/order :start-minutes))]
     (response (map reformat-slot slots))))
 
 (defn delete-slot [{{:keys [id]} :params}]

@@ -32,7 +32,7 @@
       (response person))))
 
 (defn get-persons [{{:keys [id]} :params}]
-  (let [persons (d/select db/persons (d/where {:convention_id id}))]
+  (let [persons (d/select db/persons (d/where {:convention_id id}) (d/order :name))]
     (response persons)))
 
 (defn delete-person [{{:keys [id]} :params}]
