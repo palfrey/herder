@@ -12,13 +12,14 @@
    [goog.history.EventType :as HistoryEventType])
   (:import goog.History))
 
-(secretary/set-config! :prefix "#")
+(defn convention-spa-routing []
+  (secretary/set-config! :prefix "#")
 
-(defroute "/" []
-  (swap! state assoc :component "herder.slots.component"))
+  (defroute "/" []
+    (swap! state assoc :component "herder.slots.component"))
 
-(defroute "/persons" []
-  (swap! state assoc :component "herder.persons.component"))
+  (defroute "/persons" []
+    (swap! state assoc :component "herder.persons.component")))
 
 (defn hook-browser-navigation! []
   (doto (History.)
@@ -50,5 +51,8 @@
     (set-html! title (:title @state))))
 
 (defn ^:export run []
-  (hook-browser-navigation!)
+  (if (contains? @state :id)
+    (do
+      (convention-spa-routing)
+      (hook-browser-navigation!)))
   (mount-root))
