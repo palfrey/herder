@@ -40,7 +40,8 @@
 
   (deftest MakeNewEvent
     (insert-convention con_uuid)
-    (let [event_uuid (uuid/v1)]
+    (let [event_uuid (uuid/v1)
+          second_person (uuid/v1)]
       (insert-person con_uuid person_uuid)
       (with-redefs [uuid/v1 (fn [] event_uuid)]
         (is (=
@@ -61,6 +62,20 @@
               :person_id person_uuid}
              (first (kc/select db/events-persons (kc/where {:event_id event_uuid})))))
 
+      (insert-person con_uuid second_person)
+      (is (= {:body {:id (str event_uuid)
+                     :name "Foo"
+                     :convention_id str_con_uuid
+                     :persons [(str second_person) (str person_uuid)]}
+              :status 200}
+             (->
+              (make-session)
+              (request (str "/api/convention/" str_con_uuid "/event/" (str event_uuid))
+                       :request-method :patch
+                       :params {:person (str second_person)})
+              :response
+              unpack)))
+
       (is (= {:body {}
               :status 200}
              (->
@@ -72,7 +87,8 @@
 
   (deftest MakeNewEventWithNoPerson
     (insert-convention con_uuid)
-    (let [event_uuid (uuid/v1)]
+    (let [event_uuid (uuid/v1)
+          second_person (uuid/v1)]
       (with-redefs [uuid/v1 (fn [] event_uuid)]
         (is (=
              {:body {:id (str event_uuid)} :status 201}
@@ -92,6 +108,20 @@
              (->
               (make-session)
               (request (str "/api/convention/" str_con_uuid "/event/" (str event_uuid)))
+              :response
+              unpack)))
+
+      (insert-person con_uuid second_person)
+      (is (= {:body {:id (str event_uuid)
+                     :name "Foo"
+                     :convention_id (str con_uuid)
+                     :persons [(str second_person)]}
+              :status 200}
+             (->
+              (make-session)
+              (request (str "/api/convention/" str_con_uuid "/event/" (str event_uuid))
+                       :request-method :patch
+                       :params {:person (str second_person)})
               :response
               unpack)))))
 

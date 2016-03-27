@@ -6,7 +6,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT DELETE context]]))
+   [compojure.core :refer [GET POST PATCH DELETE context]]))
 
 (defn validate-new-event [params]
   (first
@@ -31,14 +31,17 @@
                                        :person_id person}])))
       (status (response {:id id}) 201))))
 
+(defn- retrieve-event [id]
+  (first (d/select db/events (d/where {:id id}))))
+
+(defn- get-person-ids [id]
+  (map :person_id (d/select db/events-persons (d/where {:event_id id}))))
+
 (defn get-event [{{:keys [id]} :params}]
-  (let [event (first (d/select db/events (d/where {:id id})))]
+  (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
-      (response (->
-                 event
-                 (#(assoc %
-                          :persons (map :person_id (d/select db/events-persons (d/where {:event_id id}))))))))))
+      (response (assoc event :persons (get-person-ids id))))))
 
 (defn get-events [{{:keys [id]} :params}]
   (let [events (d/select db/events (d/where {:convention_id id}))]
@@ -48,11 +51,26 @@
   (let [event (d/delete db/events (d/where {:id id}))]
     (status (response {}) (if (> event 0) 200 404))))
 
+(defn patch-event [{{:keys [id person]} :params}]
+  (let [event (retrieve-event id)]
+    (if (nil? event)
+      (status (response (str "No such event " id)) 404)
+      (let [persons (get-person-ids id)
+            return (assoc event :persons persons)]
+        (if (not (.contains persons person))
+          (do
+            (d/insert
+             db/events-persons (d/values [{:event_id id
+                                           :person_id person}]))
+            (response (update return :persons #(conj % person))))
+          (response return))))))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def event-context
   (context "/event" []
     (GET "/" [] get-events)
     (GET ["/:id" :id uuid-regex] [id] get-event)
+    (PATCH ["/:id" :id uuid-regex] [id] patch-event)
     (DELETE ["/:id" :id uuid-regex] [id] delete-event)
     (POST "/" [] new-event!)))
