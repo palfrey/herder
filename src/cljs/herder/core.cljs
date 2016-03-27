@@ -7,6 +7,7 @@
    [herder.slots]
    [herder.persons]
    [herder.events]
+   [herder.event]
    [herder.helpers :refer [state]]
    [secretary.core :as secretary :refer-macros [defroute]]
    [goog.events :as events]
@@ -23,7 +24,10 @@
     (swap! state assoc :component "herder.persons.component"))
 
   (defroute "/events" []
-    (swap! state assoc :component "herder.events.component")))
+    (swap! state assoc :component "herder.events.component"))
+
+  (defroute "/events/:id" [id]
+    (swap! state assoc :component "herder.event.component" :event_id id)))
 
 (defn hook-browser-navigation! []
   (doto (History.)

@@ -7,8 +7,9 @@
 (defn persons-url []
   (str (convention-url) "/person"))
 
-(defn get-persons [& {:keys [refresh]}]
-  (get-data :persons (persons-url) :refresh refresh))
+(defn person-url [id]
+  (str (persons-url) "/" id)) (defn get-persons [& {:keys [refresh]}]
+                                (get-data :persons (persons-url) :refresh refresh))
 
 (defn create-new [val]
   (POST (persons-url)
@@ -31,7 +32,7 @@
           ^{:key id} [:li name " "
                       [:button {:type "button"
                                 :class "btn btn-danger"
-                                :on-click #(DELETE (str (persons-url) "/" id)
+                                :on-click #(DELETE (person-url id)
                                              {:handler
                                               (fn [resp] (get-persons :refresh true))})}
                        (str "Delete " name)]])]

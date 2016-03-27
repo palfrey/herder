@@ -28,7 +28,7 @@
        [:h2 "Events"]
        [:ul
         (for [{:keys [id name]} (get-events)]
-          ^{:key id} [:li name " "
+          ^{:key id} [:li [:a {:href (str "#/events/" id)} name " "]
                       [:button {:type "button"
                                 :class "btn btn-danger"
                                 :on-click #(DELETE (str (events-url) "/" id)
