@@ -31,7 +31,9 @@
     (fn []
       [:div {:class "container-fluid"}
        [convention-header :events]
-       [:h2 (:name (get-event))]
+       [:h2 "Event: " (:name (get-event))]
+       [:hr]
+       [:h4 "People"]
        (into [:ul]
              (for [{:keys [id name]} (map get-person (:persons (get-event)))]
                ^{:key id} [:li name " "
