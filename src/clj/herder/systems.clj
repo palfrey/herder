@@ -7,7 +7,7 @@
              [repl-server :refer [new-repl-server]]
              [h2 :refer [DEFAULT-DB-SPEC]])
             [environ.core :refer [env]]
-            [herder.korma :refer [new-database]]
+            [herder.systems.korma :refer [new-database]]
             [herder.web.handler :refer [app]]
             [clojure.java.io :as io]))
 

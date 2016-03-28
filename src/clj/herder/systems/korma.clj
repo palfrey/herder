@@ -1,4 +1,4 @@
-(ns herder.korma
+(ns herder.systems.korma
   (:require [com.stuartsierra.component :as component]
             [korma.db :as db]
             [lobos.migration :as mig]
