@@ -28,13 +28,7 @@
        [:h2 "Events"]
        [:ul
         (for [{:keys [id name]} (get-events)]
-          ^{:key id} [:li [:a {:href (str "#/events/" id)} name " "]
-                      [:button {:type "button"
-                                :class "btn btn-danger"
-                                :on-click #(DELETE (str (events-url) "/" id)
-                                             {:handler
-                                              (fn [resp] (get-events :refresh true))})}
-                       (str "Delete " name)]])]
+          ^{:key id} [:li [:a {:href (str "#/events/" id)} name " "]])]
        [:hr]
        [:form {:class "form-inline"
                :on-submit #(do

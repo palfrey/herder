@@ -8,11 +8,10 @@
    [herder.persons]
    [herder.events]
    [herder.event]
-   [herder.helpers :refer [state]]
+   [herder.helpers :refer [state history]]
    [secretary.core :as secretary :refer-macros [defroute]]
    [goog.events :as events]
-   [goog.history.EventType :as HistoryEventType])
-  (:import goog.History))
+   [goog.history.EventType :as HistoryEventType]))
 
 (defn convention-spa-routing []
   (secretary/set-config! :prefix "#")
@@ -30,7 +29,7 @@
     (swap! state assoc :component "herder.event.component" :event_id id)))
 
 (defn hook-browser-navigation! []
-  (doto (History.)
+  (doto history
     (events/listen
      HistoryEventType/NAVIGATE
      (fn [event]

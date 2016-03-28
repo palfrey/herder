@@ -2,10 +2,16 @@
   (:require
    [reagent.core :as r]
    [ajax.core :refer [GET]]
-   [clojure.walk :refer [keywordize-keys]]
-   [secretary.core :refer [dispatch!]]))
+   [clojure.walk :refer [keywordize-keys]])
+  (:import goog.History))
 
 (defonce state (r/atom {}))
+
+(defonce history
+  (History.))
+
+(defn nav! [token]
+  (.setToken history token))
 
 (defn to-date [tstamp]
   (-> tstamp js/moment (.format "YYYY-MM-DD")))
