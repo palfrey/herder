@@ -22,9 +22,7 @@
      :format :json
      :handler
      (fn [resp]
-       (do
-         (reset! val {})
-         (get-event :refresh true)))}))
+       (get-event :refresh true))}))
 
 (defn ^:export component []
   (let [val (r/atom {:person ""})]

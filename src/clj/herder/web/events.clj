@@ -51,6 +51,10 @@
   (let [event (d/delete db/events (d/where {:id id}))]
     (status (response {}) (if (> event 0) 200 404))))
 
+(defn delete-event-person [{{:keys [id person_id]} :params}]
+  (let [event (d/delete db/events-persons (d/where {:event_id id :person_id person_id}))]
+    (status (response {}) (if (> event 0) 200 404))))
+
 (defn patch-event [{{:keys [id person]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
@@ -70,7 +74,9 @@
 (def event-context
   (context "/event" []
     (GET "/" [] get-events)
-    (GET ["/:id" :id uuid-regex] [id] get-event)
-    (PATCH ["/:id" :id uuid-regex] [id] patch-event)
-    (DELETE ["/:id" :id uuid-regex] [id] delete-event)
+    (context "/:id" [id]
+      (GET ["/"] [id] get-event)
+      (PATCH ["/"] [id] patch-event)
+      (DELETE ["/"] [id] delete-event)
+      (DELETE ["/person/:person_id" :person_id uuid-regex] [person_id] delete-event-person))
     (POST "/" [] new-event!)))
