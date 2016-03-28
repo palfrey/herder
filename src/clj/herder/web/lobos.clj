@@ -66,6 +66,16 @@
    (drop (table :events))
    (drop (table :events-persons))))
 
+(defmigration add-schedule-table
+  (up
+   (create
+    (tbl :schedule
+         (date :date)
+         (refer-to :slots :on-delete :cascade)
+         (refer-to :events :on-delete :cascade))))
+  (down
+   (drop (table :schedule))))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -73,4 +83,5 @@
   (call-migration add-conventions-table)
   (call-migration add-slots-table)
   (call-migration add-persons-table)
-  (call-migration add-events-table))
+  (call-migration add-events-table)
+  (call-migration add-schedule-table))

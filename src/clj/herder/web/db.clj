@@ -9,3 +9,4 @@
 (core/defentity persons)
 (core/defentity events)
 (core/defentity events-persons)
+(core/defentity schedule)

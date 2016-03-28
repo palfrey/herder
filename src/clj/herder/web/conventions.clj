@@ -11,7 +11,8 @@
    [herder.web.db :as db]
    [herder.web.slots :as slots]
    [herder.web.persons :as persons]
-   [herder.web.events :as events]))
+   [herder.web.events :as events]
+   [herder.web.schedule :as schedule]))
 
 (defn validate-new-convention [params]
   (first
@@ -55,4 +56,5 @@
       (DELETE "/" [id] delete-convention)
       slots/slot-context
       persons/person-context
-      events/event-context)))
+      events/event-context
+      schedule/schedule-context)))
