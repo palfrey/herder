@@ -29,8 +29,8 @@
 (def defaultConfig
   {:firstDay (t/date-time 2015 7 6)
    :lastDay (t/date-time 2015 7 7)
-   :slots [[10 (t/hours 4)]
-           [14 (t/hours 4)]]
+   :slots [[(t/hours 10) (t/hours 4)]
+           [(t/hours 14) (t/hours 4)]]
    :events []})
 
 (defn getSolution [events]
@@ -48,7 +48,7 @@
   (is (isClass HerderSolution (getSolution []))))
 
 (deftest SlotGenerationWorks
-  (is (n-of (partial isClass Slot) 1 (genSlots [[10 (t/hours 4)]])))) ; one-of
+  (is (n-of (partial isClass Slot) 1 (genSlots [[(t/hours 10) (t/hours 4)]])))) ; one-of
 (deftest SlotGenerationWorksWithDefault
   (is (n-of (partial isClass Slot) 2 (genSlots (:slots defaultConfig))))) ; two-of
 (deftest ConfigWorks

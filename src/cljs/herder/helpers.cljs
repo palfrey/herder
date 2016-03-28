@@ -27,6 +27,9 @@
       (GET url {:handler (partial key-handler key)})
       {})))
 
+(defn get-mapped-data [& args]
+  (apply hash-map (apply concat (mapv #(vector (:id %) %) (apply get-data args)))))
+
 (defn convention-url []
   (str "/api/convention/" (:id @state)))
 

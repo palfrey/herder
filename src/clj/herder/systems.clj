@@ -8,6 +8,7 @@
              [h2 :refer [DEFAULT-DB-SPEC]])
             [environ.core :refer [env]]
             [herder.systems.korma :refer [new-database]]
+            [herder.systems.solver :refer [new-solver]]
             [herder.web.handler :refer [app]]
             [clojure.java.io :as io]))
 
@@ -21,7 +22,8 @@
                :make-pool? true))
    :web (component/using
          (new-web-server (Integer. (env :http-port)) app)
-         [:db])))
+         [:db])
+   :solver (component/using (new-solver) [:db])))
 
 (defsystem prod-system
   [:web (new-web-server (Integer. (env :http-port)) app)

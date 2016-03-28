@@ -59,7 +59,8 @@
              (first (kc/select db/events (kc/where {:id event_uuid})))))
 
       (is (= {:event_id event_uuid
-              :person_id person_uuid}
+              :person_id person_uuid
+              :convention_id con_uuid}
              (first (kc/select db/events-persons (kc/where {:event_id event_uuid})))))
 
       (insert-person con_uuid second_person)

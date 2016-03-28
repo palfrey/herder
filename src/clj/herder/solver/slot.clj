@@ -6,13 +6,13 @@
  :init init
  :state state
  :extends java.lang.Object
- :constructors {[java.lang.Integer org.joda.time.ReadablePeriod] []}
+ :constructors {[org.joda.time.ReadablePeriod org.joda.time.ReadablePeriod] []}
  :methods [[getSlotsForDay [org.joda.time.DateTime] org.joda.time.Interval]])
 
 (defn- slot-init [start length]
   [[] (ref {:start start :length length})])
 
 (defn- slot-getSlotsForDay [this day]
-  (let [beginSlot (t/plus day (t/hours (getValue this :start)))
+  (let [beginSlot (t/plus day (getValue this :start))
         endSlot (t/plus beginSlot (getValue this :length))]
     (t/interval beginSlot endSlot)))

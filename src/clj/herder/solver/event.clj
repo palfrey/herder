@@ -5,16 +5,21 @@
  :prefix "event-"
  :init init
  :state state
+ :constructors {[] []
+                [java.util.UUID] []}
  :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"]}} getSlot [] Object]
            [setSlot [Object] void]
            [getId [] java.util.UUID]
            [getPeople [] java.util.List]
-           [setPeople [java.util.List] void]])
+           [setPeople [java.util.List] void]
+           [getName [] String]
+           [setName [String] void]])
 
-(defn- event-init []
-  [[] (ref {:id (java.util.UUID/randomUUID)
-            :people []
-            :name ""})])
+(defn- event-init
+  ([] (event-init (java.util.UUID/randomUUID)))
+  ([uuid] [[] (ref {:id uuid
+                    :people []
+                    :name ""})]))
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -31,8 +36,8 @@
 (defn- event-setPeople [this item]
   (setValue this :people item))
 
-(defn- person-getName [this]
+(defn- event-getName [this]
   (getValue this :name))
 
-(defn- person-setName [this item]
+(defn- event-setName [this item]
   (setValue this :name item))

@@ -36,7 +36,7 @@
   (.buildSolver solverConfig))
 
 (defn genSlots [slots]
-  (map #(Slot. (int (first %)) (second %)) slots))
+  (map #(Slot. (first %) (second %)) slots))
 
 (defn setupSolution [config]
   (doto

@@ -5,11 +5,15 @@
  :prefix "person-"
  :init init
  :state state
- :methods [[getId [] java.util.UUID]])
+ :constructors {[] []
+                [java.util.UUID] []}
+ :methods [[getId [] java.util.UUID]
+           [getName [] String]
+           [setName [String] void]])
 
-(defn- person-init []
-  [[] (ref {:id (java.util.UUID/randomUUID)
-            :name ""})])
+(defn- person-init
+  ([] (person-init (java.util.UUID/randomUUID)))
+  ([uuid] [[] (ref {:id uuid :name ""})]))
 
 (defn- person-getId [this]
   (getValue this :id))

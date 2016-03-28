@@ -6,7 +6,7 @@
    [compojure.core :refer [GET context]]))
 
 (defn get-schedule [{{:keys [id]} :params}]
-  (let [schedules (d/select db/schedule (d/where {:id id}))]
+  (let [schedules (d/select db/schedule (d/where {:convention_id id}))]
     (response schedules)))
 
 (def schedule-context

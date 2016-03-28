@@ -6,11 +6,11 @@
    [herder.events :refer [get-events]]
    [ajax.core :refer [PATCH DELETE]]))
 
-(defn event-url []
-  (str (convention-url) "/event/" (:event_id @state)))
+(defn event-url [& {:keys [event_id] :or {event_id (:event_id @state)}}]
+  (str (convention-url) "/event/" event_id))
 
-(defn get-event [& {:keys [refresh]}]
-  (get-data (keyword (str "event_" (:event_id @state))) (event-url) :refresh refresh))
+(defn get-event [& {:keys [event_id refresh] :or {event_id (:event_id @state)}}]
+  (get-data (keyword (str "event_" event_id)) (event-url :event_id event_id) :refresh refresh))
 
 (defn get-person [id]
   (merge {:id id}

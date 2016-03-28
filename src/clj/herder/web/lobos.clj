@@ -60,6 +60,7 @@
          (refer-to :conventions)))
    (create
     (table :events-persons
+           (refer-to :conventions :on-delete :cascade)
            (refer-to :events :on-delete :cascade)
            (refer-to :persons :on-delete :cascade))))
   (down
@@ -71,6 +72,7 @@
    (create
     (tbl :schedule
          (date :date)
+         (refer-to :conventions :on-delete :cascade)
          (refer-to :slots :on-delete :cascade)
          (refer-to :events :on-delete :cascade))))
   (down

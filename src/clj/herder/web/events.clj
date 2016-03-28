@@ -27,7 +27,8 @@
                              :convention_id (:id params)}]))
       (doseq [person persons]
         (d/insert
-         db/events-persons (d/values [{:event_id id
+         db/events-persons (d/values [{:convention_id (:id params)
+                                       :event_id id
                                        :person_id person}])))
       (status (response {:id id}) 201))))
 
@@ -64,7 +65,8 @@
         (if (not (.contains persons person))
           (do
             (d/insert
-             db/events-persons (d/values [{:event_id id
+             db/events-persons (d/values [{:convention_id (:convention_id event)
+                                           :event_id id
                                            :person_id person}]))
             (response (update return :persons #(conj % person))))
           (response return))))))
