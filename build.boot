@@ -101,7 +101,7 @@
     (reset! watcher (watch-dir fix-path (io/file ".")))
     fs))
 
-(deftask solver []
+(deftask make-solver []
   (comp
    (build)
    (target "target")))
@@ -113,7 +113,7 @@
 
 (deftask tests []
   (comp
-   (solver)
+   (make-solver)
    (testing)
    (test)))
 
@@ -140,7 +140,7 @@
 (deftask dev-clj []
   (comp
    (fix)
-   (solver)
+   (make-solver)
    (watch :verbose true)
    (testing)
    (test)))
@@ -160,7 +160,7 @@
 (deftask dev []
   (comp
    (fix)
-   (solver)
+   (make-solver)
    (environ :env {:http-port "3000"})
    (repl)
    (figwheel)
@@ -174,7 +174,8 @@
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
    (target :no-clean true)
-   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj"])
+   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj" "solver.clj" "systems.clj"])
+   (make-solver)
    (testing)
    (test)
    (kill-pods)))
