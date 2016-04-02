@@ -163,7 +163,6 @@
    (fix)
    (make-solver)
    (environ :env {:http-port "3000"})
-   (repl)
    (figwheel)
    (run-figwheel)
    (sift
