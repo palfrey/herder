@@ -72,6 +72,8 @@
         (js/console.log "something else" type)))))
 
 (defn ^:export mount-root []
+  (if (-> @channel-sockets nil? not)
+    (swap! channel-sockets component/stop))
   (reset! channel-sockets (new-channel-socket-client parse-ws "/chsk"))
   (swap! channel-sockets component/start)
   (.log js/console (pr-str @state))
