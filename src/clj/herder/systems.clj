@@ -18,10 +18,7 @@
             [taoensso.sente.server-adapters.http-kit :refer [http-kit-adapter]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
-            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-            [taoensso.timbre :as timbre :refer (tracef debugf infof warnf errorf)]))
-
-(timbre/set-level! :trace)
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]))
 
 (def dbPath "herder.db")
 
