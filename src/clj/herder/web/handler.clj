@@ -1,13 +1,7 @@
 (ns herder.web.handler
   (:require
    [compojure.route :as route]
-   [compojure.core :refer [defroutes GET POST PUT context] :as compojure]
-   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-   [ring.util.response :refer [file-response content-type]]
-   [ring.middleware.json :refer [wrap-json-response wrap-json-params]]
-   [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [korma.core :as d]
+   [compojure.core :refer [defroutes GET context] :as compojure]
    [korma.db :as kd]
    [reloaded.repl :refer [system]]
    [clostache.parser :as clostache]
