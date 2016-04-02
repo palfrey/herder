@@ -18,6 +18,7 @@
                  [org.clojure/tools.namespace "0.2.10"]
                  [org.danielsz/system "0.3.0-SNAPSHOT"]
                  [de.ubercode.clostache/clostache "1.4.0"]
+                 [com.taoensso/sente "1.8.1"]
 
                  [environ "1.0.2"]
                  [boot-environ "1.0.2"]
@@ -37,11 +38,11 @@
                  [peridot "0.4.3" :scope "test"]
                  [com.h2database/h2 "1.4.191"]
 
-                 [cljfmt "0.4.1"]
+                 [cljfmt "0.5.0"]
                  [me.raynes/fs "1.4.6"]
                  [juxt/dirwatch "0.2.3"]
 
-                 [org.clojure/clojurescript "1.7.228"]
+                 [org.clojure/clojurescript "1.8.40"]
                  [reagent "0.6.0-alpha"]
                  [org.webjars/bootstrap "4.0.0-alpha.2"]
                  [deraen/boot-sass "0.2.1"]

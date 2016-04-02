@@ -12,7 +12,9 @@
    [herder.helpers :refer [state history]]
    [secretary.core :as secretary :refer-macros [defroute]]
    [goog.events :as events]
-   [goog.history.EventType :as HistoryEventType]))
+   [goog.history.EventType :as HistoryEventType]
+   [system.components.sente :refer [new-channel-socket-client]]
+   [com.stuartsierra.component :as component]))
 
 (defn convention-spa-routing []
   (secretary/set-config! :prefix "#")
@@ -54,7 +56,17 @@
 (defn page []
   [(-> (get @state :component "herder.slots.component") ->js js/eval)])
 
-(defn mount-root []
+(defonce channel-sockets (atom nil))
+
+(defn parse-ws [{[kind data] :event send :send-fn :as stuff}]
+  (js/console.log "event" (pr-str kind) (pr-str data))
+  (if (and (= kind :chsk/state) (:first-open? data))
+    (send
+     [::page (select-keys @state [:component :id])])))
+
+(defn ^:export mount-root []
+  (reset! channel-sockets (new-channel-socket-client parse-ws "/chsk"))
+  (swap! channel-sockets component/start)
   (.log js/console (pr-str @state))
   (r/render [#'page]
             (js/document.getElementById "app"))

@@ -11,8 +11,9 @@
    [korma.db :as kd]
    [reloaded.repl :refer [system]]
    [clostache.parser :as clostache]
-
-   [herder.web.conventions :refer [convention-routes]]))
+   [system.components.sente :refer [sente-routes]]
+   [herder.web.conventions :refer [convention-routes]]
+   [taoensso.timbre :as timbre :refer (tracef debugf infof warnf errorf)]))
 
 (defn page [component title request]
   (clostache/render
@@ -33,7 +34,12 @@
   (route/files "/static" {:root "target/resources/public/"})
   (route/not-found "Not found"))
 
-(def routes core-routes)
+(defn routes [system]
+  (compojure/routes
+   (sente-routes system) core-routes))
+
+(defn event-msg-handler [& args]
+  (infof "args %s" (-> args first :event)))
 
 (defn wrap-db [f]
   (fn [req]
@@ -42,8 +48,8 @@
         (f req))
       (f req))))
 
-(def app
-  (-> #'routes
+(defn app [sente]
+  (-> (routes sente)
       wrap-json-response
       wrap-keyword-params
       wrap-json-params
