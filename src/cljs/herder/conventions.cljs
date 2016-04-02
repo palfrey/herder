@@ -41,9 +41,7 @@
                       (str " " (to-date from) " - " (to-date to) " ")
                       [:button {:type "button"
                                 :class "btn btn-danger"
-                                :on-click #(DELETE (str "/api/convention/" id)
-                                             {:handler
-                                              (fn [resp] (get-convention :refresh true))})}
+                                :on-click #(DELETE (str "/api/convention/" id))}
                        (str "Delete " name)]])]
        [:hr]
 
@@ -73,7 +71,6 @@
                                    :from (-> @val :date first js/moment (.format "YYYY-MM-DD"))
                                    :to (-> @val :date second js/moment (.format "YYYY-MM-DD"))}
                                   :format :json
-                                  :handler (fn [resp] (do
-                                                        (reset! val {:name "" :date nil})
-                                                        (get-convention :refresh true)))}))}
+                                  :handler (fn [resp]
+                                             (reset! val {:name "" :date nil}))}))}
          "Create a new convention"]]])))

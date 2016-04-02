@@ -62,7 +62,14 @@
   (js/console.log "event" (pr-str kind) (pr-str data))
   (if (and (= kind :chsk/state) (:first-open? data))
     (send
-     [::page (select-keys @state [:component :id])])))
+     [::page (select-keys @state [:component :id])]))
+  (if (= kind :chsk/recv)
+    (let [[type data] data]
+      (if (= type :herder.web.notifications/cache-invalidate)
+        (doseq [key data]
+          (js/console.log "delete" (pr-str key))
+          (swap! state dissoc key))
+        (js/console.log "something else" type)))))
 
 (defn ^:export mount-root []
   (reset! channel-sockets (new-channel-socket-client parse-ws "/chsk"))

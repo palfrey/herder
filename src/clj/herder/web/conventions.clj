@@ -12,7 +12,8 @@
    [herder.web.slots :as slots]
    [herder.web.persons :as persons]
    [herder.web.events :as events]
-   [herder.web.schedule :as schedule]))
+   [herder.web.schedule :as schedule]
+   [herder.web.notifications :as notifications]))
 
 (defn validate-new-convention [params]
   (first
@@ -29,6 +30,7 @@
     (let [id (str (uuid/v1))]
       (d/insert
        db/conventions (d/values [{:id id :name (:conventionName params) :from (:from params) :to (:to params)}]))
+      (notifications/send-notification)
       (status (response {:id id}) 201))))
 
 (defn get-convention [{{:keys [id]} :params}]
@@ -37,6 +39,7 @@
 
 (defn delete-convention [{{:keys [id]} :params}]
   (let [convention (d/delete db/conventions (d/where {:id id}))]
+    (notifications/send-notification)
     (status (response {}) (if (> convention 0) 200 404))))
 
 (defn edit-convention [])
