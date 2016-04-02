@@ -11,7 +11,8 @@
    [lobos.connectivity :as lc]
    [herder.systems :refer [make-middleware]]
    [compojure.core :as compojure]
-   [com.stuartsierra.component :as component]))
+   [com.stuartsierra.component :as component]
+   [reloaded.repl :refer [system]]))
 
 (defn unpack [response]
   (try
@@ -34,8 +35,9 @@
 
 (defn db-test-fixture [f]
   (with-test-db)
-  (kd/transaction
-   (f))
+  (with-redefs [system {:sente {:chsk-send! (fn [& args])}}]
+    (kd/transaction
+     (f)))
   (lc/close-global :korma-test-connection true))
 
 (defn make-session []
