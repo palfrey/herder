@@ -47,12 +47,3 @@
       (kd/with-db sys-db
         (f req))
       (f req))))
-
-(defn app [sente]
-  (-> (routes sente)
-      wrap-json-response
-      wrap-keyword-params
-      wrap-json-params
-
-      (wrap-defaults (assoc-in api-defaults [:params :nested] true))
-      wrap-db))

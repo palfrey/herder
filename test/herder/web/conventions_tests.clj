@@ -3,7 +3,6 @@
    [clojure.test]
    [peridot.core])
   (:require
-   [herder.web.handler :refer [app routes]]
    [herder.web.db :as db]
    [clj-uuid :as uuid]
    [korma.core :as kc]

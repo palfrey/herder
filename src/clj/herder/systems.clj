@@ -13,7 +13,7 @@
             [environ.core :refer [env]]
             [herder.systems.korma :refer [new-database]]
             [herder.systems.solver :refer [new-solver]]
-            [herder.web.handler :refer [app event-msg-handler routes wrap-db]]
+            [herder.web.handler :refer [event-msg-handler routes wrap-db]]
             [clojure.java.io :as io]
             [taoensso.sente.server-adapters.http-kit :refer [http-kit-adapter]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
@@ -25,6 +25,15 @@
 
 (def dbPath "herder.db")
 
+(defn make-middleware []
+  (new-middleware
+   {:middleware [[wrap-json-response]
+                 [wrap-keyword-params]
+                 [wrap-json-params]
+                 [wrap-defaults :defaults]
+                 [wrap-db]]
+    :defaults (assoc-in api-defaults [:params :nested] true)}))
+
 (defn dev-system []
   (component/system-map
    :db (new-database
@@ -35,13 +44,7 @@
    :routes (component/using
             (new-endpoint routes)
             [:sente])
-   :middleware (new-middleware
-                {:middleware [[wrap-json-response]
-                              [wrap-keyword-params]
-                              [wrap-json-params]
-                              [wrap-defaults :defaults]
-                              [wrap-db]]
-                 :defaults (assoc-in api-defaults [:params :nested] true)})
+   :middleware (make-middleware)
    :handler (component/using
              (new-handler)
              [:routes :middleware])
@@ -51,6 +54,6 @@
    :solver (component/using (new-solver) [:db])))
 
 (defsystem prod-system
-  [:web (new-web-server (Integer. (env :http-port)) app)
+  [:web (new-web-server (Integer. (env :http-port)))
    :repl-server (new-repl-server (Integer. (env :repl-port)))
    :db (new-database)])

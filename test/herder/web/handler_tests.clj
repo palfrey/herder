@@ -2,13 +2,16 @@
   (:use
    [peridot.core])
   (:require
-   [herder.web.handler :refer [app]]
+   [herder.web.handler :refer [routes]]
    [herder.web.lobos :as lobos]
    [clojure.data.json :as json]
    [herder.web.db :as db]
    [korma.core :as kc]
    [korma.db :as kd]
-   [lobos.connectivity :as lc]))
+   [lobos.connectivity :as lc]
+   [herder.systems :refer [make-middleware]]
+   [compojure.core :as compojure]
+   [com.stuartsierra.component :as component]))
 
 (defn unpack [response]
   (try
@@ -36,4 +39,5 @@
   (lc/close-global :korma-test-connection true))
 
 (defn make-session []
-  (session app))
+  (let [wrap-wm (-> (make-middleware) component/start :wrap-wm)]
+    (session (wrap-wm (routes {})))))
