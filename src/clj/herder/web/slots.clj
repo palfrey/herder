@@ -8,7 +8,8 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT DELETE context]]))
+   [compojure.core :refer [GET POST PUT DELETE context]]
+   [herder.web.notifications :as notifications]))
 
 (def time-format (f/formatter "HH:mm"))
 
@@ -33,6 +34,7 @@
                             :start-minutes (-> params :start time->minutes)
                             :end-minutes (-> params :end time->minutes)
                             :convention_id (:id params)}]))
+      (notifications/send-notification [(:id params) :slots])
       (status (response {:id id}) 201))))
 
 (defn minutes->time [minutes]
@@ -56,8 +58,9 @@
   (let [slots (d/select db/slots (d/where {:convention_id id}) (d/order :start-minutes))]
     (response (map reformat-slot slots))))
 
-(defn delete-slot [{{:keys [id]} :params}]
-  (let [slot (d/delete db/slots (d/where {:id id}))]
+(defn delete-slot [{{:keys [id slot_id]} :params}]
+  (let [slot (d/delete db/slots (d/where {:id slot_id}))]
+    (notifications/send-notification [id :slots])
     (status (response {}) (if (> slot 0) 200 404))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
@@ -66,5 +69,5 @@
   (context "/slot" []
     (GET "/" [] get-slots)
     (GET ["/:id" :id uuid-regex] [id] get-slot)
-    (DELETE ["/:id" :id uuid-regex] [id] delete-slot)
+    (DELETE ["/:slot_id" :slot_id uuid-regex] [id slot_id] delete-slot)
     (POST "/" [] new-slot!)))

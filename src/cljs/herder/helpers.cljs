@@ -22,7 +22,7 @@
 
 (defn get-data [key url & {:keys [refresh] :or {refresh false}}]
   (if (and (not refresh) (contains? @state key))
-    (key @state)
+    (get @state key)
     (do
       (GET url {:handler (partial key-handler key)})
       {})))

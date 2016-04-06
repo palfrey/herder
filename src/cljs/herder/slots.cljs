@@ -9,7 +9,7 @@
   (str (convention-url) "/slot"))
 
 (defn get-slots [& {:keys [refresh]}]
-  (get-data :slots (slots-url) :refresh refresh))
+  (get-data [(:id @state) :slots] (slots-url) :refresh refresh))
 
 (defn timerange [val key initial]
   (r/create-class
@@ -42,9 +42,7 @@
           ^{:key id} [:li start " to " end " "
                       [:button {:type "button"
                                 :class "btn btn-danger"
-                                :on-click #(DELETE (str (slots-url) "/" id)
-                                             {:handler
-                                              (fn [resp] (get-slots :refresh true))})}
+                                :on-click #(DELETE (str (slots-url) "/" id))}
                        (str "Delete " start "-" end)]])]
        [:hr]
        [:form {:method "POST" :class "form-inline"}
@@ -63,7 +61,6 @@
                                    {:start (-> @val :fromTime)
                                     :end (-> @val :toTime)}
                                    :format :json
-                                   :handler (fn [resp] (do
-                                                         (reset! val {:fromTime nil :toTime nil})
-                                                         (get-slots :refresh true)))}))}
+                                   :handler (fn [resp]
+                                              (reset! val {:fromTime nil :toTime nil}))}))}
           "Create a new slot"]]]])))
