@@ -7,7 +7,8 @@
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PUT DELETE context]]
-   [herder.web.notifications :as notifications]))
+   [herder.web.notifications :as notifications]
+   [herder.web.solve :refer [solve]]))
 
 (defn validate-new-person [params]
   (first
@@ -26,6 +27,7 @@
                               :name (:name params)
                               :convention_id conv_id}]))
       (notifications/send-notification [:persons conv_id])
+      (solve conv_id)
       (status (response {:id id}) 201))))
 
 (defn get-person [{{:keys [id]} :params}]
@@ -44,6 +46,7 @@
       (do
         (d/delete db/persons (d/where {:id id}))
         (notifications/send-notification [:persons (str (:convention_id person))])
+        (solve (:convention_id person))
         (status (response {}) 200))
       (status (response {}) 404))))
 

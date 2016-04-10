@@ -9,7 +9,8 @@
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PUT DELETE context]]
-   [herder.web.notifications :as notifications]))
+   [herder.web.notifications :as notifications]
+   [herder.web.solve :refer [solve]]))
 
 (def time-format (f/formatter "HH:mm"))
 
@@ -35,6 +36,7 @@
                             :end-minutes (-> params :end time->minutes)
                             :convention_id (:id params)}]))
       (notifications/send-notification [:slots (:id params)])
+      (solve (:id params))
       (status (response {:id id}) 201))))
 
 (defn minutes->time [minutes]
@@ -59,9 +61,14 @@
     (response (map reformat-slot slots))))
 
 (defn delete-slot [{{:keys [id slot_id]} :params}]
-  (let [slot (d/delete db/slots (d/where {:id slot_id}))]
-    (notifications/send-notification [:slots id])
-    (status (response {}) (if (> slot 0) 200 404))))
+  (let [slot (first (d/select db/slots (d/where {:id slot_id})))]
+    (if (nil? slot)
+      (status (response {}) 404)
+      (do
+        (d/delete db/slots (d/where {:id slot_id}))
+        (notifications/send-notification [:slots id])
+        (solve (:convention_id slot))
+        (status (response {}) 200)))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 

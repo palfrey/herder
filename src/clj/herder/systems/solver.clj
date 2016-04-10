@@ -1,18 +1,31 @@
 (ns herder.systems.solver
   (:require
-   [com.stuartsierra.component :as component])
+   [com.stuartsierra.component :as component]
+   [reloaded.repl :refer [system]])
   (:import [java.util.concurrent Executors]))
 
 (defrecord Solver []
   component/Lifecycle
   (start [component]
-    (let [pool (Executors/newFixedThreadPool 1)]
-      (assoc component :pool pool)))
+    (let [pool (Executors/newFixedThreadPool 1)
+          tosolve (atom #{})
+          solving (atom false)
+          watch (atom nil)]
+      (assoc component
+             :pool pool
+             :tosolve tosolve
+             :solving solving
+             :watch watch)))
   (stop [component]
-    (if (not (nil? (:pool component)))
-      (do
-        (.shutdownNow (:pool component))
-        (assoc component :pool nil)))))
+    (if (-> component :pool nil? not)
+      (.shutdownNow (:pool component)))
+    (if (-> component :watch deref nil? not)
+      (remove-watch (:tosolve component) (-> component :watch deref)))
+    (dissoc component
+            :pool
+            :tosolve
+            :solving
+            :watch)))
 
 (defn new-solver []
   (Solver.))

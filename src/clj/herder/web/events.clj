@@ -7,7 +7,8 @@
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PATCH DELETE context]]
-   [herder.web.notifications :as notifications]))
+   [herder.web.notifications :as notifications]
+   [herder.web.solve :refer [solve]]))
 
 (defn validate-new-event [params]
   (first
@@ -33,6 +34,7 @@
                                        :event_id id
                                        :person_id person}])))
       (notifications/send-notification [:events conv_id])
+      (solve conv_id)
       (status (response {:id id}) 201))))
 
 (defn- retrieve-event [id]
@@ -58,6 +60,7 @@
       (do
         (d/delete db/events (d/where {:id id}))
         (notifications/send-notification [:events (str (:convention_id event))])
+        (solve (:convention_id event))
         (status (response {}) 200)))))
 
 (defn delete-event-person [{{:keys [id person_id]} :params}]
@@ -67,6 +70,7 @@
       (do
         (d/delete db/events-persons (d/where {:event_id id :person_id person_id}))
         (notifications/send-notification [:event (str (:convention_id event-person)) id])
+        (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
 (defn patch-event [{{:keys [id person]} :params}]
@@ -83,6 +87,7 @@
                                            :event_id id
                                            :person_id person}]))
             (notifications/send-notification [:event (str conv_id) id])
+            (solve conv_id)
             (response (update return :persons #(conj % person))))
           (response return))))))
 

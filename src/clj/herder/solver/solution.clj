@@ -1,6 +1,6 @@
 (in-ns 'herder.solver.types)
 
-(gen-class 
+(gen-class
  :name ^{PlanningSolution {}} herder.solver.types.HerderSolution
  :extends herder.solver.HardSoftSolution
  :init init
@@ -35,9 +35,11 @@
 (defn- solution-getSlotRange [this]
   (let [firstDay (getValue this :firstDay)
         lastDay (getValue this :lastDay)]
-    (apply concat (for [day (p/periodic-seq firstDay (t/days 1))
-                        :while (or (t/equal? lastDay day) (t/after? lastDay day))]
-                    (map #(.getSlotsForDay % day) (getValue this :slots))))))
+    (if (nil? firstDay)
+      []
+      (apply concat (for [day (p/periodic-seq firstDay (t/days 1))
+                          :while (or (t/equal? lastDay day) (t/after? lastDay day))]
+                      (map #(.getSlotsForDay % day) (getValue this :slots)))))))
 
 (defn- solution-getFirstDay [this]
   (getValue this :firstDay))

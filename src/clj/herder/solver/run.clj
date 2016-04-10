@@ -7,7 +7,8 @@
    [korma.db :as kd]
    [clj-time.core :as t]
    [clj-time.coerce :as c]
-   [clj-uuid :as uuid])
+   [clj-uuid :as uuid]
+   [herder.web.notifications :as notifications])
   (:import [herder.solver.types Event Person]))
 
 (defn- gen-events [events events-persons]
@@ -43,19 +44,29 @@
       ;(println "events-persons" events-persons)
       ;(println "persons" persons)
       (println "config" config)
-      (.solve solver configured)
-      (d/delete db/schedule (d/where {:convention_id id}))
-      (doseq [event (.getEvents (.getBestSolution solver))
-              :let [slottime (.getStart (.getSlot event))
-                    day (t/date-time (t/year slottime) (t/month slottime) (t/day slottime))
-                    values {:id (uuid/v1)
-                            :date (c/to-sql-date slottime)
-                            :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
-                            :event_id (.getId event)
-                            :convention_id id}]]
-        (println "event" (.getId event) (.getStart (.getSlot event)))
-        (println "values" values)
-        (d/insert db/schedule (d/values values))))))
+      (try
+        (do
+          (.solve solver configured)
+          (d/delete db/schedule (d/where {:convention_id id}))
+          (doseq [event (.getEvents (.getBestSolution solver))
+                  :let [slottime (.getStart (.getSlot event))
+                        day (t/date-time (t/year slottime) (t/month slottime) (t/day slottime))
+                        values {:id (uuid/v1)
+                                :date (c/to-sql-date slottime)
+                                :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
+                                :event_id (.getId event)
+                                :convention_id id}]]
+            (println "event" (.getId event) (.getStart (.getSlot event)))
+            (println "values" values)
+            (d/insert db/schedule (d/values values))
+            (notifications/send-notification [:schedule (str id)])))
+        (catch Exception e
+          (do
+            (println "Failure in schedule")
+            (println e)))
+        (finally (do
+                   (println "Solved")
+                   (reset! (-> system :solver :solving) false)))))))
 
 (defn run-solver [id]
   (let [solv (:solver system)
@@ -65,9 +76,28 @@
                   (solve db id)
                   (catch Throwable e
                     (println e)))]
-        futures (.invokeAll pool tasks)]
-    (for [ftr futures]
-      (.get ftr))))
+        futures (.invokeAll pool tasks)]))
+
+(defn solve-watch [key atom old-state new-state]
+  (println "Need to solve" new-state (-> system :solver :solving deref))
+  (if (and (-> system :solver :solving deref not) ; nothing currently going
+           (-> new-state empty? not)) ; something to solve
+    (do (reset! (-> system :solver :solving) true) ; mark as solving
+        (let [item (first new-state)]
+          (run-solver item)
+          (swap! (-> system :solver :tosolve) disj item)))))
+
+(defn needs-solve [id]
+  (if (-> system :solver :watch deref nil?)
+    (do
+      (add-watch (-> system :solver :tosolve) :solve-watch solve-watch)
+      (reset! (-> system :solver :watch) :solve-watch)))
+  (swap! (-> system :solver :tosolve) conj id))
+
+(let [sys-db (-> system :db :connection)]
+  (kd/with-db sys-db
+    (doseq [conv (d/select db/conventions)]
+      (needs-solve (:id conv)))))
 
 (def defaultConfig
   {:firstDay (t/date-time 2015 7 6)
