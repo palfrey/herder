@@ -62,7 +62,8 @@
     (table :events-persons
            (refer-to :conventions :on-delete :cascade)
            (refer-to :events :on-delete :cascade)
-           (refer-to :persons :on-delete :cascade))))
+           (refer-to :persons :on-delete :cascade)
+           (primary-key [:event_id :person_id]))))
   (down
    (drop (table :events))
    (drop (table :events-persons))))
