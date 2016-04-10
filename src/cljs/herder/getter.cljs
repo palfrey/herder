@@ -77,6 +77,6 @@
     (let [[type data] data]
       (if (= type :herder.web.notifications/cache-invalidate)
         (doseq [key data]
-          (js/console.log "delete" (pr-str key))
+          (js/console.log "update" (pr-str key))
           (get-data key :refresh true))
         (js/console.log "something else" type)))))
