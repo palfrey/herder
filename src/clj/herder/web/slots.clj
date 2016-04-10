@@ -34,7 +34,7 @@
                             :start-minutes (-> params :start time->minutes)
                             :end-minutes (-> params :end time->minutes)
                             :convention_id (:id params)}]))
-      (notifications/send-notification [(:id params) :slots])
+      (notifications/send-notification [:slots (:id params)])
       (status (response {:id id}) 201))))
 
 (defn minutes->time [minutes]
@@ -60,7 +60,7 @@
 
 (defn delete-slot [{{:keys [id slot_id]} :params}]
   (let [slot (d/delete db/slots (d/where {:id slot_id}))]
-    (notifications/send-notification [id :slots])
+    (notifications/send-notification [:slots id])
     (status (response {}) (if (> slot 0) 200 404))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
