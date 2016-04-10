@@ -6,7 +6,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PATCH DELETE context]]))
+   [compojure.core :refer [GET POST PATCH DELETE context]))
 
 (defn validate-new-event [params]
   (first

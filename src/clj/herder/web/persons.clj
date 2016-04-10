@@ -6,7 +6,8 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT DELETE context]]))
+   [compojure.core :refer [GET POST PUT DELETE context]]
+   [herder.web.notifications :as notifications]))
 
 (defn validate-new-person [params]
   (first
@@ -18,11 +19,13 @@
   (if-let [errors (validate-new-person params)]
     (-> (response {:errors errors})
         (status 400))
-    (let [id (str (uuid/v1))]
+    (let [id (str (uuid/v1))
+          conv_id (:id params)]
       (d/insert
        db/persons (d/values [{:id id
                               :name (:name params)
-                              :convention_id (:id params)}]))
+                              :convention_id conv_id}]))
+      (notifications/send-notification [:persons conv_id])
       (status (response {:id id}) 201))))
 
 (defn get-person [{{:keys [id]} :params}]
@@ -36,8 +39,13 @@
     (response persons)))
 
 (defn delete-person [{{:keys [id]} :params}]
-  (let [person (d/delete db/persons (d/where {:id id}))]
-    (status (response {}) (if (> person 0) 200 404))))
+  (let [person (first (d/select db/persons (d/where {:id id})))]
+    (if (-> person nil? not)
+      (do
+        (d/delete db/persons (d/where {:id id}))
+        (notifications/send-notification [:persons (str (:convention_id person))])
+        (status (response {}) 200))
+      (status (response {}) 404))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
