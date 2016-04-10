@@ -61,21 +61,28 @@
         (status (response {}) 200)))))
 
 (defn delete-event-person [{{:keys [id person_id]} :params}]
-  (let [event (d/delete db/events-persons (d/where {:event_id id :person_id person_id}))]
-    (status (response {}) (if (> event 0) 200 404))))
+  (let [event-person (first (d/select db/events-persons (d/where {:event_id id :person_id person_id})))]
+    (if (nil? event-person)
+      (status (response {}) 404)
+      (do
+        (d/delete db/events-persons (d/where {:event_id id :person_id person_id}))
+        (notifications/send-notification [:event (str (:convention_id event-person)) id])
+        (status (response {}) 200)))))
 
 (defn patch-event [{{:keys [id person]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
       (let [persons (get-person-ids id)
-            return (assoc event :persons persons)]
+            return (assoc event :persons persons)
+            conv_id (:convention_id event)]
         (if (not (.contains persons person))
           (do
             (d/insert
-             db/events-persons (d/values [{:convention_id (:convention_id event)
+             db/events-persons (d/values [{:convention_id conv_id
                                            :event_id id
                                            :person_id person}]))
+            (notifications/send-notification [:event (str conv_id) id])
             (response (update return :persons #(conj % person))))
           (response return))))))
 
