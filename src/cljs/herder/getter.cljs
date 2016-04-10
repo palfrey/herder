@@ -17,49 +17,49 @@
 
 (defmulti get-data (fn [key] (first key)))
 
-(defmethod get-data :conventions [& {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :conventions [[_] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data :conventions "/api/convention" :refresh refresh))
 
 (defn convention-url [id]
   (str "/api/convention/" id))
 
-(defmethod get-data :convention [[_ id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :convention [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :convention] (convention-url id) :refresh refresh))
 
 (defn slots-url [id]
   (str (convention-url id) "/slot"))
 
-(defmethod get-data :slots [[_ id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :slots [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :slots] (slots-url id) :refresh refresh))
 
 (defn persons-url [id]
   (str (convention-url id) "/person"))
 
-(defmethod get-data :persons [[_ id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :persons [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :persons] (persons-url id) :refresh refresh))
 
 (defn person-url [conv_id person_id]
   (str (persons-url conv_id) "/" person_id))
 
-(defmethod get-data :person [[_ conv_id person_id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :person [[_ conv_id person_id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [conv_id :person person_id] (person-url conv_id person_id) :refresh refresh))
 
 (defn events-url [id]
   (str (convention-url id) "/event"))
 
-(defmethod get-data :events [[_ id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :events [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :events] (events-url id) :refresh refresh))
 
 (defn event-url [conv_id event_id]
   (str (convention-url conv_id) "/event/" event_id))
 
-(defmethod get-data :event [[_ conv_id event_id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :event [[_ conv_id event_id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [conv_id :event event_id] (event-url conv_id event_id) :refresh refresh))
 
 (defn schedule-url [id]
   (str (convention-url id) "/schedule"))
 
-(defmethod get-data :schedule [[_ id] & {:keys [refresh] :or [refresh false]}]
+(defmethod get-data :schedule [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :schedule] (schedule-url id) :refresh refresh))
 
 (defmethod get-data :default [params]
