@@ -6,7 +6,8 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PATCH DELETE context]))
+   [compojure.core :refer [GET POST PATCH DELETE context]]
+   [herder.web.notifications :as notifications]))
 
 (defn validate-new-event [params]
   (first
@@ -19,17 +20,19 @@
     (-> (response {:errors errors})
         (status 400))
     (let [id (str (uuid/v1))
+          conv_id (:id params)
           persons (get params :persons [])
           persons (if (vector? persons) persons [persons])]
       (d/insert
        db/events (d/values [{:id id
                              :name (:name params)
-                             :convention_id (:id params)}]))
+                             :convention_id conv_id}]))
       (doseq [person persons]
         (d/insert
-         db/events-persons (d/values [{:convention_id (:id params)
+         db/events-persons (d/values [{:convention_id conv_id
                                        :event_id id
                                        :person_id person}])))
+      (notifications/send-notification [:events conv_id])
       (status (response {:id id}) 201))))
 
 (defn- retrieve-event [id]
@@ -49,8 +52,13 @@
     (response events)))
 
 (defn delete-event [{{:keys [id]} :params}]
-  (let [event (d/delete db/events (d/where {:id id}))]
-    (status (response {}) (if (> event 0) 200 404))))
+  (let [event (first (d/select db/events (d/where {:id id})))]
+    (if (nil? event)
+      (status (response {}) 404)
+      (do
+        (d/delete db/events (d/where {:id id}))
+        (notifications/send-notification [:events (str (:convention_id event))])
+        (status (response {}) 200)))))
 
 (defn delete-event-person [{{:keys [id person_id]} :params}]
   (let [event (d/delete db/events-persons (d/where {:event_id id :person_id person_id}))]
