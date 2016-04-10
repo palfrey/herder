@@ -18,7 +18,7 @@
 (defmulti get-data (fn [key] (first key)))
 
 (defmethod get-data :conventions [[_] & {:keys [refresh] :or {refresh false}}]
-  (get-raw-data :conventions "/api/convention" :refresh refresh))
+  (get-raw-data [:conventions] "/api/convention" :refresh refresh))
 
 (defn convention-url [id]
   (str "/api/convention/" id))
@@ -78,5 +78,5 @@
       (if (= type :herder.web.notifications/cache-invalidate)
         (doseq [key data]
           (js/console.log "delete" (pr-str key))
-          (swap! state dissoc key))
+          (get-data key :refresh true))
         (js/console.log "something else" type)))))
