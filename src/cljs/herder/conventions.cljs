@@ -5,10 +5,8 @@
    [cljsjs.moment]
    [cljsjs.jquery-daterange-picker]
    [ajax.core :refer [POST DELETE]]
-   [herder.helpers :as h :refer [to-date get-data]]))
-
-(defn get-convention [& {:keys [refresh]}]
-  (get-data :conventions "/api/convention" :refresh refresh))
+   [herder.helpers :refer [to-date]]
+   [herder.getter :refer [get-data]]))
 
 (defn daterange [val key]
   (r/create-class
@@ -35,7 +33,7 @@
       [:div {:class "container-fluid"}
        [:h1 "Conventions"]
        [:ul
-        (for [{:keys [id name from to]} (get-convention)]
+        (for [{:keys [id name from to]} (get-data [:conventions])]
           ^{:key id} [:li
                       [:a {:href (str "/convention/" id)} name]
                       (str " " (to-date from) " - " (to-date to) " ")

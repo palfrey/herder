@@ -1,11 +1,8 @@
 (ns herder.helpers
   (:require
-   [reagent.core :as r]
-   [ajax.core :refer [GET]]
-   [clojure.walk :refer [keywordize-keys]])
+   [herder.state :refer [state]]
+   [herder.getter :refer [get-data]])
   (:import goog.History))
-
-(defonce state (r/atom {}))
 
 (defonce history
   (History.))
@@ -16,28 +13,8 @@
 (defn to-date [tstamp]
   (-> tstamp js/moment (.format "YYYY-MM-DD")))
 
-(defn key-handler [key data]
-  (.log js/console (str key) "Response" (pr-str data))
-  (swap! state assoc key (keywordize-keys data)))
-
-(defn get-data [key url & {:keys [refresh] :or {refresh false}}]
-  (if (and (not refresh) (contains? @state key))
-    (get @state key)
-    (do
-      (GET url {:handler (partial key-handler key)})
-      {})))
-
-(defn get-mapped-data [& args]
-  (apply hash-map (apply concat (mapv #(vector (:id %) %) (apply get-data args)))))
-
-(defn convention-url []
-  (str "/api/convention/" (:id @state)))
-
-(defn get-convention [& {:keys [refresh]}]
-  (get-data :convention (convention-url) :refresh refresh))
-
 (defn convention-header [active]
-  (let [convention (get-convention)]
+  (let [convention (get-data [:convention (:id @state)])]
     [:nav {:class "navbar navbar-nav navbar-full navbar-dark bg-inverse"}
      [:a {:class "navbar-brand"} (:name convention) " (" (to-date (:from convention)) " - " (to-date (:to convention)) ")"]
      [:ul {:class "nav navbar-nav"}

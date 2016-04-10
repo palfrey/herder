@@ -1,24 +1,18 @@
 (ns herder.events
   (:require
-   [herder.helpers :refer [get-data state convention-url convention-header]]
+   [herder.helpers :refer [convention-header]]
+   [herder.getter :refer [get-data events-url]]
+   [herder.state :refer [state]]
    [reagent.core :as r]
-   [ajax.core :refer [POST DELETE]]))
-
-(defn events-url []
-  (str (convention-url) "/event"))
-
-(defn get-events [& {:keys [refresh]}]
-  (get-data :events (events-url) :refresh refresh))
+   [ajax.core :refer [POST]]))
 
 (defn create-new [val]
-  (POST (events-url)
+  (POST (events-url (:id @state))
     {:params @val
      :format :json
      :handler
      (fn [resp]
-       (do
-         (reset! val {})
-         (get-events :refresh true)))}))
+       (reset! val {}))}))
 
 (defn ^:export component []
   (let [val (r/atom {})]
@@ -27,7 +21,7 @@
        [convention-header :events]
        [:h2 "Events"]
        [:ul
-        (for [{:keys [id name]} (get-events)]
+        (for [{:keys [id name]} (get-data [:events (:id @state)])]
           ^{:key id} [:li [:a {:href (str "#/events/" id)} name " "]])]
        [:hr]
        [:form {:class "form-inline"

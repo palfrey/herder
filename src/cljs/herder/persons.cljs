@@ -1,25 +1,18 @@
 (ns herder.persons
   (:require
-   [herder.helpers :refer [get-data state convention-url convention-header]]
+   [herder.helpers :refer [convention-header]]
+   [herder.getter :refer [get-data person-url persons-url]]
+   [herder.state :refer [state]]
    [ajax.core :refer [POST DELETE]]
    [reagent.core :as r]))
 
-(defn persons-url []
-  (str (convention-url) "/person"))
-
-(defn person-url [id]
-  (str (persons-url) "/" id)) (defn get-persons [& {:keys [refresh]}]
-                                (get-data :persons (persons-url) :refresh refresh))
-
 (defn create-new [val]
-  (POST (persons-url)
+  (POST (persons-url (:id @state))
     {:params @val
      :format :json
      :handler
      (fn [resp]
-       (do
-         (reset! val {})
-         (get-persons :refresh true)))}))
+       (reset! val {}))}))
 
 (defn ^:export component []
   (let [val (r/atom {})]
@@ -28,13 +21,11 @@
        [convention-header :persons]
        [:h2 "People"]
        [:ul
-        (for [{:keys [id name]} (get-persons)]
+        (for [{:keys [id name]} (get-data [:persons (:id @state)])]
           ^{:key id} [:li name " "
                       [:button {:type "button"
                                 :class "btn btn-danger"
-                                :on-click #(DELETE (person-url id)
-                                             {:handler
-                                              (fn [resp] (get-persons :refresh true))})}
+                                :on-click #(DELETE (person-url (:id @state) id))}
                        (str "Delete " name)]])]
        [:hr]
        [:form {:class "form-inline"

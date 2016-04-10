@@ -9,7 +9,9 @@
    [herder.events]
    [herder.event]
    [herder.schedule]
-   [herder.helpers :refer [state history]]
+   [herder.state :refer [state]]
+   [herder.helpers :refer [history]]
+   [herder.getter :refer [parse-ws]]
    [secretary.core :as secretary :refer-macros [defroute]]
    [goog.events :as events]
    [goog.history.EventType :as HistoryEventType]
@@ -57,19 +59,6 @@
   [(-> (get @state :component "herder.slots.component") ->js js/eval)])
 
 (defonce channel-sockets (atom nil))
-
-(defn parse-ws [{[kind data] :event send :send-fn :as stuff}]
-  (js/console.log "event" (pr-str kind) (pr-str data))
-  (if (and (= kind :chsk/state) (:first-open? data))
-    (send
-     [::page (select-keys @state [:component :id])]))
-  (if (= kind :chsk/recv)
-    (let [[type data] data]
-      (if (= type :herder.web.notifications/cache-invalidate)
-        (doseq [key data]
-          (js/console.log "delete" (pr-str key))
-          (swap! state dissoc key))
-        (js/console.log "something else" type)))))
 
 (defn ^:export mount-root []
   (if (-> @channel-sockets nil? not)

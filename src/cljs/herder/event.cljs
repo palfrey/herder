@@ -1,34 +1,25 @@
 (ns herder.event
   (:require
-   [herder.helpers :refer [get-data state convention-url convention-header nav!]]
+   [herder.helpers :refer [convention-header nav!]]
+   [herder.getter :refer [get-data event-url]]
+   [herder.state :refer [state]]
    [reagent.core :as r]
-   [herder.persons :refer [get-persons person-url]]
-   [herder.events :refer [get-events]]
    [ajax.core :refer [PATCH DELETE]]))
-
-(defn event-url [& {:keys [event_id] :or {event_id (:event_id @state)}}]
-  (str (convention-url) "/event/" event_id))
-
-(defn get-event [& {:keys [event_id refresh] :or {event_id (:event_id @state)}}]
-  (get-data (keyword (str "event_" event_id)) (event-url :event_id event_id) :refresh refresh))
 
 (defn get-person [id]
   (merge {:id id}
-         (get-data (keyword (str "person_" id)) (person-url id))))
+         (get-data [:person (:id @state) id])))
 
 (defn add-new [val]
   (js/console.log (pr-str @val))
-  (PATCH (event-url)
+  (PATCH (event-url (:id @state) (:event_id @state))
     {:params {:person (:person @val)}
-     :format :json
-     :handler
-     (fn [resp]
-       (get-event :refresh true))}))
+     :format :json}))
 
 (defn ^:export component []
   (let [val (r/atom {:person ""})]
     (fn []
-      (let [event (get-event)]
+      (let [event (get-data [:event (:id @state) (:event_id @state)])]
         [:div {:class "container-fluid"}
          [convention-header :events]
          [:h2 "Event: " (:name event)]
@@ -39,9 +30,7 @@
                  ^{:key id} [:li name " "
                              [:button {:type "button"
                                        :class "btn btn-danger"
-                                       :on-click #(DELETE (str (event-url) "/person/" id)
-                                                    {:handler
-                                                     (fn [resp] (get-event :refresh true))})}
+                                       :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}
                               (str "Remove " name)]]))
          [:form {:class "form-inline"
                  :on-submit #(do
@@ -55,7 +44,7 @@
                      :value (:person @val)
                      :on-change #(swap! val assoc :person (-> % .-target .-value))}
             [:option {:value ""} " Select "]
-            (for [{:keys [id name]} (get-persons)]
+            (for [{:keys [id name]} (get-data [:persons (:id @state)])]
               ^{:key id} [:option {:value id} name])]
 
            [:button {:type "button"
@@ -67,9 +56,8 @@
          [:hr]
          [:button {:type "button"
                    :class "btn btn-danger"
-                   :on-click #(DELETE (event-url)
+                   :on-click #(DELETE (event-url (:id @state) (:event_id @state))
                                 {:handler
                                  (fn [resp]
-                                   (get-events :refresh true)
                                    (nav! "/events"))})}
           "Delete this event"]]))))

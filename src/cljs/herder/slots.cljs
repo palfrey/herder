@@ -1,15 +1,11 @@
 (ns herder.slots
   (:require
-   [herder.helpers :refer [get-data state convention-url convention-header]]
+   [herder.helpers :refer [convention-header]]
+   [herder.state :refer [state]]
+   [herder.getter :refer [get-data slots-url]]
    [ajax.core :refer [POST DELETE]]
    [reagent.core :as r]
    [cljsjs.jquery-timepicker]))
-
-(defn slots-url []
-  (str (convention-url) "/slot"))
-
-(defn get-slots [& {:keys [refresh]}]
-  (get-data [(:id @state) :slots] (slots-url) :refresh refresh))
 
 (defn timerange [val key initial]
   (r/create-class
@@ -38,11 +34,11 @@
        [convention-header :slots]
        [:h2 "Slots"]
        [:ul
-        (for [{:keys [id start end]} (get-slots)]
+        (for [{:keys [id start end]} (get-data [:slots (:id @state)])]
           ^{:key id} [:li start " to " end " "
                       [:button {:type "button"
                                 :class "btn btn-danger"
-                                :on-click #(DELETE (str (slots-url) "/" id))}
+                                :on-click #(DELETE (str (slots-url (:id @state)) "/" id))}
                        (str "Delete " start "-" end)]])]
        [:hr]
        [:form {:method "POST" :class "form-inline"}
@@ -56,7 +52,7 @@
                    :style {:margin-left "5px"}
                    :on-click #(do
                                 (.log js/console (pr-str @val))
-                                (POST (slots-url)
+                                (POST (slots-url (:id @state))
                                   {:params
                                    {:start (-> @val :fromTime)
                                     :end (-> @val :toTime)}
