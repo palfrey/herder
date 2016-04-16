@@ -95,7 +95,7 @@
       (reset! (-> system :solver :watch) :solve-watch)))
   (swap! (-> system :solver :tosolve) conj id))
 
-(let [sys-db (-> system :db :connection)]
+(if-let [sys-db (-> system :db :connection)]
   (kd/with-db sys-db
     (doseq [conv (d/select db/conventions)]
       (needs-solve (:id conv)))))
