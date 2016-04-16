@@ -11,7 +11,7 @@
      [convention-header :schedule]
      [:h2 "Schedule"]
      (into [:ul]
-           (for [{:keys [id date event_id slot_id]} schedule
+           (for [{:keys [id date event_id slot_id]} (sort-by :date schedule)
                  :let [event (get-data [:event (:id @state) event_id])
                        slot (get slots slot_id)]]
              ^{:key id} [:li [:a {:href (str "#/events/" event_id)} (:name event)] " " (to-date date) " " (:start slot)]))]))
