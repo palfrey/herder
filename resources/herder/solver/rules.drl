@@ -33,3 +33,23 @@ rule "people shouldn't overlap"
     then
         scoreHolder.addHardConstraintMatch(kcontext, -10);
 end
+
+rule "events with people shouldn't have null slots"
+    when
+        $event : Event(
+                slot == null,
+				people != null,
+				CollectionUtils.isNotEmpty(people))
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -10);
+end
+
+rule "events without people have null slots"
+    when
+        $event : Event(
+                slot != null,
+				people != null,
+				CollectionUtils.isEmpty(people))
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -10);
+end

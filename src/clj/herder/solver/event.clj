@@ -7,7 +7,7 @@
  :state state
  :constructors {[] []
                 [java.util.UUID] []}
- :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"]}} getSlot [] Object]
+ :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"] "nullable" true}} getSlot [] Object]
            [setSlot [Object] void]
            [getId [] java.util.UUID]
            [getPeople [] java.util.List]

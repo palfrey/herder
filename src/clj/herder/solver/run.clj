@@ -49,18 +49,20 @@
           (.solve solver configured)
           (d/delete db/schedule (d/where {:convention_id id}))
           (doseq [event (.getEvents (.getBestSolution solver))
-                  :let [slottime (c/to-date-time (.getStart (.getSlot event)))
-                        slotoffset (t/millis (.getOffset (t/default-time-zone) slottime)) ; needed to fix TZ fun
-                        day (t/minus (t/date-time (t/year slottime) (t/month slottime) (t/day slottime)) slotoffset)
-                        values {:id (uuid/v1)
-                                :date (c/to-sql-date slottime)
-                                :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
-                                :event_id (.getId event)
-                                :convention_id id}]]
-            (println "event" (.getId event) (.getStart (.getSlot event)))
-            (println "values" values)
-            (d/insert db/schedule (d/values values))
-            (notifications/send-notification [:schedule (str id)])))
+                  :let [slot (.getSlot event)]]
+            (if (-> slot nil? not)
+              (let [slottime (c/to-date-time (.getStart (.getSlot event)))
+                    slotoffset (t/millis (.getOffset (t/default-time-zone) slottime)) ; needed to fix TZ fun
+                    day (t/minus (t/date-time (t/year slottime) (t/month slottime) (t/day slottime)) slotoffset)
+                    values {:id (uuid/v1)
+                            :date (c/to-sql-date slottime)
+                            :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
+                            :event_id (.getId event)
+                            :convention_id id}]
+                (println "event" (.getId event) (.getStart (.getSlot event)))
+                (println "values" values)
+                (d/insert db/schedule (d/values values))
+                (notifications/send-notification [:schedule (str id)])))))
         (catch Exception e
           (do
             (println "Failure in schedule")
