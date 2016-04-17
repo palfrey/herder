@@ -64,7 +64,7 @@
          [:select {:id "preferred_slot"
                    :value (:preferred_slot_id event)
                    :on-change #(set-preferred-slot (-> % .-target .-value))}
-          [:option {:value ""} " Select "]
+          [:option {:value ""} "Any"]
           (for [{:keys [id start end]} (get-data [:slots (:id @state)])]
             ^{:key id} [:option {:value id} (str start "-" end)])]
          [:hr]
