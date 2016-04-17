@@ -32,8 +32,7 @@
   (compojure/routes
    (sente-routes system) core-routes))
 
-(defn event-msg-handler [& args]
-  (infof "args %s" (-> args first :event)))
+(defn event-msg-handler [& args])
 
 (defn wrap-db [f]
   (fn [req]
