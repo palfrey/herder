@@ -38,18 +38,18 @@ rule "events with people shouldn't have null slots"
     when
         $event : Event(
                 slot == null,
-				people != null,
-				CollectionUtils.isNotEmpty(people))
+                people != null,
+                CollectionUtils.isNotEmpty(people))
     then
-        scoreHolder.addHardConstraintMatch(kcontext, -10);
+        scoreHolder.addHardConstraintMatch(kcontext, -15);
 end
 
 rule "events without people have null slots"
     when
         $event : Event(
                 slot != null,
-				people != null,
-				CollectionUtils.isEmpty(people))
+                people != null,
+                CollectionUtils.isEmpty(people))
     then
         scoreHolder.addHardConstraintMatch(kcontext, -10);
 end
