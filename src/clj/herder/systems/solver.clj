@@ -19,7 +19,7 @@
   (stop [component]
     (if (-> component :pool nil? not)
       (.shutdownNow (:pool component)))
-    (if (-> component :watch deref nil? not)
+    (if (and (-> component :watch nil? not) (-> component :watch deref nil? not))
       (remove-watch (:tosolve component) (-> component :watch deref)))
     (dissoc component
             :pool
