@@ -79,6 +79,23 @@
   (down
    (drop (table :schedule))))
 
+(defmigration add-schedule-issues-table
+  (up
+   (create
+    (tbl :schedule-issues
+         (varchar :issue 256)
+         (integer :score)
+         (integer :level)
+         (refer-to :conventions :on-delete :cascade)))
+   (create
+    (tbl :schedule-issues-events
+         (refer-to :conventions :on-delete :cascade)
+         (refer-to :schedule-issues :on-delete :cascade)
+         (refer-to :events :on-delete :cascade))))
+  (down
+   (drop (table :schedule-issues))
+   (drop (table :schedule-issues-events))))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -87,4 +104,5 @@
   (call-migration add-slots-table)
   (call-migration add-persons-table)
   (call-migration add-events-table)
-  (call-migration add-schedule-table))
+  (call-migration add-schedule-table)
+  (call-migration add-schedule-issues-table))

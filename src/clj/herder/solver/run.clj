@@ -21,6 +21,14 @@
          (.setPeople people))))
    events))
 
+(defn get-constraints [solution solver]
+  (let [scoreDirectorFactory (.getScoreDirectorFactory solver)
+        scoreDirector (doto
+                       (.buildScoreDirector scoreDirectorFactory)
+                        (.setWorkingSolution solution)
+                        (.calculateScore))]
+    (.getConstraintMatchTotals scoreDirector)))
+
 (defn solve [db id]
   (println "Begin")
   (kd/with-db (:connection db)
@@ -48,21 +56,44 @@
         (do
           (.solve solver configured)
           (d/delete db/schedule (d/where {:convention_id id}))
-          (doseq [event (.getEvents (.getBestSolution solver))
-                  :let [slot (.getSlot event)]]
-            (if (-> slot nil? not)
-              (let [slottime (c/to-date-time (.getStart (.getSlot event)))
-                    slotoffset (t/millis (.getOffset (t/default-time-zone) slottime)) ; needed to fix TZ fun
-                    day (t/minus (t/date-time (t/year slottime) (t/month slottime) (t/day slottime)) slotoffset)
-                    values {:id (uuid/v1)
-                            :date (c/to-sql-date slottime)
-                            :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
-                            :event_id (.getId event)
-                            :convention_id id}]
-                (println "event" (.getId event) (.getStart (.getSlot event)))
-                (println "values" values)
-                (d/insert db/schedule (d/values values))
-                (notifications/send-notification [:schedule (str id)])))))
+          (d/delete db/schedule-issues (d/where {:convention_id id}))
+          (d/delete db/schedule-issues-events (d/where {:convention_id id}))
+          (let [solution (.getBestSolution solver)]
+            (doseq [event (.getEvents solution)
+                    :let [slot (.getSlot event)]]
+              (if (-> slot nil? not)
+                (let [slottime (c/to-date-time (.getStart (.getSlot event)))
+                      slotoffset (t/millis (.getOffset (t/default-time-zone) slottime)) ; needed to fix TZ fun
+                      day (t/minus (t/date-time (t/year slottime) (t/month slottime) (t/day slottime)) slotoffset)
+                      values {:id (uuid/v1)
+                              :date (c/to-sql-date slottime)
+                              :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
+                              :event_id (.getId event)
+                              :convention_id id}]
+                  (println "event" (.getId event) (.getStart (.getSlot event)))
+                  (println "values" values)
+                  (d/insert db/schedule (d/values values)))))
+            (notifications/send-notification [:schedule (str id)])
+            (println "score" (-> solution .getScore .toString))
+            (println "constraints")
+            (doseq [constraint (get-constraints solution solver)]
+              (doseq [match (.getConstraintMatchSet constraint)
+                      :let [match-id (uuid/v1)
+                            values {:id match-id
+                                    :score (.getWeight match)
+                                    :level (.getScoreLevel match)
+                                    :issue (.getConstraintName match)
+                                    :convention_id id}]]
+                (println "match" values)
+                (d/insert db/schedule-issues (d/values values))
+                (doseq [event (.getJustificationList match)
+                        :let [values {:id (uuid/v1)
+                                      :schedule-issue_id match-id
+                                      :event_id (.getId event)
+                                      :convention_id id}]]
+                  (d/insert db/schedule-issues-events (d/values values))
+                  (println "event" values))))
+            (notifications/send-notification [:schedule-issues (str id)])))
         (catch Exception e
           (do
             (println "Failure in schedule")

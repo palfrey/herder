@@ -10,3 +10,5 @@
 (core/defentity events)
 (core/defentity events-persons)
 (core/defentity schedule)
+(core/defentity schedule-issues)
+(core/defentity schedule-issues-events)
