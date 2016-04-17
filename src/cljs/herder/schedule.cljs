@@ -15,7 +15,7 @@
            (for [{:keys [id date event_id slot_id]} (sort-by :date schedule)
                  :let [event (get-data [:event (:id @state) event_id])
                        slot (get slots slot_id)]]
-             ^{:key id} [:li [:a {:href (str "#/events/" event_id)} (:name event)] " " (to-date date) " " (:start slot)]))
+             ^{:key id} [:li [:a {:href (str "#/events/" event_id)} (:name event)] " " (to-date date) " " (:start slot) "-" (:end slot)]))
      (if (-> schedule-issues empty? not)
        [:div
         [:h3 "Issues"]
