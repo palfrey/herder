@@ -22,10 +22,18 @@
     {:params {:preferred_slot val}
      :format :json}))
 
+(defn set-event-count [val]
+  (js/console.log (pr-str val))
+  (PATCH (event-url (:id @state) (:event_id @state))
+    {:params {:event_count val}
+     :format :json}))
+
 (defn ^:export component []
   (let [val (r/atom {:person ""})]
     (fn []
-      (let [event (get-data [:event (:id @state) (:event_id @state)])]
+      (let [event (get-data [:event (:id @state) (:event_id @state)])
+            convention (get-data [:convention (:id @state)])
+            days (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))]
         [:div {:class "container-fluid"}
          [convention-header :events]
          [:h2 "Event: " (:name event)]
@@ -67,6 +75,15 @@
           [:option {:value ""} "Any"]
           (for [{:keys [id start end]} (get-data [:slots (:id @state)])]
             ^{:key id} [:option {:value id} (str start "-" end)])]
+         [:hr]
+         [:h3 "Event count"]
+         [:select {:id "event_count"
+                   :value (:event_count event)
+                   :on-change #(set-event-count (-> % .-target .-value))}
+          [:option {:value "1"} "Single event"]
+          (js/console.log "days" days)
+          (for [value (range 2 (+ days 1))]
+            ^{:key value} [:option {:value value} value])]
          [:hr]
          [:button {:type "button"
                    :class "btn btn-danger"

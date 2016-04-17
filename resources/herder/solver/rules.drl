@@ -3,6 +3,7 @@ package herder.solver;
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 import herder.solver.types.Event;
+import org.joda.time.Interval;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -57,9 +58,21 @@ end
 rule "events with preferred slots like those"
     when
         $event : Event(
-			CollectionUtils.isNotEmpty(preferredSlots),
-			!preferredSlots.contains(slot)
-		)
+            CollectionUtils.isNotEmpty(preferredSlots),
+            !preferredSlots.contains(slot)
+        )
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -5);
+end
+
+rule "events with chained events are on later days"
+    when
+        $event : Event(
+            slot != null,
+            chainedEvent != null,
+            ((Event)chainedEvent).slot != null,
+            ((Interval)slot).getStart().toLocalDate() <= ((Interval)((Event)chainedEvent).slot).getStart().toLocalDate()
+        )
     then
         scoreHolder.addSoftConstraintMatch(kcontext, -5);
 end

@@ -1,4 +1,4 @@
-(in-ns 'herder.solver.types)
+(ns herder.solver.types)
 
 (gen-class
  :name ^{PlanningEntity {}} herder.solver.types.Event
@@ -11,7 +11,12 @@
            [setSlot [Object] void]
            [getPreferredSlots [] java.util.List]
            [setPreferredSlots [java.util.List] void]
+           [getChainedEvent [] Object]
+           [setChainedEvent [Object] void]
+           [getEventDay [] int]
+           [setEventDay [int] void]
            [getId [] java.util.UUID]
+           [getExternalId [] java.util.UUID]
            [getPeople [] java.util.List]
            [setPeople [java.util.List] void]
            [getName [] String]
@@ -19,13 +24,17 @@
 
 (defn- event-init
   ([] (event-init (java.util.UUID/randomUUID)))
-  ([uuid] [[] (ref {:id uuid
+  ([uuid] [[] (ref {:id (java.util.UUID/randomUUID)
+                    :external-id uuid
                     :people []
                     :name ""
                     :preferred-slots []})]))
 
 (defn- event-getId [this]
   (getValue this :id))
+
+(defn- event-getExternalId [this]
+  (getValue this :external-id))
 
 (defn- event-getSlot [this]
   (getValue this :slot))
@@ -38,6 +47,18 @@
 
 (defn- event-setPreferredSlots [this item]
   (setValue this :preferred-slots item))
+
+(defn- event-getChainedEvent [this]
+  (getValue this :chained-event))
+
+(defn- event-setChainedEvent [this item]
+  (setValue this :chained-event item))
+
+(defn- event-getEventDay [this]
+  (getValue this :event-day))
+
+(defn- event-setEventDay [this item]
+  (setValue this :event-day item))
 
 (defn- event-getPeople [this]
   (getValue this :people))

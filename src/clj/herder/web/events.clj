@@ -73,13 +73,15 @@
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
-(defn patch-event [{{:keys [id person preferred_slot]} :params}]
+(defn patch-event [{{:keys [id person preferred_slot event_count]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
       (let [conv_id (:convention_id event)
             preferred_slot (if (= "" preferred_slot) nil preferred_slot)]
         (d/update db/events (d/set-fields {:preferred_slot_id preferred_slot}) (d/where {:id id}))
+        (if (-> event_count nil? not)
+          (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id id})))
         (if (-> person nil? not)
           (let [persons (get-person-ids id)]
             (if (not (.contains persons person))

@@ -21,17 +21,24 @@
        (let [people (map #(Person. (:person_id %)) (filterv #(= (% :event_id) (:id ev)) events-persons))
              slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)]
          (println "ev" ev)
-         (doto
-          (Event. (:id ev))
-           (.setName (:name ev))
-           (.setPreferredSlots
-            (if (-> slot nil? not)
-              (for [day (p/periodic-seq firstDay (t/days 1))
-                    :while (or (t/equal? lastDay day) (t/after? lastDay day))]
-                (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
-                      endSlot (t/plus day (t/minutes (:end-minutes slot)))]
-                  (t/interval beginSlot endSlot))) []))
-           (.setPeople people))))
+         (loop [new-events [] previous nil count 1]
+           (let [new-event
+                 (doto
+                  (Event. (:id ev))
+                   (.setName (:name ev))
+                   (.setPreferredSlots
+                    (if (-> slot nil? not)
+                      (for [day (p/periodic-seq firstDay (t/days 1))
+                            :while (or (t/equal? lastDay day) (t/after? lastDay day))]
+                        (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
+                              endSlot (t/plus day (t/minutes (:end-minutes slot)))]
+                          (t/interval beginSlot endSlot))) []))
+                   (.setPeople people)
+                   (.setChainedEvent previous)
+                   (.setEventDay count))]
+             (if (= count (:event_count ev))
+               (conj new-events new-event)
+               (recur (conj new-events new-event) new-event (+ 1 count)))))))
      events)))
 
 (defn get-constraints [solution solver]
@@ -55,7 +62,7 @@
                   :slots
                   (mapv #(vector (t/minutes (:start-minutes %))
                                  (t/minutes (- (:end-minutes %) (:start-minutes %)))) slots)
-                  :events (gen-events events events-persons slots convention)}
+                  :events (apply concat (gen-events events events-persons slots convention))}
           solver (-> (makeSolverConfig) (makeSolver))
           configured (setupSolution config)]
       ;(println "id" id)
@@ -81,10 +88,13 @@
                       values {:id (uuid/v1)
                               :date (c/to-sql-date slottime)
                               :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
-                              :event_id (.getId event)
-                              :convention_id id}]
-                  (println "event" (.getId event) (.getStart (.getSlot event)) (.getPreferredSlots event))
+                              :event_id (.getExternalId event)
+                              :convention_id id
+                              :event_day (.getEventDay event)}]
+                  ;(println "event" (.getId event) (.getStart (.getSlot event)) (.getPreferredSlots event))
                   (println "values" values)
+                  (println "chained" event (.getChainedEvent event))
+                  (println "")
                   (d/insert db/schedule (d/values values)))))
             (notifications/send-notification [:schedule (str id)])
             (println "score" (-> solution .getScore .toString))
@@ -102,7 +112,7 @@
                 (doseq [event (.getJustificationList match)
                         :let [values {:id (uuid/v1)
                                       :schedule-issue_id match-id
-                                      :event_id (.getId event)
+                                      :event_id (.getExternalId event)
                                       :convention_id id}]]
                   (d/insert db/schedule-issues-events (d/values values))
                   (println "event" values))))
@@ -113,7 +123,8 @@
             (println e)))
         (finally (do
                    (println "Solved")
-                   (reset! (-> system :solver :solving) false)))))))
+                   (if (-> system :solver nil? not)
+                     (reset! (-> system :solver :solving) false))))))))
 
 (defn run-solver [id]
   (let [solv (:solver system)

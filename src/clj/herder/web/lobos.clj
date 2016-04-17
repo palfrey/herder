@@ -107,6 +107,20 @@
                  (refer-to-with-cname :slots "preferred_slot" :on-delete :set-null))))
   (down))
 
+(defmigration add-event-count-to-event
+  (up
+   (alter :add
+          (table :events
+                 (integer :event_count (default 1)))))
+  (down))
+
+(defmigration add-event-day-to-schedule
+  (up
+   (alter :add
+          (table :schedule
+                 (integer :event_day (default 1)))))
+  (down))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -117,4 +131,6 @@
   (call-migration add-events-table)
   (call-migration add-schedule-table)
   (call-migration add-schedule-issues-table)
-  (call-migration add-preferred-slot-to-event))
+  (call-migration add-preferred-slot-to-event)
+  (call-migration add-event-count-to-event)
+  (call-migration add-event-day-to-schedule))
