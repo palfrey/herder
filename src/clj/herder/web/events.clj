@@ -91,7 +91,7 @@
                                              :person_id person}])))))
         (solve conv_id)
         (notifications/send-notification [:event (str conv_id) id])
-        (response (retrieve-event id))))))
+        (response (assoc (retrieve-event id) :persons (get-person-ids id)))))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
