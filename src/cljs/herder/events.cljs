@@ -21,7 +21,7 @@
        [convention-header :events]
        [:h2 "Events"]
        [:ul
-        (for [{:keys [id name]} (get-data [:events (:id @state)])]
+        (for [{:keys [id name]} (sort-by :name (get-data [:events (:id @state)]))]
           ^{:key id} [:li [:a {:href (str "#/events/" id)} name " "]])]
        [:hr]
        [:form {:class "form-inline"

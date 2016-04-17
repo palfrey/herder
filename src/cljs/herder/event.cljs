@@ -40,7 +40,7 @@
          [:hr]
          [:h4 "People"]
          (into [:ul]
-               (for [{:keys [id name]} (map get-person (:persons event))]
+               (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
                  ^{:key id} [:li name " "
                              [:button {:type "button"
                                        :class "btn btn-danger"
