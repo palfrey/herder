@@ -174,7 +174,7 @@
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
    (target :no-clean true)
-   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj" "solver.clj" "systems.clj"])
+   (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj" "solver.clj" "systems.clj" "run.clj" "rules.drl"])
    (make-solver)
    (testing)
    (test)
