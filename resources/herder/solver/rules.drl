@@ -53,3 +53,13 @@ rule "events without people have null slots"
     then
         scoreHolder.addHardConstraintMatch(kcontext, -10);
 end
+
+rule "events with preferred slots like those"
+    when
+        $event : Event(
+			CollectionUtils.isNotEmpty(preferredSlots),
+			!preferredSlots.contains(slot)
+		)
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -5);
+end

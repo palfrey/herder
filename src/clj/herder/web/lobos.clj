@@ -11,11 +11,15 @@
 (defn surrogate-key [table]
   (uuid table :id :primary-key))
 
-(defn refer-to [table ptable & args]
-  (let [cname (-> (->> ptable name butlast (apply str))
+(defn refer-to-with-cname
+  [table ptable cname & args]
+  (let [cname (-> cname
                   (str "_id")
                   keyword)]
     (uuid table cname (into [:refer ptable :id] args))))
+
+(defn refer-to [table ptable & args]
+  (apply refer-to-with-cname table ptable (->> ptable name butlast (apply str)) args))
 
 (defmacro tbl [name & elements]
   `(-> (table ~name
@@ -96,6 +100,13 @@
    (drop (table :schedule-issues))
    (drop (table :schedule-issues-events))))
 
+(defmigration add-preferred-slot-to-event
+  (up
+   (alter :add
+          (table :events
+                 (refer-to-with-cname :slots "preferred_slot" :on-delete :set-null))))
+  (down))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -105,4 +116,5 @@
   (call-migration add-persons-table)
   (call-migration add-events-table)
   (call-migration add-schedule-table)
-  (call-migration add-schedule-issues-table))
+  (call-migration add-schedule-issues-table)
+  (call-migration add-preferred-slot-to-event))

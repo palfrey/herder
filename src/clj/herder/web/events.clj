@@ -73,23 +73,23 @@
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
-(defn patch-event [{{:keys [id person]} :params}]
+(defn patch-event [{{:keys [id person preferred_slot]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
-      (let [persons (get-person-ids id)
-            return (assoc event :persons persons)
-            conv_id (:convention_id event)]
-        (if (not (.contains persons person))
-          (do
-            (d/insert
-             db/events-persons (d/values [{:convention_id conv_id
-                                           :event_id id
-                                           :person_id person}]))
-            (notifications/send-notification [:event (str conv_id) id])
-            (solve conv_id)
-            (response (update return :persons #(conj % person))))
-          (response return))))))
+      (let [conv_id (:convention_id event)
+            preferred_slot (if (= "" preferred_slot) nil preferred_slot)]
+        (d/update db/events (d/set-fields {:preferred_slot_id preferred_slot}) (d/where {:id id}))
+        (if (-> person nil? not)
+          (let [persons (get-person-ids id)]
+            (if (not (.contains persons person))
+              (d/insert
+               db/events-persons (d/values [{:convention_id conv_id
+                                             :event_id id
+                                             :person_id person}])))))
+        (solve conv_id)
+        (notifications/send-notification [:event (str conv_id) id])
+        (response (retrieve-event id))))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 

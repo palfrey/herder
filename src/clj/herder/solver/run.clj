@@ -7,19 +7,32 @@
    [korma.db :as kd]
    [clj-time.core :as t]
    [clj-time.coerce :as c]
+   [clj-time.periodic :as p]
    [clj-uuid :as uuid]
    [herder.web.notifications :as notifications])
   (:import [herder.solver.types Event Person]))
 
-(defn- gen-events [events events-persons]
-  (mapv
-   (fn [ev]
-     (let [people (map #(Person. (:person_id %)) (filterv #(= (% :event_id) (:id ev)) events-persons))]
-       (doto
-        (Event. (:id ev))
-         (.setName (:name ev))
-         (.setPeople people))))
-   events))
+(defn- gen-events [events events-persons slots convention]
+  (let
+   [firstDay (c/from-sql-date (:from convention))
+    lastDay (c/from-sql-date (:to convention))]
+    (mapv
+     (fn [ev]
+       (let [people (map #(Person. (:person_id %)) (filterv #(= (% :event_id) (:id ev)) events-persons))
+             slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)]
+         (println "ev" ev)
+         (doto
+          (Event. (:id ev))
+           (.setName (:name ev))
+           (.setPreferredSlots
+            (if (-> slot nil? not)
+              (for [day (p/periodic-seq firstDay (t/days 1))
+                    :while (or (t/equal? lastDay day) (t/after? lastDay day))]
+                (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
+                      endSlot (t/plus day (t/minutes (:end-minutes slot)))]
+                  (t/interval beginSlot endSlot))) []))
+           (.setPeople people))))
+     events)))
 
 (defn get-constraints [solution solver]
   (let [scoreDirectorFactory (.getScoreDirectorFactory solver)
@@ -42,7 +55,7 @@
                   :slots
                   (mapv #(vector (t/minutes (:start-minutes %))
                                  (t/minutes (- (:end-minutes %) (:start-minutes %)))) slots)
-                  :events (gen-events events events-persons)}
+                  :events (gen-events events events-persons slots convention)}
           solver (-> (makeSolverConfig) (makeSolver))
           configured (setupSolution config)]
       ;(println "id" id)
@@ -70,7 +83,7 @@
                               :slot_id (:id (first (filter #(t/equal? slottime (t/plus day (t/minutes (:start-minutes %)))) slots)))
                               :event_id (.getId event)
                               :convention_id id}]
-                  (println "event" (.getId event) (.getStart (.getSlot event)))
+                  (println "event" (.getId event) (.getStart (.getSlot event)) (.getPreferredSlots event))
                   (println "values" values)
                   (d/insert db/schedule (d/values values)))))
             (notifications/send-notification [:schedule (str id)])

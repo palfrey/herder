@@ -9,6 +9,8 @@
                 [java.util.UUID] []}
  :methods [[^{PlanningVariable {"valueRangeProviderRefs" ["slotRange"] "nullable" true}} getSlot [] Object]
            [setSlot [Object] void]
+           [getPreferredSlots [] java.util.List]
+           [setPreferredSlots [java.util.List] void]
            [getId [] java.util.UUID]
            [getPeople [] java.util.List]
            [setPeople [java.util.List] void]
@@ -19,7 +21,8 @@
   ([] (event-init (java.util.UUID/randomUUID)))
   ([uuid] [[] (ref {:id uuid
                     :people []
-                    :name ""})]))
+                    :name ""
+                    :preferred-slots []})]))
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -29,6 +32,12 @@
 
 (defn- event-setSlot [this item]
   (setValue this :slot item))
+
+(defn- event-getPreferredSlots [this]
+  (getValue this :preferred-slots))
+
+(defn- event-setPreferredSlots [this item]
+  (setValue this :preferred-slots item))
 
 (defn- event-getPeople [this]
   (getValue this :people))
