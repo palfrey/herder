@@ -23,3 +23,8 @@
 
 (defn- person-setName [this item]
   (setValue this :name item))
+
+(defn- person-equals [this b]
+  (= (person-getId this) (person-getId b)))
+(defn- person-hashCode [this]
+  (.hashCode (person-getId this)))
