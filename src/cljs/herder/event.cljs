@@ -1,10 +1,11 @@
 (ns herder.event
   (:require
    [herder.helpers :refer [convention-header nav!]]
-   [herder.getter :refer [get-data event-url]]
+   [herder.getter :refer [get-data get-mapped-data event-url]]
    [herder.state :refer [state]]
    [reagent.core :as r]
-   [ajax.core :refer [PATCH DELETE]]))
+   [ajax.core :refer [PATCH DELETE]]
+   [clojure.set :refer [difference]]))
 
 (defn get-person [id]
   (merge {:id id}
@@ -33,7 +34,8 @@
     (fn []
       (let [event (get-data [:event (:id @state) (:event_id @state)])
             convention (get-data [:convention (:id @state)])
-            days (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))]
+            days (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))
+            persons (get-mapped-data [:persons (:id @state)])]
         [:div {:class "container-fluid"}
          [convention-header :events]
          [:h2 "Event: " (:name event)]
@@ -58,7 +60,8 @@
                      :value (:person @val)
                      :on-change #(swap! val assoc :person (-> % .-target .-value))}
             [:option {:value ""} " Select "]
-            (for [{:keys [id name]} (get-data [:persons (:id @state)])]
+            (for [id (sort-by #(:name (get persons %)) (difference (set (keys persons)) (set (:persons event))))
+                  :let [name (:name (get persons id))]]
               ^{:key id} [:option {:value id} name])]
 
            [:button {:type "button"
