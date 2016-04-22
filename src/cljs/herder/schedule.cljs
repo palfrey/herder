@@ -12,19 +12,44 @@
    4 "Fourth"
    5 "Fifth"})
 
+(defn make-link [item]
+  (let [event (get-data [:event (:id @state) (:event_id item)])
+        event_day (:event_day item)
+        day-name (if (= 1 event_day) "" (gstring/format "(%s) " (get count-map (js/parseInt event_day))))]
+    [[:a {:href (str "#/events/" (:id event))} (:name event)] " " day-name]))
+
 (defn ^:export component []
   (let [schedule (get-data [:schedule (:id @state)])
         slots (get-mapped-data [:slots (:id @state)])
-        schedule-issues (get-data [:schedule-issues (:id @state)])]
+        schedule-issues (get-data [:schedule-issues (:id @state)])
+        slot-width (quot 11 (count slots))
+        days (distinct (map :date schedule))]
     [:div {:class "container-fluid"}
      [convention-header :schedule]
      [:h2 "Schedule"]
-     (into [:ul]
-           (for [{:keys [id date event_id slot_id event_day]} (sort-by :date schedule)
-                 :let [event (get-data [:event (:id @state) event_id])
-                       slot (get slots slot_id)
-                       day-name (if (= 1 event_day) "" (gstring/format "(%s) " (get count-map (js/parseInt event_day))))]]
-             ^{:key id} [:li [:a {:href (str "#/events/" event_id)} (:name event)] " " day-name (to-date date) " " (:start slot) "-" (:end slot)]))
+     [:table.table
+      [:thead
+       [:tr
+        (cons
+         (with-meta [:th ""] {:key "corner-slot"})
+         (for [slot (sort-by :start (vals slots))]
+           (with-meta [:th (:start slot) "-" (:end slot)] {:key (:id slot)})))]]
+      (into [:tbody]
+            (for [day days]
+              [:tr
+               (cons
+                (with-meta [:td (to-date day)] {:key day})
+                (doall (for [slot_id (map :id (sort-by :start (vals slots)))
+                             :let [items (filter #(and
+                                                   (= (:date %) day)
+                                                   (= (:slot_id %) slot_id))
+                                                 schedule)
+                                   links (mapv make-link items)
+                                   links (cons (first links) (map #(cons "/ " %) (rest links)))
+                                   link (into [:td] (apply concat links))]]
+                         (do
+                           (js/console.log "link" (pr-str link))
+                           (with-meta link {:key (str slot_id "-" day)})))))]))]
      (if (-> schedule-issues empty? not)
        [:div
         [:h3 "Issues"]
