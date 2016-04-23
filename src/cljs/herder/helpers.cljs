@@ -27,4 +27,6 @@
       [:li {:class (str "nav-item " (if (= active :schedule) "active" ""))}
        [:a {:class "nav-link" :href "#/schedule"} [:i "Schedule"]]]
       [:li {:class "nav-item"}
-       [:a {:class "nav-link" :href "/"} "Goto convention list"]]]]))
+       [:a {:class "nav-link" :href "/"} "Goto convention list"]]
+      [:li {:class "nav-item pull-xs-right"}
+       [:a {:class "nav-link" :href "https://github.com/palfrey/herder/issues"} "Report problems"]]]]))

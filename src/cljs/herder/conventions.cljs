@@ -31,6 +31,7 @@
   (let [val (r/atom {:name "" :date nil})]
     (fn []
       [:div {:class "container-fluid"}
+       [:a {:class "pull-xs-right nav-link" :href "https://github.com/palfrey/herder/issues"} "Report problems"]
        [:h1 "Conventions"]
        [:ul
         (for [{:keys [id name from to]} (get-data [:conventions])]
