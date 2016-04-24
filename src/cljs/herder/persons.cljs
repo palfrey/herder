@@ -20,13 +20,20 @@
       [:div {:class "container-fluid"}
        [convention-header :persons]
        [:h2 "People"]
-       [:ul
+       [:div.row
         (for [{:keys [id name]} (get-data [:persons (:id @state)])]
-          ^{:key id} [:li [:a {:href (str "#/person/" id)} name " "]
-                      [:button {:type "button"
-                                :class "btn btn-danger"
-                                :on-click #(DELETE (person-url (:id @state) id))}
-                       (str "Delete " name)]])]
+          ^{:key id}
+          [:div
+           [:div.col-md-2
+            [:a {:class "pull-xs-right"
+                 :style {:line-height "38px"}
+                 :href (str "#/person/" id)}
+             name " "]]
+           [:div.col-md-2
+            [:button {:type "button"
+                      :class "btn btn-danger"
+                      :on-click #(DELETE (person-url (:id @state) id))}
+             (str "Delete " name)]]])]
        [:hr]
        [:form {:class "form-inline"
                :on-submit #(do
