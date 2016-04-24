@@ -1,4 +1,4 @@
-(in-ns 'herder.solver.types)
+(ns herder.solver.types)
 
 (gen-class
  :name herder.solver.types.Slot

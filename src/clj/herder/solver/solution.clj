@@ -1,4 +1,4 @@
-(in-ns 'herder.solver.types)
+(ns herder.solver.types)
 
 (gen-class
  :name ^{PlanningSolution {}} herder.solver.types.HerderSolution
