@@ -41,13 +41,21 @@
          [:h2 "Event: " (:name event)]
          [:hr]
          [:h4 "People"]
-         (into [:ul]
-               (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
-                 ^{:key id} [:li [:a {:href (str "#/person/" id)} name " "]
-                             [:button {:type "button"
-                                       :class "btn btn-danger"
-                                       :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}
-                              (str "Remove " name)]]))
+         [:div.row
+          (into [:ul]
+                (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
+                  ^{:key id} [:div
+                              [:div.col-md-2
+                               [:a {:class "pull-xs-right"
+                                    :style {:line-height "38px"}
+                                    :href (str "#/person/" id)}
+                                name " "]]
+                              [:div.col-md-2
+                               [:button {:type "button"
+                                         :class "btn btn-danger"
+                                         :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}
+                                (str "Remove " name)]]]))]
+         [:hr]
          [:form {:class "form-inline"
                  :on-submit #(do
                                (.preventDefault %)
