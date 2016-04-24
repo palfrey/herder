@@ -73,15 +73,19 @@
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
-(defn patch-event [{{:keys [id person preferred_slot event_count]} :params}]
+(defn patch-event [{{:keys [id person preferred_slot event_count name] :as params} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
       (let [conv_id (:convention_id event)
             preferred_slot (if (= "" preferred_slot) nil preferred_slot)]
-        (d/update db/events (d/set-fields {:preferred_slot_id preferred_slot}) (d/where {:id id}))
+        (if (contains? params :preferred_slot)
+          (d/update db/events (d/set-fields {:preferred_slot_id preferred_slot}) (d/where {:id id})))
         (if (-> event_count nil? not)
           (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id id})))
+        (if (-> name nil? not)
+          (d/update db/events (d/set-fields {:name name}) (d/where {:id id})))
+
         (if (-> person nil? not)
           (let [persons (get-person-ids id)]
             (if (not (.contains persons person))
@@ -89,7 +93,8 @@
                db/events-persons (d/values [{:convention_id conv_id
                                              :event_id id
                                              :person_id person}])))))
-        (solve conv_id)
+        (if (-> name nil?) ; don't solve for name, because it slows things down
+          (solve conv_id))
         (notifications/send-notification [:event (str conv_id) id])
         (response (assoc (retrieve-event id) :persons (get-person-ids id)))))))
 

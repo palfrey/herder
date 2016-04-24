@@ -29,6 +29,12 @@
     {:params {:event_count val}
      :format :json}))
 
+(defn set-event-name [val]
+  (js/console.log (pr-str val))
+  (PATCH (event-url (:id @state) (:event_id @state))
+    {:params {:name val}
+     :format :json}))
+
 (defn ^:export component []
   (let [val (r/atom {:person ""})]
     (fn []
@@ -38,8 +44,13 @@
             persons (get-mapped-data [:persons (:id @state)])]
         [:div {:class "container-fluid"}
          [convention-header :events]
-         [:h2 "Event: " (:name event)]
-         [:hr]
+         [:h2 "Event"]
+         [:label {:for "name"} "Name "]
+         [:input {:id "name"
+                  :type "text"
+                  :value (:name event)
+                  :on-change #(set-event-name (-> % .-target .-value))}]
+
          [:h4 "People"]
          [:div.row
           (into [:ul]
