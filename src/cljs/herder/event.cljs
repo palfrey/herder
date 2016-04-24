@@ -43,7 +43,7 @@
          [:h4 "People"]
          (into [:ul]
                (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
-                 ^{:key id} [:li name " "
+                 ^{:key id} [:li [:a {:href (str "#/person/" id)} name " "]
                              [:button {:type "button"
                                        :class "btn btn-danger"
                                        :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}

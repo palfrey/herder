@@ -22,7 +22,7 @@
        [:h2 "People"]
        [:ul
         (for [{:keys [id name]} (get-data [:persons (:id @state)])]
-          ^{:key id} [:li name " "
+          ^{:key id} [:li [:a {:href (str "#/person/" id)} name " "]
                       [:button {:type "button"
                                 :class "btn btn-danger"
                                 :on-click #(DELETE (person-url (:id @state) id))}

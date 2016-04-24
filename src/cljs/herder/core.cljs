@@ -6,6 +6,7 @@
    [herder.conventions]
    [herder.slots]
    [herder.persons]
+   [herder.person]
    [herder.events]
    [herder.event]
    [herder.schedule]
@@ -26,6 +27,9 @@
 
   (defroute "/persons" []
     (swap! state assoc :component "herder.persons.component"))
+
+  (defroute "/person/:id" [id]
+    (swap! state assoc :component "herder.person.component" :person_id id))
 
   (defroute "/events" []
     (swap! state assoc :component "herder.events.component"))

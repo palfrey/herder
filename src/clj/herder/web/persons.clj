@@ -6,7 +6,7 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT DELETE context]]
+   [compojure.core :refer [GET POST PATCH DELETE context]]
    [herder.web.notifications :as notifications]
    [herder.web.solve :refer [solve]]))
 
@@ -50,11 +50,23 @@
         (status (response {}) 200))
       (status (response {}) 404))))
 
+(defn patch-person [{{:keys [id name]} :params}]
+  (let [person (first (d/select db/persons (d/where {:id id})))]
+    (if (-> person nil? not)
+      (do
+        (d/update db/persons (d/set-fields {:name name}) (d/where {:id id}))
+        (notifications/send-notification [:person (str (:convention_id person)) id])
+        (notifications/send-notification [:persons (str (:convention_id person))])
+        (status (response {}) 200))
+      (status (response (str "No such person " id)) 404))))
+
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def person-context
   (context "/person" []
     (GET "/" [] get-persons)
-    (GET ["/:id" :id uuid-regex] [id] get-person)
-    (DELETE ["/:id" :id uuid-regex] [id] delete-person)
+    (context "/:id" [id]
+      (GET "/" [id] get-person)
+      (PATCH "/" [id] patch-person)
+      (DELETE "/" [id] delete-person))
     (POST "/" [] new-person!)))
