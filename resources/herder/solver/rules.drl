@@ -3,7 +3,10 @@ package herder.solver;
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 import herder.solver.types.Event;
+import herder.solver.types.HerderSolution;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.Period
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -19,6 +22,19 @@ rule "spread events out (penalty per extra event in slot)"
                 id > $leftId)
     then
         scoreHolder.addSoftConstraintMatch(kcontext, -10);
+end
+
+rule "later events are worse"
+    when
+        $event : Event(
+                slot != null, $slot: slot)
+		$solution: HerderSolution(
+			$firstDay: firstDay
+		)
+    then
+	scoreHolder.addSoftConstraintMatch(kcontext, $solution);
+        //scoreHolder.addSoftConstraintMatch(kcontext, -((Interval)$slot).getStart().getDayOfMonth());
+		//-new Period($firstDay, (DateTime)$slot).toStandardMinutes().getMinutes());
 end
 
 rule "people shouldn't overlap"

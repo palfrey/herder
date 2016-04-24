@@ -1,4 +1,4 @@
-(in-ns 'herder.solver.types)
+(ns herder.solver.types)
 
 (gen-class
  :name ^{PlanningSolution {}} herder.solver.types.HerderSolution
@@ -8,6 +8,7 @@
  :methods [[^{PlanningEntityCollectionProperty {}} getEvents [] java.util.List]
            [setEvents [java.util.List] void]
            [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.List]
+           [getFirstDay [] org.joda.time.DateTime]
            [setFirstDay [org.joda.time.DateTime] void]
            [setLastDay [org.joda.time.DateTime] void]
            [getSlots [] java.util.List]
