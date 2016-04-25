@@ -5,6 +5,7 @@
    [org.optaplanner.core.config.score.director ScoreDirectorFactoryConfig]
    [org.optaplanner.core.config.score.definition ScoreDefinitionType]
    [org.optaplanner.core.config.constructionheuristic ConstructionHeuristicPhaseConfig]
+   [org.optaplanner.core.config.localsearch LocalSearchPhaseConfig]
    [org.optaplanner.core.config.solver.termination TerminationConfig]
 
    [herder.solver.types HerderSolution Event Slot]))
@@ -16,12 +17,13 @@
     (.setScoreDrlList ["herder/solver/rules.drl"])))
 
 (defn genPhaseSearch []
-  [(ConstructionHeuristicPhaseConfig.)])
+  [(ConstructionHeuristicPhaseConfig.) (LocalSearchPhaseConfig.)])
 
 (defn genTerminationConfig []
   (doto
    (TerminationConfig.)
-    (.setSecondsSpentLimit 10)))
+    (.setSecondsSpentLimit 10)
+    (.setBestScoreLimit "0hard/0soft")))
 
 (defn makeSolverConfig []
   (doto
