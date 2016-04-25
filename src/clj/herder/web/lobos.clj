@@ -33,7 +33,7 @@
          (varchar :name 100)
          (date :from)
          (date :to)
-         (check :name (> (length :name) 1)))))
+         (check :name (> (length :name) 0)))))
   (down
    (drop (table :conventions))))
 
