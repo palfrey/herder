@@ -8,24 +8,29 @@
    [herder.helpers :refer [to-date]]
    [herder.getter :refer [get-data]]))
 
-(defn daterange [val key]
+(defn daterange [get-value set-value]
   (r/create-class
    {:reagent-render
     (fn []
       [:input {:type "text"
                :name "daterange"
                :class "form-control"
+               ;	:on-change #(js/console.log "change date" (pr-str %))
                :value
-               (let [value (key @val)]
+               (let [value (get-value)]
+                 (js/console.log "date value" (pr-str value))
                  (if (nil? value)
                    ""
-                   (str (-> value first .toDateString) " to " (-> value second .toDateString))))}])
+                   (str (-> value first .toDateString) " through " (-> value second .toDateString))))}])
     :component-did-mount #(->
                            (.dateRangePicker (js/$ (r/dom-node %)))
                            (.bind "datepicker-change"
                                   (fn [event obj]
-                                    (swap! val assoc key
-                                           [(-> obj .-date1) (-> obj .-date2)]))))}))
+                                    (set-value
+                                     [(-> obj .-date1) (-> obj .-date2)]))))}))
+
+(defn daterange-atom [val key]
+  (daterange #(key @val) #(swap! val assoc key %)))
 
 (defn ^:export component []
   (let [val (r/atom {:name "" :date nil})]
@@ -57,7 +62,7 @@
 
         [:div {:class "form-group"}
          [:label {:for "daterange"} "Dates"]
-         [daterange val :date]]
+         [daterange-atom val :date]]
         [:button {:type "button"
                   :class "btn btn-primary"
                   :style {:margin-left "5px"}

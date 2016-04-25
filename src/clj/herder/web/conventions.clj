@@ -6,14 +6,15 @@
    [clj-time.format :as f]
    [korma.core :as d]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [defroutes GET POST PUT DELETE context]]
+   [compojure.core :refer [defroutes GET POST PATCH DELETE context]]
 
    [herder.web.db :as db]
    [herder.web.slots :as slots]
    [herder.web.persons :as persons]
    [herder.web.events :as events]
    [herder.web.schedule :as schedule]
-   [herder.web.notifications :as notifications]))
+   [herder.web.notifications :as notifications]
+   [herder.web.solve :refer [solve]]))
 
 (defn validate-new-convention [params]
   (first
@@ -42,7 +43,19 @@
     (notifications/send-notification [:conventions])
     (status (response {}) (if (> convention 0) 200 404))))
 
-(defn edit-convention [])
+(defn patch-convention [{{:keys [id name from to] :as params} :params}]
+  (let [convention (first (d/select db/conventions (d/where {:id id})))]
+    (if (-> convention nil? not)
+      (do
+        (if (-> name nil? not)
+          (d/update db/conventions (d/set-fields {:name name}) (d/where {:id id})))
+        (if (-> from nil? not)
+          (do
+            (d/update db/conventions (d/set-fields {:from from :to to}) (d/where {:id id}))
+            (solve id)))
+        (notifications/send-notification [:convention id])
+        (status (response {}) 200))
+      (status (response (str "No such convention " id)) 404))))
 
 (defn list-conventions [params]
   (let [conventions (d/select db/conventions)]
@@ -55,7 +68,7 @@
 	      ;(context ["/:id" :id uuid-regex] [id]) - FIXME
     (context "/:id" [id]
       (GET "/" [id] get-convention)
-      (PUT "/" [id] edit-convention)
+      (PATCH "/" [id] patch-convention)
       (DELETE "/" [id] delete-convention)
       slots/slot-context
       persons/person-context
