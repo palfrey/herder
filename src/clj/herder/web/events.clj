@@ -41,7 +41,7 @@
   (first (d/select db/events (d/where {:id id}))))
 
 (defn- get-person-ids [id]
-  (map #(-> % :person_id str) (d/select db/events-persons (d/where {:event_id id}))))
+  (map #(-> % :person_id str) (d/select db/events-persons (d/order :person_id) (d/where {:event_id id}))))
 
 (defn get-event [{{:keys [id]} :params}]
   (let [event (retrieve-event id)]
