@@ -23,7 +23,7 @@
         slots (get-mapped-data [:slots (:id @state)])
         schedule-issues (get-data [:schedule-issues (:id @state)])
         slot-width (quot 11 (count slots))
-        days (distinct (map :date schedule))]
+        days (-> (map :date schedule) distinct sort)]
     [:div {:class "container-fluid"}
      [convention-header :schedule]
      [:h2 "Schedule"]
