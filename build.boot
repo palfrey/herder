@@ -161,7 +161,7 @@
 (deftask dev []
   (comp
    (fix)
-   (make-solver)
+   (build)
    (environ :env {:http-port "3000"})
    (figwheel)
    (run-figwheel)
@@ -175,7 +175,7 @@
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
    (target :no-clean true)
    (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj" "solver.clj" "systems.clj" "run.clj" "rules.drl"])
-   (make-solver)
+   (build)
    (testing)
    (test)
    (kill-pods)))
