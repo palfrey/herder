@@ -23,6 +23,13 @@
               :value (:name person)
               :on-change #(set-person-name (-> % .-target .-value))}]
      [:hr]
+     [:h4 "Attending"]
+     [:ul
+      (for [event_id (:events person)
+            :let [event (get-data [:event (:id @state) event_id])]]
+        ^{:key event_id}
+        [:li [:a {:href (str "#/events/" event_id)} (:name event)]])]
+     [:hr]
      [:button {:type "button"
                :class "btn btn-danger"
                :on-click #(DELETE (person-url (:id @state) (:person_id @state))
