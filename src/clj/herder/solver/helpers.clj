@@ -6,6 +6,10 @@
  :prefix "eventDifficulty-")
 
 (defn- eventDifficulty-compare [this a b]
-  (->
-   (Integer. (.getEventDay a))
-   (.compareTo (Integer. (.getEventDay b)))))
+  (cond
+    (nil? a) -1
+    (nil? b) 1
+    :else
+    (->
+     (Integer. (.getEventDay a))
+     (.compareTo (Integer. (.getEventDay b))))))

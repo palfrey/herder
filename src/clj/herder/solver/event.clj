@@ -1,6 +1,6 @@
 (ns herder.solver.types
-    (:use [herder.solver.helpers])
-    (:import [herder.solver.helpers EventDifficultyComparator]))
+  (:use [herder.solver.helpers])
+  (:import [herder.solver.helpers EventDifficultyComparator]))
 
 (gen-class
  :name ^{PlanningEntity {"difficultyComparatorClass" EventDifficultyComparator}} herder.solver.types.Event
@@ -30,7 +30,8 @@
                     :external-id uuid
                     :people []
                     :name ""
-                    :preferred-slots []})]))
+                    :preferred-slots []
+                    :event-day 1})]))
 
 (defn- event-getId [this]
   (getValue this :id))
