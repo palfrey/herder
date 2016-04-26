@@ -13,7 +13,7 @@
 
                  [compojure "1.5.0"]
                  [ring "1.4.0"]
-                 [org.optaplanner/optaplanner-core "6.3.0.Final" :exclusions [commons-io commons-codec]]
+                 [org.optaplanner/optaplanner-core "6.4.0.Final" :exclusions [commons-io commons-codec]]
                  [ring/ring-defaults "0.2.0"]
                  [org.clojure/tools.namespace "0.2.10"]
                  [org.danielsz/system "0.3.0-SNAPSHOT"]
