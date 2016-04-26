@@ -1,7 +1,9 @@
-(ns herder.solver.types)
+(ns herder.solver.types
+    (:use [herder.solver.helpers])
+    (:import [herder.solver.helpers EventDifficultyComparator]))
 
 (gen-class
- :name ^{PlanningEntity {}} herder.solver.types.Event
+ :name ^{PlanningEntity {"difficultyComparatorClass" EventDifficultyComparator}} herder.solver.types.Event
  :prefix "event-"
  :init init
  :state state

@@ -17,7 +17,8 @@
     (.setScoreDrlList ["herder/solver/rules.drl"])))
 
 (defn genPhaseSearch []
-  [(ConstructionHeuristicPhaseConfig.) (LocalSearchPhaseConfig.)])
+  [(ConstructionHeuristicPhaseConfig.)
+   (LocalSearchPhaseConfig.)])
 
 (defn genTerminationConfig []
   (doto
