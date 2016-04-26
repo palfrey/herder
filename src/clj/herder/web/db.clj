@@ -12,3 +12,4 @@
 (core/defentity schedule)
 (core/defentity schedule-issues)
 (core/defentity schedule-issues-events)
+(core/defentity person-non-availability)

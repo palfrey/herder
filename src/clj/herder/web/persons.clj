@@ -33,11 +33,16 @@
 (defn- get-event-ids [id]
   (map #(-> % :event_id str) (d/select db/events-persons (d/where {:person_id id}))))
 
+(defn- get-person-non-availability [id]
+  (map :date (d/select db/person-non-availability (d/where {:person_id id}))))
+
 (defn get-person [{{:keys [id]} :params}]
   (let [person (first (d/select db/persons (d/where {:id id})))]
     (if (nil? person)
       (status (response (str "No such person " id)) 404)
-      (response (assoc person :events (get-event-ids id))))))
+      (response (assoc person
+                       :events (get-event-ids id)
+                       :non-availability (get-person-non-availability id))))))
 
 (defn get-persons [{{:keys [id]} :params}]
   (let [persons (d/select db/persons (d/where {:convention_id id}) (d/order :name))]

@@ -58,7 +58,8 @@
             {:id (str person_uuid)
              :convention_id str_con_uuid
              :name "Foo"
-             :events []}
+             :events []
+             :non-availability []}
             :status 200}
            (->
             (make-session)
