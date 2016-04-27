@@ -58,11 +58,16 @@
         (status (response {}) 200))
       (status (response {}) 404))))
 
-(defn patch-person [{{:keys [id name]} :params}]
+(defn patch-person [{{:keys [id name available-date available-status] :as params} :params}]
   (let [person (first (d/select db/persons (d/where {:id id})))]
     (if (-> person nil? not)
       (do
-        (d/update db/persons (d/set-fields {:name name}) (d/where {:id id}))
+        (if (contains? params :name)
+          (d/update db/persons (d/set-fields {:name name}) (d/where {:id id})))
+        (if (contains? params :available-date)
+          (if available-status
+            (d/delete db/person-non-availability (d/where {:person_id id :date available-date}))
+            (d/insert db/person-non-availability (d/values {:person_id id :date available-date :convention_id (:convention_id person)}))))
         (notifications/send-notification [:person (str (:convention_id person)) id])
         (notifications/send-notification [:persons (str (:convention_id person))])
         (status (response {}) 200))
