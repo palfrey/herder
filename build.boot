@@ -51,6 +51,7 @@
                  [cljsjs/jquery-daterange-picker "0.0.8-0"]
                  [cljsjs/jquery-timepicker "1.8.10-0"]
                  [secretary "1.2.3"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
 
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
