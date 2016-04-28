@@ -17,6 +17,8 @@
            [setChainedEvent [Object] void]
            [getEventDay [] int]
            [setEventDay [int] void]
+           [getDependantEventCount [] int]
+           [setDependantEventCount [int] void]
            [getId [] java.util.UUID]
            [getExternalId [] java.util.UUID]
            [getPeople [] java.util.List]
@@ -34,7 +36,8 @@
                     :name ""
                     :preferred-slots []
                     :event-day 1
-                    :not-available-days []})]))
+                    :not-available-days []
+                    :dependant-event-count 0})]))
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -65,6 +68,12 @@
 
 (defn- event-setEventDay [this item]
   (setValue this :event-day item))
+
+(defn- event-getDependantEventCount [this]
+  (getValue this :dependant-event-count))
+
+(defn- event-setDependantEventCount [this item]
+  (setValue this :dependant-event-count item))
 
 (defn- event-getPeople [this]
   (getValue this :people))

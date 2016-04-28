@@ -40,6 +40,7 @@
                    (.setPeople people)
                    (.setChainedEvent previous)
                    (.setEventDay count)
+                   (.setDependantEventCount (- (:event_count ev) count))
                    (.setNotAvailableDays non-availability))]
              (if (= count (:event_count ev))
                (conj new-events new-event)

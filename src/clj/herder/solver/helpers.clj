@@ -11,5 +11,5 @@
     (nil? b) 1
     :else
     (->
-     (Integer. (.getEventDay a))
-     (.compareTo (Integer. (.getEventDay b))))))
+     (Integer. (.getDependantEventCount a))
+     (.compareTo (Integer. (.getDependantEventCount b))))))
