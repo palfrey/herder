@@ -69,7 +69,7 @@
       (is (= {:body {:id (str event_uuid)
                      :name "Foo"
                      :convention_id str_con_uuid
-                     :persons [(str person_uuid) (str second_person)]
+                     :persons (-> [(str person_uuid) (str second_person)] sort vec)
                      :preferred_slot_id nil
                      :event_count 1}
               :status 200}
