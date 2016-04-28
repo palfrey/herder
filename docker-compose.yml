@@ -1,0 +1,12 @@
+herder:
+  build: .
+  command: bash -c "./wait-for-postgres.sh postgres && boot dev"
+  links:
+    - postgres
+  environment:
+    - DATABASE_URL=postgres://postgres:mysecretpassword@postgres/postgres
+    - PGPASSWORD=mysecretpassword
+postgres:
+  image: postgres:9.5
+  environment:
+    - POSTGRES_PASSWORD=mysecretpassword
