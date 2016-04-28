@@ -61,15 +61,17 @@
 (defn patch-person [{{:keys [id name available-date available-status] :as params} :params}]
   (let [person (first (d/select db/persons (d/where {:id id})))]
     (if (-> person nil? not)
-      (do
+      (let [conv_id (:convention_id person)]
         (if (contains? params :name)
           (d/update db/persons (d/set-fields {:name name}) (d/where {:id id})))
         (if (contains? params :available-date)
-          (if available-status
-            (d/delete db/person-non-availability (d/where {:person_id id :date available-date}))
-            (d/insert db/person-non-availability (d/values {:person_id id :date available-date :convention_id (:convention_id person)}))))
-        (notifications/send-notification [:person (str (:convention_id person)) id])
-        (notifications/send-notification [:persons (str (:convention_id person))])
+          (do
+            (if available-status
+              (d/delete db/person-non-availability (d/where {:person_id id :date available-date}))
+              (d/insert db/person-non-availability (d/values {:person_id id :date available-date :convention_id conv_id})))
+            (solve conv_id)))
+        (notifications/send-notification [:person (str conv_id) id])
+        (notifications/send-notification [:persons (str conv_id)])
         (status (response {}) 200))
       (status (response (str "No such person " id)) 404))))
 

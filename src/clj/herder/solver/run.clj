@@ -12,15 +12,19 @@
    [herder.web.notifications :as notifications])
   (:import [herder.solver.types Event Person]))
 
-(defn- gen-events [events events-persons slots convention]
+(defn- gen-events [events events-persons slots convention persons-non-available]
   (let
    [firstDay (c/from-sql-date (:from convention))
     lastDay (c/from-sql-date (:to convention))]
     (mapv
      (fn [ev]
-       (let [people (map #(Person. (:person_id %)) (filterv #(= (% :event_id) (:id ev)) events-persons))
-             slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)]
+       (let [event-persons (map :person_id (filterv #(= (% :event_id) (:id ev)) events-persons))
+             people (map #(Person. %) event-persons)
+             slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)
+             add-day #(t/plus % (t/days 1))
+             non-availability (map #(-> % :date c/from-sql-date .toDateMidnight add-day .toLocalDate) (filter #(.contains event-persons (:person_id %)) persons-non-available))]
          (println "ev" ev)
+         (println "na" non-availability)
          (loop [new-events [] previous nil count 1]
            (let [new-event
                  (doto
@@ -35,7 +39,8 @@
                           (t/interval beginSlot endSlot))) []))
                    (.setPeople people)
                    (.setChainedEvent previous)
-                   (.setEventDay count))]
+                   (.setEventDay count)
+                   (.setNotAvailableDays non-availability))]
              (if (= count (:event_count ev))
                (conj new-events new-event)
                (recur (conj new-events new-event) new-event (+ 1 count)))))))
@@ -57,12 +62,13 @@
           events (d/select db/events (d/where {:convention_id id}))
           events-persons (d/select db/events-persons (d/where {:convention_id id}))
           persons (d/select db/persons (d/where {:convention_id id}))
+          persons-non-available (d/select db/person-non-availability (d/where {:convention_id id}))
           config {:firstDay (c/from-sql-date (:from convention))
                   :lastDay (c/from-sql-date (:to convention))
                   :slots
                   (mapv #(vector (t/minutes (:start-minutes %))
                                  (t/minutes (- (:end-minutes %) (:start-minutes %)))) slots)
-                  :events (apply concat (gen-events events events-persons slots convention))}
+                  :events (apply concat (gen-events events events-persons slots convention persons-non-available))}
           solver (-> (makeSolverConfig) (makeSolver))
           configured (setupSolution config)]
       ;(println "id" id)

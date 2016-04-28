@@ -13,7 +13,8 @@
 
 (defn- person-init
   ([] (person-init (java.util.UUID/randomUUID)))
-  ([uuid] [[] (ref {:id uuid :name ""})]))
+  ([uuid] [[] (ref {:id uuid
+                    :name ""})]))
 
 (defn- person-getId [this]
   (getValue this :id))

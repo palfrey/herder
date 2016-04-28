@@ -3,6 +3,7 @@ package herder.solver;
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 import herder.solver.types.Event;
+import herder.solver.types.Person;
 import org.joda.time.Interval;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -74,5 +75,15 @@ rule "events with chained events are on later days"
             ((Interval)slot).getStart().toLocalDate() <= ((Interval)((Event)chainedEvent).slot).getStart().toLocalDate()
         )
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, -5);
+        scoreHolder.addHardConstraintMatch(kcontext, -8);
+end
+
+rule "people not there on a day, do not have events on that day"
+    when
+        $event : Event(
+            slot != null,
+            CollectionUtils.isNotEmpty(notAvailableDays),
+            notAvailableDays.contains(((Interval)slot).getStart().toLocalDate()))
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -5);
 end

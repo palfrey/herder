@@ -22,7 +22,9 @@
            [getPeople [] java.util.List]
            [setPeople [java.util.List] void]
            [getName [] String]
-           [setName [String] void]])
+           [setName [String] void]
+           [getNotAvailableDays [] java.util.List]
+           [setNotAvailableDays [java.util.List] void]])
 
 (defn- event-init
   ([] (event-init (java.util.UUID/randomUUID)))
@@ -31,7 +33,8 @@
                     :people []
                     :name ""
                     :preferred-slots []
-                    :event-day 1})]))
+                    :event-day 1
+                    :not-available-days []})]))
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -74,3 +77,10 @@
 
 (defn- event-setName [this item]
   (setValue this :name item))
+
+; Technically these are the not-available-days of the *people* attending this event
+(defn- event-getNotAvailableDays [this]
+  (getValue this :not-available-days))
+
+(defn- event-setNotAvailableDays [this item]
+  (setValue this :not-available-days item))
