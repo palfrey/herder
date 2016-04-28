@@ -65,7 +65,7 @@
          '[reloaded.repl :refer [init start stop go reset]]
          '[environ.boot :refer [environ]]
          '[system.boot :refer [system run]]
-         '[herder.systems :refer [dev-system]]
+         '[herder.systems :refer [dev-system prod-system]]
          '[boot-figwheel]
          '[deraen.boot-sass :refer [sass]])
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
@@ -180,6 +180,21 @@
    (testing)
    (test)
    (kill-pods)))
+
+(deftask prod []
+	(comp
+     (build)
+     (cljs)
+     (sift
+      :add-jar {'cljsjs/jquery-daterange-picker #"^cljsjs/common/jquery-daterange-picker.inc.css$"
+                'cljsjs/jquery-timepicker #"^cljsjs/common/jquery-timepicker.inc.css$"}
+      :move {#"cljsjs/common/(jquery-daterange-picker.inc.css)" "resources/public/css/$1"
+             #"cljsjs/common/(jquery-timepicker.inc.css)" "resources/public/css/$1"})
+     (sass)
+     (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
+     (target :no-clean true)
+     (system :sys #'prod-system :auto)))
+
 
 (deftask watch-tests []
   (comp
