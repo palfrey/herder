@@ -9,8 +9,18 @@
    [clj-time.coerce :as c]
    [clj-time.periodic :as p]
    [clj-uuid :as uuid]
-   [herder.web.notifications :as notifications])
-  (:import [herder.solver.types Event Person]))
+   [herder.web.notifications :as notifications]
+   [herder.web.events :refer [event-type-map]]
+   [clojure.set :refer [map-invert]])
+  (:import
+   [herder.solver.types Event Person]
+   [herder.solver EventType]))
+
+(defn- make-event-type [id]
+  (case (get (map-invert event-type-map) id)
+    :single EventType/SINGLE
+    :one_day EventType/ONE_DAY
+    :multiple_days EventType/MULTIPLE_DAYS))
 
 (defn- gen-events [events events-persons slots convention persons-non-available]
   (let
@@ -23,7 +33,7 @@
              slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)
              add-day #(t/plus % (t/days 1))
              non-availability (map #(-> % :date c/from-sql-date .toDateMidnight add-day .toLocalDate) (filter #(.contains event-persons (:person_id %)) persons-non-available))]
-         (println "ev" ev)
+         (println "ev" ev (make-event-type (:event_type ev)))
          (println "na" non-availability)
          (loop [new-events [] previous nil count 1]
            (let [new-event
@@ -41,7 +51,8 @@
                    (.setChainedEvent previous)
                    (.setEventDay count)
                    (.setDependantEventCount (- (:event_count ev) count))
-                   (.setNotAvailableDays non-availability))]
+                   (.setNotAvailableDays non-availability)
+                   (.setEventType (make-event-type (:event_type ev))))]
              (if (= count (:event_count ev))
                (conj new-events new-event)
                (recur (conj new-events new-event) new-event (+ 1 count)))))))

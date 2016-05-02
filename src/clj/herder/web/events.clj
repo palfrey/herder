@@ -8,7 +8,8 @@
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PATCH DELETE context]]
    [herder.web.notifications :as notifications]
-   [herder.web.solve :refer [solve]]))
+   [herder.web.solve :refer [solve]]
+   [clojure.set :refer [map-invert]]))
 
 (defn validate-new-event [params]
   (first
@@ -43,11 +44,18 @@
 (defn- get-person-ids [id]
   (map #(-> % :person_id str) (d/select db/events-persons (d/order :person_id) (d/where {:event_id id}))))
 
+(def event-type-map
+  {:single 1
+   :one_day 2
+   :multiple_days 3})
+
 (defn get-event [{{:keys [id]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
-      (response (assoc event :persons (get-person-ids id))))))
+      (response (assoc event
+                       :persons (get-person-ids id)
+                       :event_type (get (map-invert event-type-map) (:event_type event)))))))
 
 (defn get-events [{{:keys [id]} :params}]
   (let [events (d/select db/events (d/where {:convention_id id}))]
@@ -73,7 +81,7 @@
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
-(defn patch-event [{{:keys [id person preferred_slot event_count name] :as params} :params}]
+(defn patch-event [{{:keys [id person preferred_slot event_count name type] :as params} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
@@ -85,6 +93,10 @@
           (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id id})))
         (if (-> name nil? not)
           (d/update db/events (d/set-fields {:name name}) (d/where {:id id})))
+        (if (-> type nil? not)
+          (do
+            (println "event type" type (get event-type-map type))
+            (d/update db/events (d/set-fields {:event_type (get event-type-map (keyword type))}) (d/where {:id id}))))
 
         (if (-> person nil? not)
           (let [persons (get-person-ids id)]

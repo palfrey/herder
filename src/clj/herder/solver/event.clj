@@ -1,6 +1,8 @@
 (ns herder.solver.types
   (:use [herder.solver.helpers])
-  (:import [herder.solver.helpers EventDifficultyComparator]))
+  (:import
+   [herder.solver.helpers EventDifficultyComparator]
+   [herder.solver EventType]))
 
 (gen-class
  :name ^{PlanningEntity {"difficultyComparatorClass" EventDifficultyComparator}} herder.solver.types.Event
@@ -19,6 +21,9 @@
            [setEventDay [int] void]
            [getDependantEventCount [] int]
            [setDependantEventCount [int] void]
+           [getEventType [] herder.solver.EventType]
+           [setEventType [herder.solver.EventType] void]
+
            [getId [] java.util.UUID]
            [getExternalId [] java.util.UUID]
            [getPeople [] java.util.List]
@@ -37,7 +42,8 @@
                     :preferred-slots []
                     :event-day 1
                     :not-available-days []
-                    :dependant-event-count 0})]))
+                    :dependant-event-count 0
+                    :event-type EventType/SINGLE})]))
 
 (defn- event-getId [this]
   (getValue this :id))
@@ -74,6 +80,12 @@
 
 (defn- event-setDependantEventCount [this item]
   (setValue this :dependant-event-count item))
+
+(defn- event-getEventType [this]
+  (getValue this :event-type))
+
+(defn- event-setEventType [this item]
+  (setValue this :event-type item))
 
 (defn- event-getPeople [this]
   (getValue this :people))

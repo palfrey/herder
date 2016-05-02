@@ -1,12 +1,13 @@
 package herder.solver;
     dialect "java"
 
+import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.Interval;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
+
 import herder.solver.types.Event;
 import herder.solver.types.Person;
-import org.joda.time.Interval;
-
-import org.apache.commons.collections.CollectionUtils;
+import herder.solver.EventType;
 
 global HardSoftScoreHolder scoreHolder;
 
@@ -66,17 +67,32 @@ rule "events with preferred slots like those"
         scoreHolder.addSoftConstraintMatch(kcontext, -5);
 end
 
-rule "events with chained events are on later days"
+rule "multiple day events are on later days"
     when
         $event : Event(
+            eventType == EventType.MULTIPLE_DAYS,
             slot != null,
             chainedEvent != null,
             ((Event)chainedEvent).slot != null,
             ((Interval)slot).getStart().toLocalDate() <= ((Interval)((Event)chainedEvent).slot).getStart().toLocalDate()
         )
     then
+        scoreHolder.addHardConstraintMatch(kcontext, -12);
+end
+
+rule "one day events are on same days"
+    when
+        $event : Event(
+            eventType == EventType.ONE_DAY,
+            slot != null,
+            chainedEvent != null,
+            ((Event)chainedEvent).slot != null,
+            ((Interval)slot).getStart().toLocalDate() != ((Interval)((Event)chainedEvent).slot).getStart().toLocalDate()
+        )
+    then
         scoreHolder.addHardConstraintMatch(kcontext, -8);
 end
+
 
 rule "people not there on a day, do not have events on that day"
     when
