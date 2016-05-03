@@ -57,7 +57,8 @@
               :name "Foo"
               :convention_id con_uuid
               :preferred_slot_id nil
-              :event_count 1}
+              :event_count 1
+              :event_type 1}
              (first (kc/select db/events (kc/where {:id event_uuid})))))
 
       (is (= {:event_id event_uuid
@@ -71,7 +72,8 @@
                      :convention_id str_con_uuid
                      :persons (-> [(str person_uuid) (str second_person)] sort vec)
                      :preferred_slot_id nil
-                     :event_count 1}
+                     :event_count 1
+                     :event_type "single"}
               :status 200}
              (->
               (make-session)
@@ -110,7 +112,8 @@
                :convention_id (str con_uuid)
                :persons []
                :preferred_slot_id nil
-               :event_count 1}
+               :event_count 1
+               :event_type "single"}
               :status 200}
              (->
               (make-session)
@@ -124,7 +127,8 @@
                      :convention_id (str con_uuid)
                      :persons [(str second_person)]
                      :preferred_slot_id nil
-                     :event_count 1}
+                     :event_count 1
+                     :event_type "single"}
               :status 200}
              (->
               (make-session)
@@ -146,7 +150,8 @@
              :name "Foo"
              :persons [(str person_uuid)]
              :preferred_slot_id nil
-             :event_count 1}
+             :event_count 1
+             :event_type "single"}
             :status 200}
            (->
             (make-session)

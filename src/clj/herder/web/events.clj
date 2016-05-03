@@ -49,13 +49,16 @@
    :one_day 2
    :multiple_days 3})
 
+(defn- set-event-fields [event]
+  (assoc event
+         :persons (get-person-ids (:id event))
+         :event_type (get (map-invert event-type-map) (:event_type event))))
+
 (defn get-event [{{:keys [id]} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
-      (response (assoc event
-                       :persons (get-person-ids id)
-                       :event_type (get (map-invert event-type-map) (:event_type event)))))))
+      (response (set-event-fields event)))))
 
 (defn get-events [{{:keys [id]} :params}]
   (let [events (d/select db/events (d/where {:convention_id id}))]
@@ -108,7 +111,7 @@
         (if (-> name nil?) ; don't solve for name, because it slows things down
           (solve conv_id))
         (notifications/send-notification [:event (str conv_id) id])
-        (response (assoc (retrieve-event id) :persons (get-person-ids id)))))))
+        (response (set-event-fields event))))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
