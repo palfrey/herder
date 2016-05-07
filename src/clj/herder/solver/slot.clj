@@ -1,7 +1,10 @@
-(ns herder.solver.types)
+(ns herder.solver.slot
+  (:require
+   [herder.solver.helpers :refer [getValue setValue]]
+   [clj-time.core :as t]))
 
 (gen-class
- :name herder.solver.types.Slot
+ :name herder.solver.slot.Slot
  :prefix "slot-"
  :init init
  :state state

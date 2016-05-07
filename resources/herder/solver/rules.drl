@@ -5,9 +5,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.Interval;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 
-import herder.solver.types.Event;
-import herder.solver.types.Person;
-import herder.solver.EventType;
+import herder.solver.event.Event;
+import herder.solver.event.EventType;
+import herder.solver.person.Person;
 
 global HardSoftScoreHolder scoreHolder;
 
@@ -20,7 +20,7 @@ rule "spread events out (penalty per extra event in slot)"
                 slot == $slot,
                 id > $leftId)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, -10);
+        scoreHolder.addSoftConstraintMatch(kcontext, -3);
 end
 
 rule "people shouldn't overlap"
@@ -93,6 +93,18 @@ rule "one day events are on same days"
         scoreHolder.addHardConstraintMatch(kcontext, -8);
 end
 
+rule "one day events are in sequence"
+    when
+        $event : Event(
+            eventType == EventType.ONE_DAY,
+            slot != null,
+            chainedEvent != null,
+            ((Event)chainedEvent).slot != null,
+            ((Interval)slot).getStart() <= ((Interval)((Event)chainedEvent).slot).getStart()
+        )
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -3);
+end
 
 rule "people not there on a day, do not have events on that day"
     when

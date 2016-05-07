@@ -13,8 +13,8 @@
    [herder.web.events :refer [event-type-map]]
    [clojure.set :refer [map-invert]])
   (:import
-   [herder.solver.types Event Person]
-   [herder.solver EventType]))
+   [herder.solver.person Person]
+   [herder.solver.event Event EventType]))
 
 (defn- make-event-type [id]
   (case (get (map-invert event-type-map) id)
@@ -53,6 +53,7 @@
                    (.setDependantEventCount (- (:event_count ev) count))
                    (.setNotAvailableDays non-availability)
                    (.setEventType (make-event-type (:event_type ev))))]
+             (if (-> previous nil? not) (.setLaterEvent previous new-event))
              (if (= count (:event_count ev))
                (conj new-events new-event)
                (recur (conj new-events new-event) new-event (+ 1 count)))))))

@@ -73,7 +73,8 @@
 (deftask build []
   (comp
    (javac)
-   (aot :namespace '#{herder.solver.types})))
+   (aot :namespace '#{herder.solver.helpers})
+   (aot :namespace '#{herder.solver.event herder.solver.person herder.solver.slot herder.solver.solution})))
 
 (require '[cljfmt.core :refer [reformat-string]]
          '[clojure.java.io :as io]

@@ -1,15 +1,10 @@
 (ns herder.solver.helpers)
 
-(gen-class
- :name herder.solver.helpers.EventDifficultyComparator
- :extends herder.solver.ObjectComparator
- :prefix "eventDifficulty-")
+(defn getValue [this k]
+  (let [state (.state this)]
+    (get @state k)))
 
-(defn- eventDifficulty-compare [this a b]
-  (cond
-    (nil? a) -1
-    (nil? b) 1
-    :else
-    (->
-     (Integer. (.getDependantEventCount a))
-     (.compareTo (Integer. (.getDependantEventCount b))))))
+(defn setValue [this k v]
+  (let [state (.state this)]
+    (dosync (alter state assoc k v))
+    v))

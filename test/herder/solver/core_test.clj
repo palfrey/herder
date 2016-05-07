@@ -1,12 +1,14 @@
 (ns herder.solver.core-test
   (:use
-   [herder.solver.types]
    [herder.solver.schedule]
    [clojure.test])
   (:require
    [clj-time.core :as t])
   (:import
-   [herder.solver.types HerderSolution Event Slot Person]
+   [herder.solver.solution HerderSolution]
+   [herder.solver.event Event]
+   [herder.solver.slot Slot]
+   [herder.solver.person Person]
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.api.solver Solver]
    [org.joda.time Interval]))

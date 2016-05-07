@@ -1,7 +1,9 @@
-(ns herder.solver.types)
+(ns herder.solver.person
+	(:require
+		[herder.solver.helpers :refer [getValue setValue]]))
 
 (gen-class
- :name ^{PlanningEntity {}} herder.solver.types.Person
+ :name ^{PlanningEntity {}} herder.solver.person.Person
  :prefix "person-"
  :init init
  :state state
