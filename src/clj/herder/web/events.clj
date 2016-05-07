@@ -42,7 +42,7 @@
   (first (d/select db/events (d/where {:id id}))))
 
 (defn- get-person-ids [id]
-  (map #(-> % :person_id str) (d/select db/events-persons (d/order :person_id) (d/where {:event_id id}))))
+  (sort (map #(-> % :person_id str) (d/select db/events-persons (d/where {:event_id id})))))
 
 (def event-type-map
   {:single 1
