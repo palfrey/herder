@@ -186,12 +186,14 @@
 (deftask prod []
   (comp
    (build)
-   (cljs)
+   (cljs :ids #{"herder"})
    (sift
     :add-jar {'cljsjs/jquery-daterange-picker #"^cljsjs/common/jquery-daterange-picker.inc.css$"
               'cljsjs/jquery-timepicker #"^cljsjs/common/jquery-timepicker.inc.css$"}
     :move {#"cljsjs/common/(jquery-daterange-picker.inc.css)" "resources/public/css/$1"
-           #"cljsjs/common/(jquery-timepicker.inc.css)" "resources/public/css/$1"})
+           #"cljsjs/common/(jquery-timepicker.inc.css)" "resources/public/css/$1"
+           #"herder.js" "resources/public/js/herder.js"
+           #"herder.out/(.*)" "resources/public/js/herder.out/$1"})
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
    (target :no-clean true)
