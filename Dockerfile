@@ -11,4 +11,3 @@ RUN ./boot show --deps; exit 0
 COPY build.boot /usr/src/app/
 RUN ./boot show --deps; exit 0
 COPY . /usr/src/app
-CMD ./boot dev
