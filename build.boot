@@ -37,6 +37,7 @@
                  [ring/ring-mock "0.3.0" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
                  [com.h2database/h2 "1.4.191"]
+                 [postgresql "9.3-1102.jdbc41"]
 
                  [cljfmt "0.5.0"]
                  [me.raynes/fs "1.4.6"]
@@ -194,7 +195,8 @@
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
    (target :no-clean true)
-   (system :sys #'prod-system :auto)))
+   (run :main-namespace "herder.core" :arguments [#'prod-system])
+   (wait)))
 
 (deftask watch-tests []
   (comp

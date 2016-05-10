@@ -1,7 +1,6 @@
 (ns herder.systems.solver
   (:require
-   [com.stuartsierra.component :as component]
-   [reloaded.repl :refer [system]])
+   [com.stuartsierra.component :as component])
   (:import [java.util.concurrent Executors]))
 
 (defrecord Solver []
