@@ -4,6 +4,7 @@
    [bouncer.validators :as v]
    [clj-uuid :as uuid]
    [clj-time.format :as f]
+   [clj-time.coerce :as c]
    [korma.core :as d]
    [ring.util.response :refer [response status]]
    [compojure.core :refer [defroutes GET POST PATCH DELETE context]]
@@ -14,28 +15,35 @@
    [herder.web.events :as events]
    [herder.web.schedule :as schedule]
    [herder.web.notifications :as notifications]
-   [herder.web.solve :refer [solve]]))
+   [herder.web.solve :refer [solve]]
+   [herder.web.dates :refer [to-sql-date date-format]])
+  (:import
+   [java.util UUID]))
 
 (defn validate-new-convention [params]
   (first
    (b/validate
     params
     :conventionName [[v/required :message "Need a name for the convention"]]
-    :from [v/required [v/datetime (f/formatter "yyyy-MM-dd")]]
-    :to [v/required [v/datetime (f/formatter "yyyy-MM-dd")]])))
+    :from [v/required [v/datetime date-format]]
+    :to [v/required [v/datetime date-format]])))
 
 (defn save-new-convention! [{:keys [:params]}]
   (if-let [errors (validate-new-convention params)]
     (-> (response {:errors errors})
         (status 400))
-    (let [id (str (uuid/v1))]
+    (let [id (uuid/v1)]
       (d/insert
-       db/conventions (d/values [{:id id :name (:conventionName params) :from (:from params) :to (:to params)}]))
+       db/conventions
+       (d/values [{:id id
+                   :name (:conventionName params)
+                   :from (c/to-sql-date (f/parse date-format (:from params)))
+                   :to (c/to-sql-date (f/parse date-format (:to params)))}]))
       (notifications/send-notification [:conventions])
       (status (response {:id id}) 201))))
 
 (defn get-convention [{{:keys [id]} :params}]
-  (let [convention (d/select db/conventions (d/where {:id id}))]
+  (let [convention (d/select db/conventions (d/where {:id (UUID/fromString id)}))]
     (response (first convention))))
 
 (defn delete-convention [{{:keys [id]} :params}]
