@@ -1,6 +1,6 @@
 herder:
   build: .
-  command: bash -c "./wait-for-postgres.sh postgres && ./boot prod"
+  command: bash -c "./wait-for-postgres.sh postgres && ./boot prod-run"
   links:
     - postgres
   environment:

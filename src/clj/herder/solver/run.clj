@@ -1,6 +1,6 @@
 (ns herder.solver.run
   (:require
-   [reloaded.repl :refer [system]]
+   [system.repl :refer [system]]
    [herder.solver.schedule :refer [makeSolver makeSolverConfig setupSolution]]
    [herder.web.db :as db]
    [korma.core :as d]

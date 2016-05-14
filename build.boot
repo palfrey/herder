@@ -15,7 +15,7 @@
                  [ring "1.4.0"]
                  [org.optaplanner/optaplanner-core "6.4.0.Final" :exclusions [commons-io commons-codec]]
                  [ring/ring-defaults "0.2.0"]
-                 [org.clojure/tools.namespace "0.2.10"]
+                 [org.clojure/tools.namespace "0.3.0-alpha3"]
                  [org.danielsz/system "0.3.0-SNAPSHOT"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [com.taoensso/sente "1.8.1"]
@@ -63,7 +63,7 @@
 
 (require '[adzerk.boot-test :refer [test]]
          '[adzerk.boot-cljs :refer [cljs]]
-         '[reloaded.repl :refer [init start stop go reset]]
+         '[system.repl :refer [init start stop go reset]]
          '[environ.boot :refer [environ]]
          '[system.boot :refer [system run]]
          '[herder.systems :refer [dev-system prod-system]]
@@ -183,7 +183,7 @@
    (test)
    (kill-pods)))
 
-(deftask prod []
+(deftask prod-build []
   (comp
    (build)
    (cljs :ids #{"herder"})
@@ -196,8 +196,17 @@
            #"herder.out/(.*)" "resources/public/js/herder.out/$1"})
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
-   (target :no-clean true)
-   (run :main-namespace "herder.core" :arguments [#'prod-system])
+   (target :no-clean true)))
+
+(deftask fix-classpath []
+  (with-pre-wrap [fs]
+    (set-env! :resource-paths #(conj % "target"))
+    fs))
+
+(deftask prod-run []
+  (comp
+   (fix-classpath)
+   (system :sys #'prod-system :auto true)
    (wait)))
 
 (deftask watch-tests []

@@ -3,7 +3,7 @@
    [compojure.route :as route]
    [compojure.core :refer [defroutes GET context] :as compojure]
    [korma.db :as kd]
-   [reloaded.repl :refer [system]]
+   [system.repl :refer [system]]
    [clostache.parser :as clostache]
    [system.components.sente :refer [sente-routes]]
    [herder.web.conventions :refer [convention-routes]]

@@ -12,7 +12,7 @@
    [herder.systems :refer [make-middleware]]
    [compojure.core :as compojure]
    [com.stuartsierra.component :as component]
-   [reloaded.repl :refer [system]]))
+   [system.repl :refer [system]]))
 
 (defn unpack [response]
   (try
