@@ -9,15 +9,9 @@
    [compojure.core :refer [GET POST PATCH DELETE context]]
    [herder.web.notifications :as notifications]
    [herder.web.solve :refer [solve]]
-   [clojure.set :refer [map-invert]])
-  (:import
-   [java.util UUID]))
+   [herder.uuid :refer [to-uuid]]
+   [clojure.set :refer [map-invert]]))
 
-(defn- to-uuid [input]
-  (cond
-    (instance? UUID input) input
-    (nil? input) input
-    :else (UUID/fromString input)))
 
 (defn validate-new-event [params]
   (first
