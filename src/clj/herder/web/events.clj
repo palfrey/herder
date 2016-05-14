@@ -13,6 +13,12 @@
   (:import
    [java.util UUID]))
 
+(defn- to-uuid [input]
+  (cond
+    (instance? UUID input) input
+    (nil? input) input
+    :else (UUID/fromString input)))
+
 (defn validate-new-event [params]
   (first
    (b/validate
@@ -28,25 +34,20 @@
           persons (get params :persons [])
           persons (if (vector? persons) persons [persons])]
       (d/insert
-       db/events (d/values [{:id (UUID/fromString id)
+       db/events (d/values [{:id (to-uuid id)
                              :name (:name params)
-                             :convention_id (UUID/fromString conv_id)}]))
+                             :convention_id (to-uuid conv_id)}]))
       (doseq [person persons]
         (d/insert
-         db/events-persons (d/values [{:convention_id (UUID/fromString conv_id)
-                                       :event_id (UUID/fromString id)
-                                       :person_id (UUID/fromString person)}])))
+         db/events-persons (d/values [{:convention_id (to-uuid conv_id)
+                                       :event_id (to-uuid id)
+                                       :person_id (to-uuid person)}])))
       (notifications/send-notification [:events conv_id])
       (solve conv_id)
       (status (response {:id id}) 201))))
 
 (defn- retrieve-event [id]
-  (first (d/select db/events (d/where {:id (UUID/fromString id)}))))
-
-(defn- to-uuid [input]
-  (if (instance? UUID input)
-    input
-    (UUID/fromString input)))
+  (first (d/select db/events (d/where {:id (to-uuid id)}))))
 
 (defn- get-person-ids [id]
   (sort (map #(-> % :person_id str) (d/select db/events-persons (d/where {:event_id (to-uuid id)})))))
@@ -68,25 +69,25 @@
       (response (set-event-fields event)))))
 
 (defn get-events [{{:keys [id]} :params}]
-  (let [events (d/select db/events (d/where {:convention_id (UUID/fromString id)}))]
+  (let [events (d/select db/events (d/where {:convention_id (to-uuid id)}))]
     (response events)))
 
 (defn delete-event [{{:keys [id]} :params}]
-  (let [event (first (d/select db/events (d/where {:id (UUID/fromString id)})))]
+  (let [event (first (d/select db/events (d/where {:id (to-uuid id)})))]
     (if (nil? event)
       (status (response {}) 404)
       (do
-        (d/delete db/events (d/where {:id (UUID/fromString id)}))
+        (d/delete db/events (d/where {:id (to-uuid id)}))
         (notifications/send-notification [:events (str (:convention_id event))])
         (solve (:convention_id event))
         (status (response {}) 200)))))
 
 (defn delete-event-person [{{:keys [id person_id]} :params}]
-  (let [event-person (first (d/select db/events-persons (d/where {:event_id (UUID/fromString id) :person_id (UUID/fromString person_id)})))]
+  (let [event-person (first (d/select db/events-persons (d/where {:event_id (to-uuid id) :person_id (to-uuid person_id)})))]
     (if (nil? event-person)
       (status (response {}) 404)
       (do
-        (d/delete db/events-persons (d/where {:event_id (UUID/fromString id) :person_id (UUID/fromString person_id)}))
+        (d/delete db/events-persons (d/where {:event_id (to-uuid id) :person_id (to-uuid person_id)}))
         (notifications/send-notification [:event (str (:convention_id event-person)) id])
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
@@ -98,15 +99,15 @@
       (let [conv_id (:convention_id event)
             preferred_slot (if (= "" preferred_slot) nil preferred_slot)]
         (if (contains? params :preferred_slot)
-          (d/update db/events (d/set-fields {:preferred_slot_id preferred_slot}) (d/where {:id (UUID/fromString id)})))
+          (d/update db/events (d/set-fields {:preferred_slot_id (to-uuid preferred_slot)}) (d/where {:id (to-uuid id)})))
         (if (-> event_count nil? not)
-          (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id (UUID/fromString id)})))
+          (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id (to-uuid id)})))
         (if (-> name nil? not)
-          (d/update db/events (d/set-fields {:name name}) (d/where {:id (UUID/fromString id)})))
+          (d/update db/events (d/set-fields {:name name}) (d/where {:id (to-uuid id)})))
         (if (-> type nil? not)
           (do
             (println "event type" type (get event-type-map type))
-            (d/update db/events (d/set-fields {:event_type (get event-type-map (keyword type))}) (d/where {:id (UUID/fromString id)}))))
+            (d/update db/events (d/set-fields {:event_type (get event-type-map (keyword type))}) (d/where {:id (to-uuid id)}))))
 
         (if (-> person nil? not)
           (let [persons (get-person-ids id)]
