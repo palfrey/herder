@@ -2,4 +2,4 @@
  :init-fns [herder.core/run]
  :compiler-options {
      :asset-path "/static/js/herder.out"
-     :optimizations :advanced}}
+     :optimizations :none}}
