@@ -4,7 +4,8 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [compojure.core :refer [GET context]]
-   [herder.uuid :refer [to-uuid]]))
+   [herder.uuid :refer [to-uuid]]
+   [system.repl :refer [system]]))
 
 (defn get-schedule [{{:keys [id]} :params}]
   (let [schedules (d/select db/schedule (d/where {:convention_id (to-uuid id)}))]
@@ -17,7 +18,12 @@
         schedule-issues (map add-events schedule-issues)]
     (response schedule-issues)))
 
+(defn get-status [{{:keys [id]} :params}]
+  (let [tosolve @(-> system :solver :tosolve)]
+    (response {:solved (not (.contains tosolve (to-uuid id)))})))
+
 (def schedule-context
   (context "/schedule" []
     (GET "/" [] get-schedule)
-    (GET "/issues" [] get-schedule-issues)))
+    (GET "/issues" [] get-schedule-issues)
+    (GET "/status" [] get-status)))

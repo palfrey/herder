@@ -65,6 +65,9 @@
 (defmethod get-data :schedule-issues [[_ id] & {:keys [refresh] :or {refresh false}}]
   (get-raw-data [id :schedule-issues] (str (schedule-url id) "/issues") :refresh refresh))
 
+(defmethod get-data :status [[_ id] & {:keys [refresh] :or {refresh false}}]
+  (get-raw-data [id :status] (str (schedule-url id) "/status") :refresh refresh))
+
 (defmethod get-data :default [params]
   (js/console.log "get-data: Don't know key" (pr-str params)))
 
