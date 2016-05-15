@@ -12,7 +12,6 @@
    [herder.uuid :refer [to-uuid]]
    [clojure.set :refer [map-invert]]))
 
-
 (defn validate-new-event [params]
   (first
    (b/validate

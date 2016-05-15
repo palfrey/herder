@@ -10,9 +10,8 @@
    [ring.util.response :refer [response status]]
    [compojure.core :refer [GET POST PUT DELETE context]]
    [herder.web.notifications :as notifications]
-   [herder.web.solve :refer [solve]])
-  (:import
-   [java.util UUID]))
+   [herder.web.solve :refer [solve]]
+   [herder.uuid :refer [to-uuid]]))
 
 (def time-format (f/formatter "HH:mm"))
 
@@ -33,10 +32,10 @@
         (status 400))
     (let [id (str (uuid/v1))]
       (d/insert
-       db/slots (d/values [{:id (UUID/fromString id)
+       db/slots (d/values [{:id (to-uuid id)
                             :start-minutes (-> params :start time->minutes)
                             :end-minutes (-> params :end time->minutes)
-                            :convention_id (UUID/fromString (:id params))}]))
+                            :convention_id (to-uuid (:id params))}]))
       (notifications/send-notification [:slots (:id params)])
       (solve (:id params))
       (status (response {:id id}) 201))))
@@ -53,21 +52,21 @@
    (#(dissoc % :start-minutes :end-minutes))))
 
 (defn get-slot [{{:keys [id]} :params}]
-  (let [slot (first (d/select db/slots (d/where {:id (UUID/fromString id)})))]
+  (let [slot (first (d/select db/slots (d/where {:id (to-uuid id)})))]
     (if (nil? slot)
       (status (response (str "No such slot " id)) 404)
       (response (reformat-slot slot)))))
 
 (defn get-slots [{{:keys [id]} :params}]
-  (let [slots (d/select db/slots (d/where {:convention_id (UUID/fromString id)}) (d/order :start-minutes))]
+  (let [slots (d/select db/slots (d/where {:convention_id (to-uuid id)}) (d/order :start-minutes))]
     (response (map reformat-slot slots))))
 
 (defn delete-slot [{{:keys [id slot_id]} :params}]
-  (let [slot (first (d/select db/slots (d/where {:id (UUID/fromString slot_id)})))]
+  (let [slot (first (d/select db/slots (d/where {:id (to-uuid slot_id)})))]
     (if (nil? slot)
       (status (response {}) 404)
       (do
-        (d/delete db/slots (d/where {:id (UUID/fromString slot_id)}))
+        (d/delete db/slots (d/where {:id (to-uuid slot_id)}))
         (notifications/send-notification [:slots id])
         (solve (:convention_id slot))
         (status (response {}) 200)))))

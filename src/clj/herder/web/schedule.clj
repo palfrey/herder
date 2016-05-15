@@ -3,17 +3,16 @@
    [ring.util.response :refer [response]]
    [korma.core :as d]
    [herder.web.db :as db]
-   [compojure.core :refer [GET context]])
-  (:import
-   [java.util UUID]))
+   [compojure.core :refer [GET context]]
+   [herder.uuid :refer [to-uuid]]))
 
 (defn get-schedule [{{:keys [id]} :params}]
-  (let [schedules (d/select db/schedule (d/where {:convention_id (UUID/fromString id)}))]
+  (let [schedules (d/select db/schedule (d/where {:convention_id (to-uuid id)}))]
     (response schedules)))
 
 (defn get-schedule-issues [{{:keys [id]} :params}]
-  (let [schedule-issues (d/select db/schedule-issues (d/where {:convention_id (UUID/fromString id)}))
-        schedule-issues-events (d/select db/schedule-issues-events (d/where {:convention_id (UUID/fromString id)}))
+  (let [schedule-issues (d/select db/schedule-issues (d/where {:convention_id (to-uuid id)}))
+        schedule-issues-events (d/select db/schedule-issues-events (d/where {:convention_id (to-uuid id)}))
         add-events (fn [issue] (assoc issue :events (map :event_id (filter #(= (:id issue) (:schedule-issue_id %)) schedule-issues-events))))
         schedule-issues (map add-events schedule-issues)]
     (response schedule-issues)))

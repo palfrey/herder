@@ -16,9 +16,8 @@
    [herder.web.schedule :as schedule]
    [herder.web.notifications :as notifications]
    [herder.web.solve :refer [solve]]
-   [herder.web.dates :refer [to-sql-date date-format]])
-  (:import
-   [java.util UUID]))
+   [herder.uuid :refer [to-uuid]]
+   [herder.web.dates :refer [to-sql-date date-format]]))
 
 (defn validate-new-convention [params]
   (first
@@ -43,23 +42,23 @@
       (status (response {:id id}) 201))))
 
 (defn get-convention [{{:keys [id]} :params}]
-  (let [convention (d/select db/conventions (d/where {:id (UUID/fromString id)}))]
+  (let [convention (d/select db/conventions (d/where {:id (to-uuid id)}))]
     (response (first convention))))
 
 (defn delete-convention [{{:keys [id]} :params}]
-  (let [convention (d/delete db/conventions (d/where {:id id}))]
+  (let [convention (d/delete db/conventions (d/where {:id (to-uuid id)}))]
     (notifications/send-notification [:conventions])
     (status (response {}) (if (> convention 0) 200 404))))
 
 (defn patch-convention [{{:keys [id name from to] :as params} :params}]
-  (let [convention (first (d/select db/conventions (d/where {:id id})))]
+  (let [convention (first (d/select db/conventions (d/where {:id (to-uuid id)})))]
     (if (-> convention nil? not)
       (do
         (if (-> name nil? not)
-          (d/update db/conventions (d/set-fields {:name name}) (d/where {:id id})))
+          (d/update db/conventions (d/set-fields {:name name}) (d/where {:id (to-uuid id)})))
         (if (-> from nil? not)
           (do
-            (d/update db/conventions (d/set-fields {:from from :to to}) (d/where {:id id}))
+            (d/update db/conventions (d/set-fields {:from from :to to}) (d/where {:id (to-uuid id)}))
             (solve id)))
         (notifications/send-notification [:convention id])
         (status (response {}) 200))
