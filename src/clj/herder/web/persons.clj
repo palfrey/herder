@@ -29,7 +29,6 @@
                               :name (:name params)
                               :convention_id (to-uuid conv_id)}]))
       (notifications/send-notification [:persons conv_id])
-      (solve conv_id)
       (status (response {:id id}) 201))))
 
 (defn- get-event-ids [id]
