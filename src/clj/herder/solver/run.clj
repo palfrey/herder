@@ -69,6 +69,7 @@
 
 (defn solve [db id]
   (println "Begin")
+  (notifications/send-notification [:status (str id)])
   (kd/with-db (:connection db)
     (let [convention (first (d/select db/conventions (d/where {:id id})))
           slots (d/select db/slots (d/where {:convention_id id}))
@@ -162,7 +163,8 @@
     (do (reset! (-> system :solver :solving) true) ; mark as solving
         (let [item (first new-state)]
           (run-solver item)
-          (send-off (-> system :solver :tosolve) disj item)))))
+          (send-off (-> system :solver :tosolve) disj item)
+          (notifications/send-notification [:status (str item)])))))
 
 (defn needs-solve [id]
   (if (-> system :solver nil? not) ; if we have solver available. Not true in tests

@@ -27,7 +27,7 @@
         status (get-data [:status (:id @state)])]
     [:div {:class "container-fluid"}
      [convention-header :schedule]
-     [:h4 {:style {:float "right" :color "red"}} (if (:solved status) "" "solved")]
+     [:h4 {:style {:float "right" :color "red"}} (if (:solved status) "" "updating...")]
      [:h2 "Schedule"]
      [:table.table
       [:thead
