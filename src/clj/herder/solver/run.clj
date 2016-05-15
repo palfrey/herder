@@ -162,7 +162,7 @@
     (do (reset! (-> system :solver :solving) true) ; mark as solving
         (let [item (first new-state)]
           (run-solver item)
-          (swap! (-> system :solver :tosolve) disj item)))))
+          (send-off (-> system :solver :tosolve) disj item)))))
 
 (defn needs-solve [id]
   (if (-> system :solver nil? not) ; if we have solver available. Not true in tests
@@ -171,7 +171,7 @@
         (do
           (add-watch (-> system :solver :tosolve) :solve-watch solve-watch)
           (reset! (-> system :solver :watch) :solve-watch)))
-      (swap! (-> system :solver :tosolve) conj id))))
+      (send-off (-> system :solver :tosolve) conj id))))
 
 (if-let [sys-db (-> system :db :connection)]
   (kd/with-db sys-db

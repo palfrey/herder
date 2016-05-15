@@ -7,7 +7,7 @@
   component/Lifecycle
   (start [component]
     (let [pool (Executors/newFixedThreadPool 1)
-          tosolve (atom #{})
+          tosolve (agent #{})
           solving (atom false)
           watch (atom nil)]
       (assoc component
