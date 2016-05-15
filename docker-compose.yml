@@ -10,6 +10,8 @@ herder:
   ports:
     - "3000:3000"
 postgres:
-  image: postgres:9.5.2
+  image: postgres:9.4
   environment:
     - POSTGRES_PASSWORD=mysecretpassword
+  ports:
+    - "5432"
