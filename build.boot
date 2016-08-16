@@ -16,7 +16,7 @@
                  [org.optaplanner/optaplanner-core "6.4.0.Final" :exclusions [commons-io commons-codec]]
                  [ring/ring-defaults "0.2.0"]
                  [org.clojure/tools.namespace "0.3.0-alpha3"]
-                 [org.danielsz/system "0.3.0-SNAPSHOT"]
+                 [org.danielsz/system "0.3.1"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [com.taoensso/sente "1.8.1"]
 
