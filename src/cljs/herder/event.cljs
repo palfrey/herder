@@ -112,7 +112,7 @@
            (into [:div]
                  (concat
                   [[:input (radio_attrs :single)] " Single slot" [:br]]
-                  (if (= (count slots) 0) []
+                  (if (< (count slots) 2) []
                       (concat
                        [[:input (radio_attrs :one_day)] " Multiple slots, one day" [:br]]
                        (if (not= event_type :one_day) []
