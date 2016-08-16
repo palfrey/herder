@@ -22,7 +22,7 @@
     :one_day EventType/ONE_DAY
     :multiple_days EventType/MULTIPLE_DAYS))
 
-(defn- gen-events [events events-persons slots convention persons-non-available]
+(defn gen-events [events events-persons slots convention persons-non-available]
   (let
    [firstDay (c/from-sql-date (:from convention))
     lastDay (c/from-sql-date (:to convention))]
@@ -36,24 +36,27 @@
          (println "ev" ev (make-event-type (:event_type ev)))
          (println "na" non-availability)
          (loop [new-events [] previous nil count 1]
-           (let [new-event
+           (let [converted-event-type (make-event-type (:event_type ev))
+                 new-event
                  (doto
                   (Event. (:id ev))
                    (.setName (:name ev))
-                   (.setPreferredSlots
-                    (if (-> slot nil? not)
-                      (for [day (p/periodic-seq firstDay (t/days 1))
-                            :while (or (t/equal? lastDay day) (t/after? lastDay day))]
-                        (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
-                              endSlot (t/plus day (t/minutes (:end-minutes slot)))]
-                          (t/interval beginSlot endSlot))) []))
                    (.setPeople people)
                    (.setChainedEvent previous)
                    (.setEventDay count)
                    (.setDependantEventCount (- (:event_count ev) count))
                    (.setNotAvailableDays non-availability)
-                   (.setEventType (make-event-type (:event_type ev))))]
-             (if (-> previous nil? not) (.setLaterEvent previous new-event))
+                   (.setEventType converted-event-type))]
+             (if (and (nil? previous) (= converted-event-type EventType/ONE_DAY))
+               (.setPreferredSlots new-event
+                                   (if (-> slot nil? not)
+                                     (for [day (p/periodic-seq firstDay (t/days 1))
+                                           :while (or (t/equal? lastDay day) (t/after? lastDay day))]
+                                       (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
+                                             endSlot (t/plus day (t/minutes (:end-minutes slot)))]
+                                         (t/interval beginSlot endSlot))) [])))
+             (if (-> previous nil? not)
+               (.setLaterEvent previous new-event))
              (if (= count (:event_count ev))
                (conj new-events new-event)
                (recur (conj new-events new-event) new-event (+ 1 count)))))))
