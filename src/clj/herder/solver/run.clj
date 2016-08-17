@@ -47,7 +47,7 @@
                    (.setDependantEventCount (- (:event_count ev) count))
                    (.setNotAvailableDays non-availability)
                    (.setEventType converted-event-type))]
-             (if (and (nil? previous) (= converted-event-type EventType/ONE_DAY))
+             (if (or (not= converted-event-type EventType/ONE_DAY) (and (nil? previous) (= converted-event-type EventType/ONE_DAY)))
                (.setPreferredSlots new-event
                                    (if (-> slot nil? not)
                                      (for [day (p/periodic-seq firstDay (t/days 1))
