@@ -106,6 +106,23 @@ rule "one day events are in sequence"
         scoreHolder.addHardConstraintMatch(kcontext, -3);
 end
 
+rule "one day events are as close as possible in order as doable"
+    when
+        $event : Event(
+            eventType == EventType.ONE_DAY,
+            slot != null,
+            chainedEvent != null,
+            ((Event)chainedEvent).slot != null,
+            ((Interval)slot).getStart() >= ((Interval)((Event)chainedEvent).slot).getStart()
+        )
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext,
+        (int)-new Interval (
+            ((Interval)((Event)$event.getChainedEvent()).getSlot()).getStart(),
+            ((Interval)$event.getSlot()).getStart()
+        ).toDurationMillis() / 5000000);
+end
+
 rule "people not there on a day, do not have events on that day"
     when
         $event : Event(
