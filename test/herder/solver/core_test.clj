@@ -6,7 +6,7 @@
    [clj-time.core :as t])
   (:import
    [herder.solver.solution HerderSolution]
-   [herder.solver.event Event]
+   [herder.solver.event Event EventType]
    [herder.solver.slot Slot]
    [herder.solver.person Person]
    [org.optaplanner.core.config.solver SolverConfig]
@@ -84,6 +84,20 @@
          (.getEvents)
          (map #(.getSlot %))
          distinct?)))
+
+  (deftest MultiSlotEventsHaveCosts
+    (let [one (doto (eventWithPerson alpha)
+                (.setEventType EventType/ONE_DAY)
+                (.setDependantEventCount 1))
+          two (doto (eventWithPerson alpha)
+                (.setChainedEvent one)
+                (.setEventType EventType/ONE_DAY))]
+      (is (= "0hard/-1soft"
+             (->>
+              (getSolution [(doto one
+                              (.setLaterEvent two)) two])
+              (.getScore)
+              (.toString))))))
 
   (deftest EventsHavedistinctSlotsWithOverlyFullSolution
     (->> (getSolution

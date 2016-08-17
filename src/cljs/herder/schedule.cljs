@@ -54,7 +54,7 @@
        [:div
         [:h3 "Issues"]
         (into [:ul]
-              (for [{:keys [id issue score level events]} (sort-by :level schedule-issues)]
+              (for [{:keys [id issue score level events]} (filter #(not= (:score %) 0) (sort-by :level schedule-issues))]
                 ^{:key id}
                 [:li (if (= level 1) "soft" "hard") " " score ": " issue
                  (into [:ul]
