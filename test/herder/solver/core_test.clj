@@ -91,13 +91,14 @@
                 (.setDependantEventCount 1))
           two (doto (eventWithPerson alpha)
                 (.setChainedEvent one)
-                (.setEventType EventType/ONE_DAY))]
-      (is (= "0hard/-1soft"
-             (->>
-              (getSolution [(doto one
-                              (.setLaterEvent two)) two])
-              (.getScore)
-              (.toString))))))
+                (.setEventType EventType/ONE_DAY))
+          softScore (->>
+                     (getSolution [(doto one
+                                     (.setLaterEvent two)) two])
+                     (.getScore)
+                     (.getSoftScore))]
+      (is (< softScore 0))
+      (is (> softScore -3))))
 
   (deftest EventsHavedistinctSlotsWithOverlyFullSolution
     (->> (getSolution
