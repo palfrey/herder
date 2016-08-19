@@ -32,6 +32,7 @@
              people (map #(Person. %) event-persons)
              slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)
              add-day #(t/plus % (t/days 1))
+             preferred-day (if (-> ev :preferred_day nil? not) (-> ev :preferred_day c/from-sql-date .toDateMidnight add-day .toLocalDate) nil)
              non-availability (map #(-> % :date c/from-sql-date .toDateMidnight add-day .toLocalDate) (filter #(.contains event-persons (:person_id %)) persons-non-available))]
          (println "ev" ev (make-event-type (:event_type ev)))
          (println "na" non-availability)
@@ -44,6 +45,7 @@
                    (.setPeople people)
                    (.setChainedEvent previous)
                    (.setEventDay count)
+                   (.setPreferredDay preferred-day)
                    (.setDependantEventCount (- (:event_count ev) count))
                    (.setNotAvailableDays non-availability)
                    (.setEventType converted-event-type))]
