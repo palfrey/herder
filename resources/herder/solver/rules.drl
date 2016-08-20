@@ -20,7 +20,7 @@ rule "spread events out (penalty per extra event in slot)"
                 slot == $slot,
                 id > $leftId)
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, -3);
+        scoreHolder.addSoftConstraintMatch(kcontext, -1);
 end
 
 rule "people shouldn't overlap"
@@ -34,7 +34,7 @@ rule "people shouldn't overlap"
                 CollectionUtils.isNotEmpty(CollectionUtils.intersection(people, $people)),
                 id > $leftId)
     then
-        scoreHolder.addHardConstraintMatch(kcontext, -10);
+        scoreHolder.addHardConstraintMatch(kcontext, -30);
 end
 
 rule "events with people shouldn't have null slots"
@@ -64,7 +64,7 @@ rule "events with preferred slots like those"
             !preferredSlots.contains(slot)
         )
     then
-        scoreHolder.addSoftConstraintMatch(kcontext, -5);
+        scoreHolder.addSoftConstraintMatch(kcontext, -13);
 end
 
 rule "multiple day events are on later days"
@@ -117,7 +117,7 @@ rule "one day events are as close as possible in order as doable"
         )
     then
         scoreHolder.addSoftConstraintMatch(kcontext,
-        (int)-new Interval (
+        2+(int)-new Interval (
             ((Interval)((Event)$event.getChainedEvent()).getSlot()).getStart(),
             ((Interval)$event.getSlot()).getStart()
         ).toDurationMillis() / 5000000);

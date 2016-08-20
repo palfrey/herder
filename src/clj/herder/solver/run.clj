@@ -165,6 +165,7 @@
            (-> new-state empty? not)) ; something to solve
     (do (reset! (-> system :solver :solving) true) ; mark as solving
         (let [item (first new-state)]
+          (send-off (-> system :solver :tosolve) disj item)
           (run-solver item)
           (send-off (-> system :solver :tosolve) disj item)
           (notifications/send-notification [:status (str item)])))))
