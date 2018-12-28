@@ -23,6 +23,9 @@
 (defn set-preferred-slot [val]
   (patch-event {:preferred_slot val}))
 
+(defn set-preferred-day [val]
+  (patch-event {:preferred_day val}))
+
 (defn set-event-count [val]
   (patch-event {:event_count val}))
 
@@ -32,13 +35,25 @@
 (defn set-event-type [val]
   (patch-event {:type val}))
 
+(defn- gen-days [from to]
+  (let [mto (js/moment to)
+        current (js/moment from)]
+    (if (.isValid mto)
+      (loop [days []]
+        (if (< current mto)
+          (let [new-days (conj days (js/moment current))]
+            (.add current 1 "days")
+            (recur new-days))
+          (conj days (js/moment current)))) [])))
+
 (defn ^:export component []
   (let [val (r/atom {:person ""})]
     (fn []
       (let [event (get-data [:event (:id @state) (:event_id @state)])
             convention (get-data [:convention (:id @state)])
             slots (get-data [:slots (:id @state)])
-            days (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))
+            day_count (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))
+            days (gen-days (:from convention) (:to convention))
             persons (get-mapped-data [:persons (:id @state)])
             event_type (keyword (:event_type event))]
         [:div {:class "container-fluid"}
@@ -97,6 +112,14 @@
           (for [{:keys [id start end]} slots]
             ^{:key id} [:option {:value id} (str start "-" end)])]
          [:hr]
+         [:h3 "Preferred Day"]
+         [:select {:id "preferred_day"
+                   :value (.format (js/moment (:preferred_day event)) "YYYY-MM-DD")
+                   :on-change #(set-preferred-day (-> % .-target .-value))}
+          [:option {:value ""} "Any"]
+          (for [day days :let [fday (.format day "YYYY-MM-DD")]]
+            ^{:key day} [:option {:value fday} fday])]
+         [:hr]
          [:h3 "Event type"]
          (let [attrs {:type "radio"
                       :name "event_type"
@@ -121,14 +144,14 @@
                                       :on-change #(set-event-count (-> % .-target .-value))}
                              (for [value (range 2 (+ (count slots) 1))]
                                ^{:key value} [:option {:value value} value " slots"])] [:br]])))
-                  (if (= days 0) []
+                  (if (= day_count 0) []
                       (concat
                        [[:input (radio_attrs :multiple_days)] " One slot per day, multiple days" [:br]]
                        (if (not= event_type :multiple_days) []
                            [[:select {:id "day_count"
                                       :value (:event_count event)
                                       :on-change #(set-event-count (-> % .-target .-value))}
-                             (for [value (range 2 (+ days 1))]
+                             (for [value (range 2 (+ day_count 1))]
                                ^{:key value} [:option {:value value} value " days"])]]))))))
          [:hr]
          [:button {:type "button"
