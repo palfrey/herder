@@ -74,6 +74,7 @@
 (deftask build []
   (comp
    (javac)
+   (aot :namespace '#{clj-time.core})
    (aot :namespace '#{herder.solver.helpers})
    (aot :namespace '#{herder.solver.event herder.solver.person herder.solver.slot herder.solver.solution})))
 
