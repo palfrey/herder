@@ -8,7 +8,7 @@
                  [commons-io "2.4"]
 
                  [org.slf4j/slf4j-log4j12 "1.7.18"]
-                 [clj-time "0.11.0"]
+                 [clj-time "0.15.0"]
                  [commons-collections/commons-collections "3.2.2"]
 
                  [compojure "1.5.0"]
