@@ -16,7 +16,7 @@
                  [org.optaplanner/optaplanner-core "6.4.0.Final" :exclusions [commons-io commons-codec]]
                  [ring/ring-defaults "0.2.0"]
                  [org.clojure/tools.namespace "0.3.0-alpha3"]
-                 [org.danielsz/system "0.3.1"]
+                 [org.danielsz/system "0.3.1" :exclusions [http-kit]]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [com.taoensso/sente "1.8.1"]
 
@@ -28,7 +28,7 @@
                  [org.xerial/sqlite-jdbc "3.8.11.2"]
                  [korma "0.4.2"]
 
-                 [http-kit "2.1.19"]
+                 [http-kit "2.3.0"]
                  [bouncer "1.0.0"]
                  [ring/ring-json "0.4.0"]
                  [org.clojure/data.json "0.2.6"]
