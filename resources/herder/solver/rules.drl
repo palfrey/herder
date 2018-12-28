@@ -6,7 +6,7 @@ import herder.solver.event.Event;
 import herder.solver.solution.HerderSolution;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.Period
+import org.joda.time.Period;
 import org.apache.commons.collections.CollectionUtils;
 
 import herder.solver.event.Event;
@@ -35,9 +35,8 @@ rule "later events are worse"
 			$firstDay: firstDay
 		)
     then
-	scoreHolder.addSoftConstraintMatch(kcontext, -5);
-        //scoreHolder.addSoftConstraintMatch(kcontext, -((Interval)$slot).getStart().getDayOfMonth());
-		//-new Period($firstDay, (DateTime)$slot).toStandardMinutes().getMinutes());
+        scoreHolder.addSoftConstraintMatch(kcontext,
+		    -new Period($firstDay, $slot.getStart()).toStandardMinutes().getMinutes());
 end
 
 rule "people shouldn't overlap"
