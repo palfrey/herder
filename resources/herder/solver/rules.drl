@@ -132,3 +132,14 @@ rule "people not there on a day, do not have events on that day"
     then
         scoreHolder.addHardConstraintMatch(kcontext, -5);
 end
+
+rule "preferred days matter"
+    when
+        $event : Event(
+            preferredDay != null,
+            slot != null,
+            slot.getStart().toLocalDate() != preferredDay
+        )
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -20);
+end

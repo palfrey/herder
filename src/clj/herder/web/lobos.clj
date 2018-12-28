@@ -138,6 +138,13 @@
                  (smallint :event_type (default 1)))))
   (down))
 
+(defmigration add-preferred-day-to-event
+  (up
+   (alter :add
+          (table :events
+                 (date :preferred_day))))
+  (down))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -152,4 +159,5 @@
   (call-migration add-event-count-to-event)
   (call-migration add-event-day-to-schedule)
   (call-migration person-non-availability)
-  (call-migration add-event-type-to-event))
+  (call-migration add-event-type-to-event)
+  (call-migration add-preferred-day-to-event))

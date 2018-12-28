@@ -34,6 +34,10 @@ public class Event implements Cloneable {
     public Interval getSlot(){return slot;}
     public void setSlot(Interval slot) {this.slot = slot;}
 
+    private LocalDate preferredDay;
+    public LocalDate getPreferredDay() {return preferredDay;}
+    public void setPreferredDay(LocalDate preferredDay) { this.preferredDay = preferredDay;}
+
     private List<Interval> preferredSlots;
     public List<Interval> getPreferredSlots(){return preferredSlots;}
     public void setPreferredSlots(List<Interval> preferredSlots) { this.preferredSlots = preferredSlots;}
@@ -74,6 +78,7 @@ public class Event implements Cloneable {
         ret.id = this.id;
         ret.slot = this.slot;
         ret.preferredSlots = this.preferredSlots;
+        ret.preferredDay = this.preferredDay;
         ret.eventDay = this.eventDay;
         ret.eventCount = this.eventCount;
         ret.eventType = this.eventType;

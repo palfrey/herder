@@ -10,6 +10,7 @@
    [herder.web.notifications :as notifications]
    [herder.web.solve :refer [solve]]
    [herder.uuid :refer [to-uuid]]
+   [herder.web.dates :refer [to-sql-date]]
    [clojure.set :refer [map-invert]]))
 
 (defn validate-new-event [params]
@@ -85,14 +86,19 @@
         (solve (:convention_id event-person))
         (status (response {}) 200)))))
 
-(defn patch-event [{{:keys [id person preferred_slot event_count name type] :as params} :params}]
+(defn patch-event [{{:keys [id person preferred_slot preferred_day event_count name type] :as params} :params}]
   (let [event (retrieve-event id)]
     (if (nil? event)
       (status (response (str "No such event " id)) 404)
       (let [conv_id (:convention_id event)
-            preferred_slot (if (= "" preferred_slot) nil preferred_slot)]
+            preferred_slot (if (= "" preferred_slot) nil preferred_slot)
+            preferred_day (if (= "" preferred_day) nil preferred_day)]
         (if (contains? params :preferred_slot)
           (d/update db/events (d/set-fields {:preferred_slot_id (to-uuid preferred_slot)}) (d/where {:id (to-uuid id)})))
+        (if (contains? params :preferred_day)
+          (do
+            (println "Setting preferred day" preferred_day (to-sql-date preferred_day))
+            (d/update db/events (d/set-fields {:preferred_day (to-sql-date preferred_day)}) (d/where {:id (to-uuid id)}))))
         (if (-> event_count nil? not)
           (d/update db/events (d/set-fields {:event_count event_count}) (d/where {:id (to-uuid id)})))
         (if (-> name nil? not)
