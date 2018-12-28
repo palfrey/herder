@@ -6,9 +6,11 @@
    [korma.core :as d]
    [herder.web.db :as db]
    [ring.util.response :refer [response status]]
-   [compojure.core :refer [GET POST PUT DELETE context]]
+   [compojure.core :refer [GET POST PATCH DELETE context]]
    [herder.web.notifications :as notifications]
-   [herder.web.solve :refer [solve]]))
+   [herder.web.solve :refer [solve]]
+   [herder.uuid :refer [to-uuid]]
+   [herder.web.dates :refer [to-sql-date]]))
 
 (defn validate-new-person [params]
   (first
@@ -23,38 +25,64 @@
     (let [id (str (uuid/v1))
           conv_id (:id params)]
       (d/insert
-       db/persons (d/values [{:id id
+       db/persons (d/values [{:id (to-uuid id)
                               :name (:name params)
-                              :convention_id conv_id}]))
+                              :convention_id (to-uuid conv_id)}]))
       (notifications/send-notification [:persons conv_id])
-      (solve conv_id)
       (status (response {:id id}) 201))))
 
+(defn- get-event-ids [id]
+  (map #(-> % :event_id str) (d/select db/events-persons (d/where {:person_id (to-uuid id)}))))
+
+(defn- get-person-non-availability [id]
+  (map :date (d/select db/person-non-availability (d/where {:person_id (to-uuid id)}))))
+
 (defn get-person [{{:keys [id]} :params}]
-  (let [person (first (d/select db/persons (d/where {:id id})))]
+  (let [person (first (d/select db/persons (d/where {:id (to-uuid id)})))]
     (if (nil? person)
       (status (response (str "No such person " id)) 404)
-      (response person))))
+      (response (assoc person
+                       :events (get-event-ids id)
+                       :non-availability (get-person-non-availability id))))))
 
 (defn get-persons [{{:keys [id]} :params}]
-  (let [persons (d/select db/persons (d/where {:convention_id id}) (d/order :name))]
+  (let [persons (d/select db/persons (d/where {:convention_id (to-uuid id)}) (d/order :name))]
     (response persons)))
 
 (defn delete-person [{{:keys [id]} :params}]
-  (let [person (first (d/select db/persons (d/where {:id id})))]
+  (let [person (first (d/select db/persons (d/where {:id (to-uuid id)})))]
     (if (-> person nil? not)
       (do
-        (d/delete db/persons (d/where {:id id}))
+        (d/delete db/persons (d/where {:id (to-uuid id)}))
         (notifications/send-notification [:persons (str (:convention_id person))])
         (solve (:convention_id person))
         (status (response {}) 200))
       (status (response {}) 404))))
+
+(defn patch-person [{{:keys [id name available-date available-status] :as params} :params}]
+  (let [person (first (d/select db/persons (d/where {:id (to-uuid id)})))]
+    (if (-> person nil? not)
+      (let [conv_id (:convention_id person)]
+        (if (contains? params :name)
+          (d/update db/persons (d/set-fields {:name name}) (d/where {:id (to-uuid id)})))
+        (if (contains? params :available-date)
+          (do
+            (if available-status
+              (d/delete db/person-non-availability (d/where {:person_id (to-uuid id) :date (to-sql-date available-date)}))
+              (d/insert db/person-non-availability (d/values {:person_id (to-uuid id) :date (to-sql-date available-date) :convention_id conv_id})))
+            (solve conv_id)))
+        (notifications/send-notification [:person (str conv_id) id])
+        (notifications/send-notification [:persons (str conv_id)])
+        (status (response {}) 200))
+      (status (response (str "No such person " id)) 404))))
 
 (def uuid-regex #"[\w]{8}(-[\w]{4}){3}-[\w]{12}")
 
 (def person-context
   (context "/person" []
     (GET "/" [] get-persons)
-    (GET ["/:id" :id uuid-regex] [id] get-person)
-    (DELETE ["/:id" :id uuid-regex] [id] delete-person)
+    (context "/:id" [id]
+      (GET "/" [id] get-person)
+      (PATCH "/" [id] patch-person)
+      (DELETE "/" [id] delete-person))
     (POST "/" [] new-person!)))

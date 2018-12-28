@@ -11,3 +11,4 @@ herder.db*
 .lobos_stash.clj
 .nrepl-history
 figwheel_server.log
+boot

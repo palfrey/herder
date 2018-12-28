@@ -13,10 +13,10 @@
 
                  [compojure "1.5.0"]
                  [ring "1.4.0"]
-                 [org.optaplanner/optaplanner-core "6.3.0.Final" :exclusions [commons-io commons-codec]]
+                 [org.optaplanner/optaplanner-core "6.4.0.Final" :exclusions [commons-io commons-codec]]
                  [ring/ring-defaults "0.2.0"]
-                 [org.clojure/tools.namespace "0.2.10"]
-                 [org.danielsz/system "0.3.0-SNAPSHOT"]
+                 [org.clojure/tools.namespace "0.3.0-alpha3"]
+                 [org.danielsz/system "0.3.1" :exclusions [http-kit]]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [com.taoensso/sente "1.8.1"]
 
@@ -28,7 +28,7 @@
                  [org.xerial/sqlite-jdbc "3.8.11.2"]
                  [korma "0.4.2"]
 
-                 [http-kit "2.1.19"]
+                 [http-kit "2.3.0"]
                  [bouncer "1.0.0"]
                  [ring/ring-json "0.4.0"]
                  [org.clojure/data.json "0.2.6"]
@@ -37,6 +37,7 @@
                  [ring/ring-mock "0.3.0" :scope "test"]
                  [peridot "0.4.3" :scope "test"]
                  [com.h2database/h2 "1.4.191"]
+                 [postgresql "9.3-1102.jdbc41"]
 
                  [cljfmt "0.5.0"]
                  [me.raynes/fs "1.4.6"]
@@ -51,6 +52,7 @@
                  [cljsjs/jquery-daterange-picker "0.0.8-0"]
                  [cljsjs/jquery-timepicker "1.8.10-0"]
                  [secretary "1.2.3"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
 
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
@@ -61,10 +63,10 @@
 
 (require '[adzerk.boot-test :refer [test]]
          '[adzerk.boot-cljs :refer [cljs]]
-         '[reloaded.repl :refer [init start stop go reset]]
+         '[system.repl :refer [init start stop go reset]]
          '[environ.boot :refer [environ]]
          '[system.boot :refer [system run]]
-         '[herder.systems :refer [dev-system]]
+         '[herder.systems :refer [dev-system prod-system]]
          '[boot-figwheel]
          '[deraen.boot-sass :refer [sass]])
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
@@ -72,7 +74,8 @@
 (deftask build []
   (comp
    (javac)
-   (aot :namespace '#{herder.solver.types})))
+   (aot :namespace '#{herder.solver.helpers})
+   (aot :namespace '#{herder.solver.event herder.solver.person herder.solver.slot herder.solver.solution})))
 
 (require '[cljfmt.core :refer [reformat-string]]
          '[clojure.java.io :as io]
@@ -161,7 +164,7 @@
 (deftask dev []
   (comp
    (fix)
-   (make-solver)
+   (build)
    (environ :env {:http-port "3000"})
    (figwheel)
    (run-figwheel)
@@ -173,12 +176,38 @@
    (watch)
    (sass)
    (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
+   (build)
    (target :no-clean true)
    (system :sys #'dev-system :auto true :files ["lobos.clj" "handler.clj" "solver.clj" "systems.clj" "run.clj" "rules.drl"])
-   (make-solver)
    (testing)
    (test)
    (kill-pods)))
+
+(deftask prod-build []
+  (comp
+   (build)
+   (cljs :ids #{"herder"})
+   (sift
+    :add-jar {'cljsjs/jquery-daterange-picker #"^cljsjs/common/jquery-daterange-picker.inc.css$"
+              'cljsjs/jquery-timepicker #"^cljsjs/common/jquery-timepicker.inc.css$"}
+    :move {#"cljsjs/common/(jquery-daterange-picker.inc.css)" "resources/public/css/$1"
+           #"cljsjs/common/(jquery-timepicker.inc.css)" "resources/public/css/$1"
+           #"herder.js" "resources/public/js/herder.js"
+           #"herder.out/(.*)" "resources/public/js/herder.out/$1"})
+   (sass)
+   (sift :move {#"herder/sass/(.*)" "resources/public/css/$1"})
+   (target :no-clean true)))
+
+(deftask fix-classpath []
+  (with-pre-wrap [fs]
+    (set-env! :resource-paths #(conj % "target"))
+    fs))
+
+(deftask prod-run []
+  (comp
+   (fix-classpath)
+   (system :sys #'prod-system :auto true)
+   (wait)))
 
 (deftask watch-tests []
   (comp

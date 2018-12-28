@@ -4,8 +4,10 @@
    [reagent.core :as r]
    [clojure.string :as str]
    [herder.conventions]
+   [herder.convention]
    [herder.slots]
    [herder.persons]
+   [herder.person]
    [herder.events]
    [herder.event]
    [herder.schedule]
@@ -22,10 +24,16 @@
   (secretary/set-config! :prefix "#")
 
   (defroute "/" []
+    (swap! state assoc :component "herder.convention.component"))
+
+  (defroute "/slots" []
     (swap! state assoc :component "herder.slots.component"))
 
   (defroute "/persons" []
     (swap! state assoc :component "herder.persons.component"))
+
+  (defroute "/person/:id" [id]
+    (swap! state assoc :component "herder.person.component" :person_id id))
 
   (defroute "/events" []
     (swap! state assoc :component "herder.events.component"))

@@ -11,43 +11,76 @@
   (merge {:id id}
          (get-data [:person (:id @state) id])))
 
-(defn add-new [val]
-  (js/console.log (pr-str @val))
+(defn- patch-event [value]
+  (js/console.log (pr-str value))
   (PATCH (event-url (:id @state) (:event_id @state))
-    {:params {:person (:person @val)}
+    {:params value
      :format :json}))
+
+(defn add-new [val]
+  (patch-event {:person (:person @val)}))
 
 (defn set-preferred-slot [val]
-  (js/console.log (pr-str val))
-  (PATCH (event-url (:id @state) (:event_id @state))
-    {:params {:preferred_slot val}
-     :format :json}))
+  (patch-event {:preferred_slot val}))
+
+(defn set-preferred-day [val]
+  (patch-event {:preferred_day val}))
 
 (defn set-event-count [val]
-  (js/console.log (pr-str val))
-  (PATCH (event-url (:id @state) (:event_id @state))
-    {:params {:event_count val}
-     :format :json}))
+  (patch-event {:event_count val}))
+
+(defn set-event-name [val]
+  (patch-event {:name val}))
+
+(defn set-event-type [val]
+  (patch-event {:type val}))
+
+(defn- gen-days [from to]
+  (let [mto (js/moment to)
+        current (js/moment from)]
+    (if (.isValid mto)
+      (loop [days []]
+        (if (< current mto)
+          (let [new-days (conj days (js/moment current))]
+            (.add current 1 "days")
+            (recur new-days))
+          (conj days (js/moment current)))) [])))
 
 (defn ^:export component []
   (let [val (r/atom {:person ""})]
     (fn []
       (let [event (get-data [:event (:id @state) (:event_id @state)])
             convention (get-data [:convention (:id @state)])
-            days (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))
-            persons (get-mapped-data [:persons (:id @state)])]
+            slots (get-data [:slots (:id @state)])
+            day_count (+ 1 (/ (- (js/moment (:to convention)) (js/moment (:from convention))) 86400000))
+            days (gen-days (:from convention) (:to convention))
+            persons (get-mapped-data [:persons (:id @state)])
+            event_type (keyword (:event_type event))]
         [:div {:class "container-fluid"}
          [convention-header :events]
-         [:h2 "Event: " (:name event)]
-         [:hr]
+         [:h2 "Event"]
+         [:label {:for "name"} "Name "]
+         [:input {:id "name"
+                  :type "text"
+                  :value (:name event)
+                  :on-change #(set-event-name (-> % .-target .-value))}]
+
          [:h4 "People"]
-         (into [:ul]
-               (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
-                 ^{:key id} [:li name " "
-                             [:button {:type "button"
-                                       :class "btn btn-danger"
-                                       :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}
-                              (str "Remove " name)]]))
+         [:div.row
+          (into [:ul]
+                (for [{:keys [id name]} (sort-by :name (map get-person (:persons event)))]
+                  ^{:key id} [:div
+                              [:div.col-md-2
+                               [:a {:class "pull-xs-right"
+                                    :style {:line-height "38px"}
+                                    :href (str "#/person/" id)}
+                                name " "]]
+                              [:div.col-md-2
+                               [:button {:type "button"
+                                         :class "btn btn-danger"
+                                         :on-click #(DELETE (str (event-url (:id @state) (:event_id @state)) "/person/" id))}
+                                (str "Remove " name)]]]))]
+         [:hr]
          [:form {:class "form-inline"
                  :on-submit #(do
                                (.preventDefault %)
@@ -76,17 +109,50 @@
                    :value (:preferred_slot_id event)
                    :on-change #(set-preferred-slot (-> % .-target .-value))}
           [:option {:value ""} "Any"]
-          (for [{:keys [id start end]} (get-data [:slots (:id @state)])]
+          (for [{:keys [id start end]} slots]
             ^{:key id} [:option {:value id} (str start "-" end)])]
          [:hr]
-         [:h3 "Event count"]
-         [:select {:id "event_count"
-                   :value (:event_count event)
-                   :on-change #(set-event-count (-> % .-target .-value))}
-          [:option {:value "1"} "Single event"]
-          (js/console.log "days" days)
-          (for [value (range 2 (+ days 1))]
-            ^{:key value} [:option {:value value} value])]
+         [:h3 "Preferred Day"]
+         [:select {:id "preferred_day"
+                   :value (.format (js/moment (:preferred_day event)) "YYYY-MM-DD")
+                   :on-change #(set-preferred-day (-> % .-target .-value))}
+          [:option {:value ""} "Any"]
+          (for [day days :let [fday (.format day "YYYY-MM-DD")]]
+            ^{:key day} [:option {:value fday} fday])]
+         [:hr]
+         [:h3 "Event type"]
+         (let [attrs {:type "radio"
+                      :name "event_type"
+                      :on-change #(let [type (-> % .-target .-value)]
+                                    (set-event-type type)
+                                    (if (= type "single")
+                                      (set-event-count 1)
+                                      (set-event-count 2)))}
+               radio_attrs
+               (fn [wanted]
+                 (let [att (assoc attrs :value (name wanted))]
+                   (if (= event_type wanted) (assoc att :checked true) att)))]
+           (into [:div]
+                 (concat
+                  [[:input (radio_attrs :single)] " Single slot" [:br]]
+                  (if (< (count slots) 2) []
+                      (concat
+                       [[:input (radio_attrs :one_day)] " Multiple slots, one day" [:br]]
+                       (if (not= event_type :one_day) []
+                           [[:select {:id "slot_count"
+                                      :value (:event_count event)
+                                      :on-change #(set-event-count (-> % .-target .-value))}
+                             (for [value (range 2 (+ (count slots) 1))]
+                               ^{:key value} [:option {:value value} value " slots"])] [:br]])))
+                  (if (= day_count 0) []
+                      (concat
+                       [[:input (radio_attrs :multiple_days)] " One slot per day, multiple days" [:br]]
+                       (if (not= event_type :multiple_days) []
+                           [[:select {:id "day_count"
+                                      :value (:event_count event)
+                                      :on-change #(set-event-count (-> % .-target .-value))}
+                             (for [value (range 2 (+ day_count 1))]
+                               ^{:key value} [:option {:value value} value " days"])]]))))))
          [:hr]
          [:button {:type "button"
                    :class "btn btn-danger"

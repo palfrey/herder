@@ -1,6 +1,6 @@
 (ns herder.solver.run
   (:require
-   [reloaded.repl :refer [system]]
+   [system.repl :refer [system]]
    [herder.solver.schedule :refer [makeSolver makeSolverConfig setupSolution]]
    [herder.web.db :as db]
    [korma.core :as d]
@@ -9,33 +9,56 @@
    [clj-time.coerce :as c]
    [clj-time.periodic :as p]
    [clj-uuid :as uuid]
-   [herder.web.notifications :as notifications])
-  (:import [herder.solver.types Event Person]))
+   [herder.web.notifications :as notifications]
+   [herder.web.events :refer [event-type-map]]
+   [clojure.set :refer [map-invert]])
+  (:import
+   [herder.solver.person Person]
+   [herder.solver.event Event EventType]))
 
-(defn- gen-events [events events-persons slots convention]
+(defn- make-event-type [id]
+  (case (get (map-invert event-type-map) id)
+    :single EventType/SINGLE
+    :one_day EventType/ONE_DAY
+    :multiple_days EventType/MULTIPLE_DAYS))
+
+(defn gen-events [events events-persons slots convention persons-non-available]
   (let
    [firstDay (c/from-sql-date (:from convention))
     lastDay (c/from-sql-date (:to convention))]
     (mapv
      (fn [ev]
-       (let [people (map #(Person. (:person_id %)) (filterv #(= (% :event_id) (:id ev)) events-persons))
-             slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)]
-         (println "ev" ev)
+       (let [event-persons (map :person_id (filterv #(= (% :event_id) (:id ev)) events-persons))
+             people (map #(Person. %) event-persons)
+             slot (if (-> ev :preferred_slot_id nil? not) (first (filter #(= (:id %) (:preferred_slot_id ev)) slots)) nil)
+             add-day #(t/plus % (t/days 1))
+             preferred-day (if (-> ev :preferred_day nil? not) (-> ev :preferred_day c/from-sql-date .toDateMidnight add-day .toLocalDate) nil)
+             non-availability (map #(-> % :date c/from-sql-date .toDateMidnight add-day .toLocalDate) (filter #(.contains event-persons (:person_id %)) persons-non-available))]
+         (println "ev" ev (make-event-type (:event_type ev)))
+         (println "na" non-availability)
          (loop [new-events [] previous nil count 1]
-           (let [new-event
+           (let [converted-event-type (make-event-type (:event_type ev))
+                 new-event
                  (doto
                   (Event. (:id ev))
                    (.setName (:name ev))
-                   (.setPreferredSlots
-                    (if (-> slot nil? not)
-                      (for [day (p/periodic-seq firstDay (t/days 1))
-                            :while (or (t/equal? lastDay day) (t/after? lastDay day))]
-                        (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
-                              endSlot (t/plus day (t/minutes (:end-minutes slot)))]
-                          (t/interval beginSlot endSlot))) []))
                    (.setPeople people)
                    (.setChainedEvent previous)
-                   (.setEventDay count))]
+                   (.setEventDay count)
+                   (.setPreferredDay preferred-day)
+                   (.setDependantEventCount (- (:event_count ev) count))
+                   (.setNotAvailableDays non-availability)
+                   (.setEventType converted-event-type))]
+             (if (or (not= converted-event-type EventType/ONE_DAY) (and (nil? previous) (= converted-event-type EventType/ONE_DAY)))
+               (.setPreferredSlots new-event
+                                   (if (-> slot nil? not)
+                                     (for [day (p/periodic-seq firstDay (t/days 1))
+                                           :while (or (t/equal? lastDay day) (t/after? lastDay day))]
+                                       (let [beginSlot (t/plus day (t/minutes (:start-minutes slot)))
+                                             endSlot (t/plus day (t/minutes (:end-minutes slot)))]
+                                         (t/interval beginSlot endSlot))) [])))
+             (if (-> previous nil? not)
+               (.setLaterEvent previous new-event))
              (if (= count (:event_count ev))
                (conj new-events new-event)
                (recur (conj new-events new-event) new-event (+ 1 count)))))))
@@ -51,18 +74,20 @@
 
 (defn solve [db id]
   (println "Begin")
+  (notifications/send-notification [:status (str id)])
   (kd/with-db (:connection db)
     (let [convention (first (d/select db/conventions (d/where {:id id})))
           slots (d/select db/slots (d/where {:convention_id id}))
           events (d/select db/events (d/where {:convention_id id}))
           events-persons (d/select db/events-persons (d/where {:convention_id id}))
           persons (d/select db/persons (d/where {:convention_id id}))
+          persons-non-available (d/select db/person-non-availability (d/where {:convention_id id}))
           config {:firstDay (c/from-sql-date (:from convention))
                   :lastDay (c/from-sql-date (:to convention))
                   :slots
                   (mapv #(vector (t/minutes (:start-minutes %))
                                  (t/minutes (- (:end-minutes %) (:start-minutes %)))) slots)
-                  :events (apply concat (gen-events events events-persons slots convention))}
+                  :events (apply concat (gen-events events events-persons slots convention persons-non-available))}
           solver (-> (makeSolverConfig) (makeSolver))
           configured (setupSolution config)]
       ;(println "id" id)
@@ -143,7 +168,8 @@
     (do (reset! (-> system :solver :solving) true) ; mark as solving
         (let [item (first new-state)]
           (run-solver item)
-          (swap! (-> system :solver :tosolve) disj item)))))
+          (send-off (-> system :solver :tosolve) disj item)
+          (notifications/send-notification [:status (str item)])))))
 
 (defn needs-solve [id]
   (if (-> system :solver nil? not) ; if we have solver available. Not true in tests
@@ -152,7 +178,7 @@
         (do
           (add-watch (-> system :solver :tosolve) :solve-watch solve-watch)
           (reset! (-> system :solver :watch) :solve-watch)))
-      (swap! (-> system :solver :tosolve) conj id))))
+      (send-off (-> system :solver :tosolve) conj id))))
 
 (if-let [sys-db (-> system :db :connection)]
   (kd/with-db sys-db

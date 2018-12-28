@@ -3,7 +3,7 @@
    [compojure.route :as route]
    [compojure.core :refer [defroutes GET context] :as compojure]
    [korma.db :as kd]
-   [reloaded.repl :refer [system]]
+   [system.repl :refer [system]]
    [clostache.parser :as clostache]
    [system.components.sente :refer [sente-routes]]
    [herder.web.conventions :refer [convention-routes]]
@@ -22,7 +22,7 @@
 
 (defroutes core-routes
   (GET "/" [] (partial page "herder.conventions.component" "Index"))
-  (GET ["/convention/:id" :id uuid-regex] [id] (partial page "herder.slots.component", "Convention"))
+  (GET ["/convention/:id" :id uuid-regex] [id] (partial page "herder.convention.component", "Convention"))
   (context "/api" []
     convention-routes)
   (route/files "/static" {:root "target/resources/public/"})

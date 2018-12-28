@@ -23,9 +23,11 @@
         slots (get-mapped-data [:slots (:id @state)])
         schedule-issues (get-data [:schedule-issues (:id @state)])
         slot-width (quot 11 (count slots))
-        days (distinct (map :date schedule))]
+        days (-> (map :date schedule) distinct sort)
+        status (get-data [:status (:id @state)])]
     [:div {:class "container-fluid"}
      [convention-header :schedule]
+     [:h4 {:style {:float "right" :color "red"}} (if (:solved status) "" "updating...")]
      [:h2 "Schedule"]
      [:table.table
       [:thead
@@ -47,14 +49,12 @@
                                    links (mapv make-link items)
                                    links (cons (first links) (map #(cons "/ " %) (rest links)))
                                    link (into [:td] (apply concat links))]]
-                         (do
-                           (js/console.log "link" (pr-str link))
-                           (with-meta link {:key (str slot_id "-" day)})))))]))]
+                         (with-meta link {:key (str slot_id "-" day)}))))]))]
      (if (-> schedule-issues empty? not)
        [:div
         [:h3 "Issues"]
         (into [:ul]
-              (for [{:keys [id issue score level events]} (sort-by :level schedule-issues)]
+              (for [{:keys [id issue score level events]} (filter #(not= (:score %) 0) (sort-by :level schedule-issues))]
                 ^{:key id}
                 [:li (if (= level 1) "soft" "hard") " " score ": " issue
                  (into [:ul]

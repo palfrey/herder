@@ -1,0 +1,17 @@
+herder:
+  build: .
+  command: bash -c "./wait-for-postgres.sh postgres && ./boot prod-run"
+  links:
+    - postgres
+  environment:
+    - DATABASE_URL=postgres://postgres:mysecretpassword@postgres/postgres
+    - PGPASSWORD=mysecretpassword
+    - HTTP_PORT=3000
+  ports:
+    - "3000:3000"
+postgres:
+  image: postgres:9.4
+  environment:
+    - POSTGRES_PASSWORD=mysecretpassword
+  ports:
+    - "5432"

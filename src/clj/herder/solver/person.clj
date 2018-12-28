@@ -1,7 +1,9 @@
-(in-ns 'herder.solver.types)
+(ns herder.solver.person
+	(:require
+		[herder.solver.helpers :refer [getValue setValue]]))
 
 (gen-class
- :name ^{PlanningEntity {}} herder.solver.types.Person
+ :name ^{PlanningEntity {}} herder.solver.person.Person
  :prefix "person-"
  :init init
  :state state
@@ -13,7 +15,8 @@
 
 (defn- person-init
   ([] (person-init (java.util.UUID/randomUUID)))
-  ([uuid] [[] (ref {:id uuid :name ""})]))
+  ([uuid] [[] (ref {:id uuid
+                    :name ""})]))
 
 (defn- person-getId [this]
   (getValue this :id))

@@ -1,10 +1,31 @@
-(ns herder.solver.types)
+(ns herder.solver.solution
+  (:require
+   [herder.solver.helpers :refer [getValue setValue]]
+   [clj-time.periodic :as p]
+   [clj-time.core :as t])
+  (:import
+   [org.optaplanner.core.api.domain.solution PlanningSolution PlanningEntityCollectionProperty]
+   [org.optaplanner.core.api.domain.solution.cloner PlanningCloneable]
+   [org.optaplanner.core.api.domain.valuerange ValueRangeProvider]
+   [java.util ArrayList]))
+
+; Double gen-class for self-reference http://stackoverflow.com/a/29375133/320546
+(gen-class
+ :name ^{PlanningSolution {}} herder.solver.solution.HerderSolution
+ :extends herder.solver.HardSoftSolution
+ :implements [org.optaplanner.core.api.domain.solution.cloner.PlanningCloneable]
+ :init init
+ :constructors {[] []
+                [clojure.lang.PersistentArrayMap] []})
 
 (gen-class
- :name ^{PlanningSolution {}} herder.solver.types.HerderSolution
+ :name ^{PlanningSolution {}} herder.solver.solution.HerderSolution
  :extends herder.solver.HardSoftSolution
+ :implements [org.optaplanner.core.api.domain.solution.cloner.PlanningCloneable]
  :init init
  :state state
+ :constructors {[] []
+                [clojure.lang.PersistentArrayMap] []}
  :methods [[^{PlanningEntityCollectionProperty {}} getEvents [] java.util.List]
            [setEvents [java.util.List] void]
            [^{ValueRangeProvider {"id" "slotRange"}} getSlotRange [] java.util.List]
@@ -15,8 +36,9 @@
            [setSlots [java.util.List] void]]
  :prefix "solution-")
 
-(defn- solution-init []
-  [[] (ref {:events (ArrayList.)})])
+(defn- solution-init
+  ([] (solution-init {:events (ArrayList.)}))
+  ([state] [[] (ref state)]))
 
 (defn- solution-getEvents [this]
   (ArrayList. (getValue this :events)))
@@ -25,7 +47,7 @@
   (setValue this :events events))
 
 (defn- solution-getProblemFacts [this]
-  (getValue this :events))
+  (ArrayList.))
 
 (defn- solution-getScore [this]
   (getValue this :score))
@@ -56,3 +78,10 @@
 
 (defn- solution-setSlots [this value]
   (setValue this :slots value))
+
+(defn- solution-planningClone [this]
+  (let [events (map #(.clone %) (solution-getEvents this))]
+    (doseq [event events] (.fixChainedEventRef event events))
+    (doto
+     (herder.solver.solution.HerderSolution. (deref (.state this)))
+      (solution-setEvents events))))

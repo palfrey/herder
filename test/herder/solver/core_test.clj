@@ -1,12 +1,14 @@
 (ns herder.solver.core-test
   (:use
-   [herder.solver.types]
    [herder.solver.schedule]
    [clojure.test])
   (:require
    [clj-time.core :as t])
   (:import
-   [herder.solver.types HerderSolution Event Slot Person]
+   [herder.solver.solution HerderSolution]
+   [herder.solver.event Event EventType]
+   [herder.solver.slot Slot]
+   [herder.solver.person Person]
    [org.optaplanner.core.config.solver SolverConfig]
    [org.optaplanner.core.api.solver Solver]
    [org.joda.time Interval]))
@@ -82,6 +84,21 @@
          (.getEvents)
          (map #(.getSlot %))
          distinct?)))
+
+  (deftest MultiSlotEventsHaveCosts
+    (let [one (doto (eventWithPerson alpha)
+                (.setEventType EventType/ONE_DAY)
+                (.setDependantEventCount 1))
+          two (doto (eventWithPerson alpha)
+                (.setChainedEvent one)
+                (.setEventType EventType/ONE_DAY))
+          softScore (->>
+                     (getSolution [(doto one
+                                     (.setLaterEvent two)) two])
+                     (.getScore)
+                     (.getSoftScore))]
+      (is (< softScore 0))
+      (is (> softScore -3))))
 
   (deftest EventsHavedistinctSlotsWithOverlyFullSolution
     (->> (getSolution

@@ -33,7 +33,7 @@
          (varchar :name 100)
          (date :from)
          (date :to)
-         (check :name (> (length :name) 1)))))
+         (check :name (> (length :name) 0)))))
   (down
    (drop (table :conventions))))
 
@@ -121,6 +121,30 @@
                  (integer :event_day (default 1)))))
   (down))
 
+; Persons are assumed to be available unless otherwise specified
+(defmigration person-non-availability
+  (up
+   (create
+    (table :person-non-availability
+           (date :date)
+           (refer-to :persons :on-delete :cascade)
+           (refer-to :conventions)
+           (primary-key [:date :person_id])))))
+
+(defmigration add-event-type-to-event
+  (up
+   (alter :add
+          (table :events
+                 (smallint :event_type (default 1)))))
+  (down))
+
+(defmigration add-preferred-day-to-event
+  (up
+   (alter :add
+          (table :events
+                 (date :preferred_day))))
+  (down))
+
 (defn call-migration [migration]
   (mig/up migration))
 
@@ -133,4 +157,7 @@
   (call-migration add-schedule-issues-table)
   (call-migration add-preferred-slot-to-event)
   (call-migration add-event-count-to-event)
-  (call-migration add-event-day-to-schedule))
+  (call-migration add-event-day-to-schedule)
+  (call-migration person-non-availability)
+  (call-migration add-event-type-to-event)
+  (call-migration add-preferred-day-to-event))
